@@ -1,0 +1,97 @@
+# Scholr on the home machine (docs/STUDENT-APP.md D6): database, API and web, started together and restarted
+# with the machine. Nothing is published to the internet — the ports bind to the host, which is reachable from
+# the home network. Moving to a VPS later means running this same file there and putting a TLS proxy in front.
+#
+#   docker compose -f infra/docker-compose.home.yml --env-file infra/home.env up -d --build
+#
+# infra/home.env holds the secrets (copy infra/home.env.example). It is gitignored.
+name: scholr-home
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: scholr-home-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: scholr
+      POSTGRES_PASSWORD: ${SCHOLR_DB_PASSWORD:?set SCHOLR_DB_PASSWORD in infra/home.env}
+      POSTGRES_DB: scholr
+      SCHOLR_APP_PASSWORD: ${SCHOLR_APP_PASSWORD:?set SCHOLR_APP_PASSWORD in infra/home.env}
+    volumes:
+      - scholr-home-db:/var/lib/postgresql/data
+      - ./db-init-home:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scholr -d scholr"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  # Runs the migrations once, then exits. The API waits for it to finish.
+  migrate:
+    build:
+      context: ../apps/api
+    image: scholr-api
+    container_name: scholr-home-migrate
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: prod
+      DATABASE_URL: postgresql+psycopg://scholr_app:${SCHOLR_APP_PASSWORD:?set SCHOLR_APP_PASSWORD}@db:5432/scholr
+      MIGRATION_DATABASE_URL: postgresql+psycopg://scholr:${SCHOLR_DB_PASSWORD}@db:5432/scholr
+      AUTH_MODE: local
+      AUTH_DEV_SECRET: ${SCHOLR_SESSION_SECRET:?set SCHOLR_SESSION_SECRET (32+ characters)}
+      SCHOLR_CONTENT_DIR: /content
+    volumes:
+      - ../content:/content
+    command: ["alembic", "upgrade", "head"]
+
+  api:
+    build:
+      context: ../apps/api
+    image: scholr-api
+    container_name: scholr-home-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      APP_ENV: prod
+      DATABASE_URL: postgresql+psycopg://scholr_app:${SCHOLR_APP_PASSWORD}@db:5432/scholr
+      MIGRATION_DATABASE_URL: postgresql+psycopg://scholr:${SCHOLR_DB_PASSWORD}@db:5432/scholr
+      # Email and password accounts, approved by the admin (D7).
+      AUTH_MODE: local
+      AUTH_DEV_SECRET: ${SCHOLR_SESSION_SECRET}
+      # A password alone is not multi-factor; until mobile OTP exists, parents sign in with one (D7).
+      AUTH_REQUIRE_GUARDIAN_MFA: "false"
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY in infra/home.env}
+      SCHOLR_CONTENT_DIR: /content
+      PRIVATE_CONTENT_DIR: /content/private
+      UPLOADS_DIR: /content/private/uploads
+      SUBJECTS_DIR: /app/subject_configs
+    volumes:
+      # Her books and papers stay on the machine; no copyrighted source is ever baked into an image.
+      - ../content:/content
+    ports:
+      - "127.0.0.1:8000:8000"  # only the web container and this machine reach the API directly
+
+  web:
+    build:
+      context: ../apps/web
+      args:
+        # Baked into the build: the browser calls /api on this origin, which the web server forwards to the API.
+        SCHOLR_API_ORIGIN: http://api:8000
+    image: scholr-web
+    container_name: scholr-home-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "3000:3000"  # open her phone at http://<this machine's address>:3000
+
+volumes:
+  scholr-home-db:

@@ -1,0 +1,774 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Caveat:wght@500;600&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F4F6FB; font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; color: #1A2240; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    a { color: #3F51F0; text-decoration: none; }
+    a:hover { color: #2F3DD1; }
+    svg { display: block; flex: none; }
+  </style>
+</helmet>
+
+<div style="width: 1536px; height: 1024px; display: flex; background: #F4F6FB; overflow: hidden;">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside style="width: 256px; flex: none; background: #F7F8FD; border-right: 1px solid #ECEFF6; display: flex; flex-direction: column; padding: 12px 12px 34px 12px;">
+
+    <!-- Logo -->
+    <div style="height: 50px; display: flex; align-items: center; gap: 10px; padding: 0 12px;">
+      <svg width="36" height="36" viewBox="0 0 36 36">
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#3B5BFD"></stop>
+            <stop offset="1" stop-color="#7C3AED"></stop>
+          </linearGradient>
+        </defs>
+        <path d="M26 9.5 C22.5 5.5 10.5 5.5 10.5 12.5 C10.5 19.5 25.5 16.5 25.5 24.5 C25.5 31.5 13 31.5 9 26.5" fill="none" stroke="url(#logoGrad)" stroke-width="5" stroke-linecap="round"></path>
+        <path d="M30 2.5 L31.1 5.4 L34 6.5 L31.1 7.6 L30 10.5 L28.9 7.6 L26 6.5 L28.9 5.4 Z" fill="#7C3AED"></path>
+      </svg>
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <div style="font-size: 20px; font-weight: 800; color: #1B2446; letter-spacing: -0.01em; line-height: 1;">Scholr</div>
+        <div style="font-size: 10px; font-weight: 500; color: #6B7390; line-height: 1.2;">An AI Study Companion</div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav style="display: flex; flex-direction: column; margin-top: 10px;">
+      <div style="display: flex; align-items: center; gap: 14px; height: 38px; padding: 0 14px; border-radius: 12px; background: #E5E9FD; color: #2F3DD1; font-size: 14px; font-weight: 600;">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 10.8 L12 3.5 L21 10.8 V20 A1 1 0 0 1 20 21 H15 V15 H9 V21 H4 A1 1 0 0 1 3 20 Z" fill="#3F51F0"></path></svg>
+        <span>Home</span>
+      </div>
+
+      <div style="margin-top: 22px; margin-bottom: 4px; padding: 0 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: #5C6480; line-height: 14px;">LEARN</div>
+
+      <div style="display: flex; align-items: center; gap: 14px; height: 42px; padding: 0 14px; font-size: 13.5px; font-weight: 500; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5 C5 4 9 4 12 6 C15 4 19 4 22 5.5 V19 C19 17.5 15 17.5 12 19.5 C9 17.5 5 17.5 2 19 Z"></path><path d="M12 6 V19.5"></path></svg>
+        <span>IGCSE</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; height: 42px; padding: 0 14px; font-size: 13.5px; font-weight: 500; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.8"><circle cx="12" cy="12" r="1.6" fill="#243056"></circle><ellipse cx="12" cy="12" rx="10" ry="4"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"></ellipse></svg>
+        <span>IIT Foundation</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; height: 42px; padding: 0 14px; font-size: 13.5px; font-weight: 500; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.6" stroke-linejoin="round"><path d="M10 1 L13 1.5 L14 4 L13 6 L16 8 L19 8.5 L22 7.5 L23 9 L20 11 L18 11.5 L17 13 L15 14.5 L13 18 L11.5 23 L10 20 L8.5 15 L7.5 13 L5 13.5 L3 11.5 L4.5 10 L6.5 9.5 L7 7 L9 5 L8.5 3 Z"></path></svg>
+        <span>India Explorer</span>
+      </div>
+
+      <div style="margin-top: 14px; display: flex; align-items: center; gap: 14px; height: 46px; padding: 0 14px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.03em; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="#243056"></circle></svg>
+        <span>PRACTICE</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 14px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.03em; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5 H14 L19 7.5 V21.5 H6 Z"></path><path d="M14 2.5 V7.5 H19"></path><path d="M9 12 H16"></path><path d="M9 16 H16"></path></svg>
+        <span>ASSESSMENTS</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 14px; font-size: 13.5px; font-weight: 500; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 21 H20.5"></path><path d="M7 17.5 V12"></path><path d="M11 17.5 V6"></path><path d="M15 17.5 V9"></path><path d="M19 17.5 V13.5"></path></svg>
+        <span>My Progress</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 14px; font-size: 13.5px; font-weight: 500; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L22 20 H2 Z"></path><path d="M12 9.5 V14"></path><circle cx="12" cy="17" r="0.9" fill="#243056"></circle></svg>
+        <span>My Mistakes</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; height: 46px; padding: 0 14px; font-size: 13.5px; font-weight: 500; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="13" r="8.5"></circle><circle cx="11" cy="13" r="4.5"></circle><path d="M11 13 L20 4"></path><path d="M17 3.5 H20.5 V7"></path></svg>
+        <span>My Goals</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; height: 50px; padding: 0 14px; font-size: 13.5px; font-weight: 500; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5 C16.5 3.3 19.5 3 21 3 C21 4.5 20.7 7.5 19.5 10 C17.8 13.5 14 16.5 10 17.8 L6.2 14 C7.5 10 10.5 6.2 14 4.5 Z"></path><circle cx="15.3" cy="8.7" r="1.8"></circle><path d="M6.2 14 L3 14.6 L5.2 10.8 L8.6 10.2"></path><path d="M10 17.8 L9.4 21 L13.2 18.8 L13.8 15.4"></path><path d="M5.5 16.5 L3 21 L7.5 18.5"></path></svg>
+        <span>Career Explorer</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 14px; font-size: 13.5px; font-weight: 500; color: #1F2847;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#243056" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5 H20 A1 1 0 0 1 21 5.5 V16 A1 1 0 0 1 20 17 H10 L5.5 20.5 V17 H4 A1 1 0 0 1 3 16 V5.5 A1 1 0 0 1 4 4.5 Z"></path><circle cx="8" cy="10.8" r="0.9" fill="#243056"></circle><circle cx="12" cy="10.8" r="0.9" fill="#243056"></circle><circle cx="16" cy="10.8" r="0.9" fill="#243056"></circle></svg>
+        <span>AI Companion</span>
+      </div>
+
+      <div style="margin: 16px 14px 0 14px; height: 1px; background: #E4E8F1;"></div>
+
+      <div style="margin-top: 14px; display: flex; align-items: center; gap: 14px; height: 40px; padding: 0 14px; font-size: 13px; font-weight: 500; color: #4A5373;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C6480" stroke-width="1.8" stroke-linejoin="round"><path d="M2 12 C4.5 7 8 5 12 5 C16 5 19.5 7 22 12 C19.5 17 16 19 12 19 C8 19 4.5 17 2 12 Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <span>What my parent sees</span>
+      </div>
+    </nav>
+
+    <!-- Sidebar illustration + motto -->
+    <div style="margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+      <svg width="220" height="96" viewBox="0 0 220 96">
+        <defs>
+          <linearGradient id="sideMtnA" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#C9D3F6"></stop>
+            <stop offset="1" stop-color="#EEF1FB" stop-opacity="0"></stop>
+          </linearGradient>
+          <linearGradient id="sideMtnB" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#AEBBEE"></stop>
+            <stop offset="1" stop-color="#E9EDFA" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path d="M0 96 L40 64 L62 74 L96 40 L118 52 L128 44 L160 66 L186 58 L220 80 L220 96 Z" fill="url(#sideMtnA)"></path>
+        <path d="M30 96 L78 58 L100 66 L128 30 L150 52 L172 62 L200 96 Z" fill="url(#sideMtnB)"></path>
+        <path d="M128 30 L135 40 L128 38 L122 41 Z" fill="#FFFFFF" opacity="0.9"></path>
+        <path d="M128 30 V8" stroke="#4A5BD9" stroke-width="1.6" stroke-linecap="round"></path>
+        <path d="M128 8 L141 12 L128 17 Z" fill="#4A5BD9"></path>
+      </svg>
+      <div style="font-size: 15px; line-height: 1.55; font-weight: 500; color: #2F3DD1; text-align: center;">Big dreams.<br>Structured steps.<br>Real progress.</div>
+      <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 20.5 C5 15.5 3 11.8 3 8.6 A4.6 4.6 0 0 1 12 6.6 A4.6 4.6 0 0 1 21 8.6 C21 11.8 19 15.5 12 20.5 Z" fill="#8B6CF0"></path></svg>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 22px; padding: 12px 26px 16px 18px;">
+
+    <!-- Top bar -->
+    <div style="height: 38px; display: flex; align-items: center;">
+      <div style="width: 716px; height: 40px; background: #FFFFFF; border: 1px solid #E6EAF3; border-radius: 20px; display: flex; align-items: center; gap: 12px; padding: 0 5px 0 16px; box-shadow: 0 1px 2px rgba(20, 30, 70, 0.04);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A8299" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20 L16 16"></path></svg>
+        <span style="flex: 1; font-size: 13px; color: #858CA2;">Ask a question, get help, or search your subjects...</span>
+        <div style="height: 30px; padding: 0 12px; border-radius: 15px; background: #4450EE; color: #FFFFFF; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+          <span>Ask AI</span>
+          <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#FFFFFF"></circle><path d="M12 5 L13.4 10.6 L19 12 L13.4 13.4 L12 19 L10.6 13.4 L5 12 L10.6 10.6 Z" fill="#4450EE"></path></svg>
+        </div>
+      </div>
+
+      <div style="flex: 1;"></div>
+
+      <div style="position: relative; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3A4466" stroke-width="1.8" stroke-linejoin="round"><path d="M6 16 V11 A6 6 0 0 1 18 11 V16 L20 18 H4 Z"></path><path d="M10 20.5 A2 2 0 0 0 14 20.5" stroke-linecap="round"></path></svg>
+        <div style="position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; border-radius: 8px; background: #EF4444; color: #FFFFFF; font-size: 9.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #F4F6FB;">3</div>
+      </div>
+
+      <div style="margin-left: 26px; display: flex; align-items: center; gap: 10px;">
+        <svg width="42" height="42" viewBox="0 0 64 64">
+          <defs><clipPath id="clipAvatarTop"><circle cx="32" cy="32" r="32"></circle></clipPath></defs>
+          <g clip-path="url(#clipAvatarTop)">
+            <rect width="64" height="64" fill="#E4E9F7"></rect>
+            <path d="M13 40 C11 18 21 8 32 8 C44 8 53 18 51 40 C51 50 48 58 46 64 H18 C16 58 13 50 13 40 Z" fill="#1F1A1C"></path>
+            <path d="M8 64 C10 52 19 47 32 47 C45 47 54 52 56 64 Z" fill="#E7A64A"></path>
+            <rect x="28" y="38" width="8" height="10" fill="#C98E6B"></rect>
+            <ellipse cx="32" cy="29" rx="11" ry="13" fill="#DCA27F"></ellipse>
+            <path d="M20.5 27 C21 15 28 12 33 12 C41 12 45 17 44.5 27 C41 20 36 17 31 17 C27 19 23 23 20.5 27 Z" fill="#1F1A1C"></path>
+            <circle cx="28" cy="30" r="1.2" fill="#2B2020"></circle>
+            <circle cx="36" cy="30" r="1.2" fill="#2B2020"></circle>
+            <path d="M28.8 35 Q32 37.6 35.2 35" stroke="#A55A48" stroke-width="1.3" fill="none" stroke-linecap="round"></path>
+          </g>
+        </svg>
+        <div style="display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-size: 13px; font-weight: 700; color: #1A2240;">Priya Sharma</div>
+          <div style="font-size: 11px; color: #6E768D;">Year 10 (IGCSE)</div>
+        </div>
+        <svg style="margin-left: 26px;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3A4466" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 L12 15 L18 9"></path></svg>
+      </div>
+    </div>
+
+    <!-- Content columns -->
+    <div style="flex: 1; min-height: 0; display: flex; gap: 20px;">
+
+      <!-- ===== LEFT COLUMN ===== -->
+      <div style="width: 847px; flex: none; display: flex; flex-direction: column; gap: 16px;">
+
+        <!-- Hero -->
+        <section style="position: relative; height: 177px; flex: none; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(26, 34, 64, 0.06);">
+          <svg style="position: absolute; left: 0; top: 0;" width="847" height="177" viewBox="0 0 847 177">
+            <defs>
+              <linearGradient id="heroSky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#AFC4EC"></stop>
+                <stop offset="0.55" stop-color="#E6D6E4"></stop>
+                <stop offset="1" stop-color="#F8C79C"></stop>
+              </linearGradient>
+              <radialGradient id="heroSun" cx="0.78" cy="0.78" r="0.35">
+                <stop offset="0" stop-color="#FFE2B8" stop-opacity="1"></stop>
+                <stop offset="1" stop-color="#FFE2B8" stop-opacity="0"></stop>
+              </radialGradient>
+              <linearGradient id="heroFade" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#F5F6FD" stop-opacity="1"></stop>
+                <stop offset="0.36" stop-color="#F3F4FC" stop-opacity="0.96"></stop>
+                <stop offset="0.62" stop-color="#F3F4FC" stop-opacity="0"></stop>
+              </linearGradient>
+              <linearGradient id="heroMtnFar" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#A9B8DC"></stop>
+                <stop offset="1" stop-color="#D5CBE0"></stop>
+              </linearGradient>
+              <linearGradient id="heroMtnMid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#7F92C4"></stop>
+                <stop offset="1" stop-color="#A9A7C9"></stop>
+              </linearGradient>
+            </defs>
+            <rect width="847" height="177" fill="url(#heroSky)"></rect>
+            <rect width="847" height="177" fill="url(#heroSun)"></rect>
+            <path d="M280 177 L360 128 L420 140 L495 96 L555 124 L618 86 L690 120 L762 78 L847 108 L847 177 Z" fill="url(#heroMtnFar)"></path>
+            <path d="M340 177 L440 142 L515 152 L596 118 L660 144 L744 108 L847 136 L847 177 Z" fill="url(#heroMtnMid)"></path>
+            <path d="M440 177 L540 160 L632 168 L720 150 L847 162 L847 177 Z" fill="#5F6FA0"></path>
+            <path d="M488 177 L534 146 L592 132 L676 140 L736 177 Z" fill="#434760"></path>
+            <path d="M534 146 L592 132 L676 140 L640 144 L590 142 Z" fill="#5A5E78"></path>
+            <!-- Seated student, facing the sunset -->
+            <g transform="translate(548 26)">
+              <ellipse cx="42" cy="104" rx="24" ry="8" fill="#34405F"></ellipse>
+              <rect x="6" y="42" width="30" height="54" rx="10" fill="#2F3E6B"></rect>
+              <rect x="10" y="62" width="22" height="16" rx="5" fill="#3A4B7E"></rect>
+              <path d="M26 40 Q38 34 50 40 L56 100 L22 100 Z" fill="#86A8DB"></path>
+              <path d="M30 44 Q40 62 36 92" fill="none" stroke="#243258" stroke-width="3" stroke-linecap="round"></path>
+              <path d="M44 96 L84 76 L91 86 L52 108 Z" fill="#3B4A73"></path>
+              <path d="M84 76 L95 124 L83 126 L76 86 Z" fill="#3B4A73"></path>
+              <rect x="79" y="121" width="22" height="8" rx="4" fill="#EEEEF2"></rect>
+              <path d="M48 50 Q66 70 84 79 L80 88 Q60 78 44 62 Z" fill="#86A8DB"></path>
+              <circle cx="84" cy="82" r="5" fill="#D9A27E"></circle>
+              <rect x="36" y="32" width="8" height="8" fill="#D9A27E"></rect>
+              <circle cx="40" cy="24" r="12" fill="#2A2430"></circle>
+              <path d="M49 19 Q55 26 50 32 Q46.5 26.5 49 19 Z" fill="#D9A27E"></path>
+              <path d="M32 18 Q17 28 23 54 Q27 38 35 29 Z" fill="#2A2430"></path>
+            </g>
+            <rect width="847" height="177" fill="url(#heroFade)"></rect>
+          </svg>
+
+          <div style="position: relative; padding: 28px 31px; display: flex; flex-direction: column; gap: 8px;">
+            <h1 style="margin: 0; font-size: 28px; line-height: 1.2; font-weight: 800; color: #1B2340; letter-spacing: -0.01em;">Good Morning, Priya! 👋</h1>
+            <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #2E3654;">Small steps every day lead to big dreams.</p>
+            <div style="margin-top: 16px; display: flex; gap: 10px;">
+              <div style="height: 28px; padding: 0 12px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #3C4FD8; box-shadow: 0 1px 2px rgba(26, 34, 64, 0.06);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3C4FD8" stroke-width="2.4" stroke-linejoin="round"><path d="M5 4.5 A1.5 1.5 0 0 1 6.5 3 H19 V18 H6.5 A1.5 1.5 0 0 0 5 19.5 Z"></path><path d="M5 19.5 A1.5 1.5 0 0 0 6.5 21 H19 V18"></path></svg>
+                <span>IGCSE</span>
+              </div>
+              <div style="height: 28px; padding: 0 12px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #1E8F63; box-shadow: 0 1px 2px rgba(26, 34, 64, 0.06);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1E8F63" stroke-width="2.2"><circle cx="12" cy="12" r="1.8" fill="#1E8F63"></circle><ellipse cx="12" cy="12" rx="10" ry="4"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"></ellipse></svg>
+                <span>IIT Foundation</span>
+              </div>
+              <div style="height: 28px; padding: 0 12px; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #1E8F63; box-shadow: 0 1px 2px rgba(26, 34, 64, 0.06);">
+                <svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 2 L14.2 9.8 L22 12 L14.2 14.2 L12 22 L9.8 14.2 L2 12 L9.8 9.8 Z" fill="#1E8F63"></path></svg>
+                <span>India Explorer</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="position: absolute; right: 28px; top: 14px; transform: rotate(-20deg); transform-origin: right top; font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive; font-size: 24px; font-weight: 600; line-height: 1.02; color: #262B42; display: flex; flex-direction: column;">
+            <span style="margin-right: 56px;">Learn</span>
+            <span style="margin-right: 28px;">Explore</span>
+            <span style="display: flex; align-items: center; gap: 4px;">Achieve
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#262B42" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5 C5 15.5 3 11.8 3 8.6 A4.6 4.6 0 0 1 12 6.6 A4.6 4.6 0 0 1 21 8.6 C21 11.8 19 15.5 12 20.5 Z"></path></svg>
+            </span>
+          </div>
+        </section>
+
+        <!-- My Day -->
+        <section style="height: 450px; flex: none; background: #FFFFFF; border: 1px solid #E9EDF5; border-radius: 16px; padding: 17px 18px 16px 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 1px 3px rgba(26, 34, 64, 0.04);">
+          <div style="height: 32px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 32px; height: 32px; border-radius: 9px; background: #EEF1FD; display: flex; align-items: center; justify-content: center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3F51F0" stroke-width="1.9" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"></rect><path d="M3.5 10 H20.5"></path><path d="M8 3 V7"></path><path d="M16 3 V7"></path><rect x="7.5" y="13" width="3" height="3" rx="0.6" fill="#3F51F0" stroke="none"></rect></svg>
+            </div>
+            <div style="font-size: 20px; font-weight: 700; color: #1A2240;">My Day</div>
+            <div style="font-size: 12px; color: #7A8299; margin-top: 3px;">Tue, 22 Apr 2025</div>
+            <div style="flex: 1;"></div>
+            <a href="#" style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;">
+              <span>View Full Plan</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3F51F0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19"></path><path d="M13 6 L19 12 L13 18"></path></svg>
+            </a>
+          </div>
+
+          <!-- Stats -->
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+            <div style="height: 62px; border-radius: 12px; background: #F6F8FD; display: flex; align-items: center; gap: 12px; padding: 0 16px;">
+              <div style="width: 34px; height: 34px; border-radius: 17px; background: #E6EBFD; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3F51F0" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7 V12 L15.5 14"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 11px; color: #6E768D;">Total Study Time</div>
+                <div style="font-size: 14px; font-weight: 700; color: #1A2240;">6h 40m</div>
+              </div>
+            </div>
+            <div style="height: 62px; border-radius: 12px; background: #F6F8FD; display: flex; align-items: center; gap: 12px; padding: 0 16px;">
+              <div style="width: 34px; height: 34px; border-radius: 17px; background: #DDF3E6; display: flex; align-items: center; justify-content: center;">
+                <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#22A462"></circle><path d="M7.5 12.5 L10.7 15.5 L16.5 9" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 11px; color: #6E768D;">Completed</div>
+                <div style="font-size: 14px; font-weight: 700; color: #1A2240;">2/6</div>
+              </div>
+            </div>
+            <div style="height: 62px; border-radius: 12px; background: #F6F8FD; display: flex; align-items: center; gap: 12px; padding: 0 16px;">
+              <div style="width: 34px; height: 34px; border-radius: 17px; background: #DDF3EF; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#129B7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.5"></circle><path d="M3.5 20 C4 15.5 7 14 10 14 C11.6 14 13 14.4 14.2 15.2"></path><path d="M15 18 L17.2 20.2 L21.5 15.5"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 11px; color: #6E768D;">Solved Without Help</div>
+                <div style="font-size: 14px; font-weight: 700; color: #1A2240;">7 of 10</div>
+              </div>
+            </div>
+            <div style="height: 62px; border-radius: 12px; background: #F6F8FD; display: flex; align-items: center; gap: 12px; padding: 0 16px;">
+              <div style="width: 34px; height: 34px; border-radius: 17px; background: #FCE6F1; display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D9468F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12 A8 8 0 1 1 17.66 6.34"></path><path d="M20.5 3.5 V8 H16"></path><path d="M8.5 12.5 L11 15 L15.5 10"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 11px; color: #6E768D;">Mistakes Fixed</div>
+                <div style="font-size: 14px; font-weight: 700; color: #1A2240;">3 this week</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+
+            <div style="height: 43px; border: 1px solid #EDF0F6; border-radius: 10px; background: #FBFCFE; display: flex; align-items: center;">
+              <div style="width: 118px; height: 100%; border-right: 1px solid #EDF0F6; display: flex; align-items: center; padding-left: 16px; font-size: 11.5px; color: #3E4763;">08:00 – 15:00</div>
+              <div style="margin: 0 14px; width: 30px; height: 30px; border-radius: 8px; background: #E9EEFD; display: flex; align-items: center; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3F51F0" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 L12 4 L21 9.5"></path><path d="M5.5 10.5 V18"></path><path d="M10 10.5 V18"></path><path d="M14 10.5 V18"></path><path d="M18.5 10.5 V18"></path><path d="M3 20.5 H21"></path></svg>
+              </div>
+              <div style="width: 180px; font-size: 12px; font-weight: 600; color: #1A2240;">School</div>
+              <div style="width: 228px; font-size: 11px; color: #6E768D;">Classes &amp; Homework</div>
+              <div style="width: 110px; font-size: 11px; color: #6E768D;">–</div>
+              <div style="flex: 1;"></div>
+              <div style="margin-right: 14px; height: 24px; padding: 0 10px; border-radius: 12px; background: #E9F7EF; color: #1F9D5C; font-size: 10.5px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F9D5C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"></circle><path d="M8 12.5 L11 15 L16 9.5"></path></svg>
+                <span>Completed</span>
+              </div>
+            </div>
+
+            <div style="height: 43px; border: 1px solid #EDF0F6; border-radius: 10px; background: #FBFCFE; display: flex; align-items: center;">
+              <div style="width: 118px; height: 100%; border-right: 1px solid #EDF0F6; display: flex; align-items: center; padding-left: 16px; font-size: 11.5px; color: #3E4763;">16:00 – 16:45</div>
+              <div style="margin: 0 14px; width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #8B5CF6, #5B4FE8); display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 4.5 H6.5 L13 12 L6.5 19.5 H17"></path></svg>
+              </div>
+              <div style="width: 180px; font-size: 12px; font-weight: 600; color: #1A2240;">Mathematics (IGCSE)</div>
+              <div style="width: 228px; font-size: 11px; color: #6E768D;">Quadratic Equations</div>
+              <div style="width: 110px; font-size: 11px; color: #6E768D;">45 min</div>
+              <div style="flex: 1;"></div>
+              <div style="margin-right: 14px; height: 24px; padding: 0 10px; border-radius: 12px; background: #E9F7EF; color: #1F9D5C; font-size: 10.5px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F9D5C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"></circle><path d="M8 12.5 L11 15 L16 9.5"></path></svg>
+                <span>Completed</span>
+              </div>
+            </div>
+
+            <div style="height: 43px; border: 1px solid #EDF0F6; border-radius: 10px; background: #FBFCFE; display: flex; align-items: center;">
+              <div style="width: 118px; height: 100%; border-right: 1px solid #EDF0F6; display: flex; align-items: center; padding-left: 16px; font-size: 11.5px; color: #3E4763;">17:00 – 18:00</div>
+              <div style="margin: 0 14px; width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #5B8DEF, #3F5FE0); display: flex; align-items: center; justify-content: center;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8"><circle cx="12" cy="12" r="1.8" fill="#FFFFFF"></circle><ellipse cx="12" cy="12" rx="10" ry="4"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"></ellipse></svg>
+              </div>
+              <div style="width: 180px; font-size: 12px; font-weight: 600; color: #1A2240;">IIT Foundation</div>
+              <div style="width: 228px; font-size: 11px; color: #6E768D;">Advanced Problem Solving</div>
+              <div style="width: 110px; font-size: 11px; color: #6E768D;">60 min</div>
+              <div style="flex: 1;"></div>
+              <div style="margin-right: 14px; height: 24px; padding: 0 10px; border-radius: 12px; background: #E9F7EF; color: #1F9D5C; font-size: 10.5px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F9D5C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"></circle><path d="M8 12.5 L11 15 L16 9.5"></path></svg>
+                <span>Completed</span>
+              </div>
+            </div>
+
+            <div style="height: 43px; border: 1px solid #EDF0F6; border-radius: 10px; background: #FBFCFE; display: flex; align-items: center;">
+              <div style="width: 118px; height: 100%; border-right: 1px solid #EDF0F6; display: flex; align-items: center; padding-left: 16px; font-size: 11.5px; color: #3E4763;">19:30 – 20:10</div>
+              <div style="margin: 0 14px; width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #FB7185, #E8364F); display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"><path d="M5 3.5 H10 V12 A2 2 0 0 0 14 12 V3.5 H19 V12 A7 7 0 0 1 5 12 Z"></path><path d="M5 8 H10"></path><path d="M14 8 H19"></path></svg>
+              </div>
+              <div style="width: 180px; font-size: 12px; font-weight: 600; color: #1A2240;">Physics (IGCSE)</div>
+              <div style="width: 228px; font-size: 11px; color: #6E768D;">Forces &amp; Motion</div>
+              <div style="width: 110px; font-size: 11px; color: #6E768D;">40 min</div>
+              <div style="flex: 1;"></div>
+              <div style="margin-right: 14px; height: 24px; padding: 0 10px; border-radius: 12px; background: #EAF0FD; color: #3E6BE6; font-size: 10.5px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3E6BE6" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"></circle><path d="M12 7.5 V12 L15 13.8"></path></svg>
+                <span>In Progress</span>
+              </div>
+            </div>
+
+            <div style="height: 43px; border: 1px solid #EDF0F6; border-radius: 10px; background: #FBFCFE; display: flex; align-items: center;">
+              <div style="width: 118px; height: 100%; border-right: 1px solid #EDF0F6; display: flex; align-items: center; padding-left: 16px; font-size: 11.5px; color: #3E4763;">20:10 – 20:40</div>
+              <div style="margin: 0 14px; width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #FBBF24, #F59E0B); display: flex; align-items: center; justify-content: center;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linejoin="round"><path d="M10 1 L13 1.5 L14 4 L13 6 L16 8 L19 8.5 L22 7.5 L23 9 L20 11 L18 11.5 L17 13 L15 14.5 L13 18 L11.5 23 L10 20 L8.5 15 L7.5 13 L5 13.5 L3 11.5 L4.5 10 L6.5 9.5 L7 7 L9 5 L8.5 3 Z"></path></svg>
+              </div>
+              <div style="width: 180px; font-size: 12px; font-weight: 600; color: #1A2240;">India Explorer</div>
+              <div style="width: 228px; font-size: 11px; color: #6E768D;">Indian Geography</div>
+              <div style="width: 110px; font-size: 11px; color: #6E768D;">30 min</div>
+              <div style="flex: 1;"></div>
+              <div style="margin-right: 14px; height: 24px; padding: 0 10px; border-radius: 12px; background: #F1F2F6; color: #858CA0; font-size: 10.5px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#B7BCCB"></circle><circle cx="12" cy="12" r="4" fill="#F1F2F6"></circle></svg>
+                <span>Not Started</span>
+              </div>
+            </div>
+
+            <div style="height: 43px; border: 1px solid #EDF0F6; border-radius: 10px; background: #FBFCFE; display: flex; align-items: center;">
+              <div style="width: 118px; height: 100%; border-right: 1px solid #EDF0F6; display: flex; align-items: center; padding-left: 16px; font-size: 11.5px; color: #3E4763;">20:40 – 20:50</div>
+              <div style="margin: 0 14px; width: 30px; height: 30px; border-radius: 8px; background: #E3F5EA; display: flex; align-items: center; justify-content: center;">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#23945A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 C14.5 8 14.5 12 12 16 C9.5 12 9.5 8 12 5 Z"></path><path d="M12 16 C8 16 5 13 4 9.5 C7 9.5 10 11 12 16"></path><path d="M12 16 C16 16 19 13 20 9.5 C17 9.5 14 11 12 16"></path><path d="M4 19 C8 18 16 18 20 19"></path></svg>
+              </div>
+              <div style="width: 180px; font-size: 12px; font-weight: 600; color: #1A2240;">Reflection</div>
+              <div style="width: 228px; font-size: 11px; color: #6E768D;">What did I learn today?</div>
+              <div style="width: 110px; font-size: 11px; color: #6E768D;">10 min</div>
+              <div style="flex: 1;"></div>
+              <div style="margin-right: 14px; height: 24px; padding: 0 10px; border-radius: 12px; background: #F1F2F6; color: #858CA0; font-size: 10.5px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#B7BCCB"></circle><circle cx="12" cy="12" r="4" fill="#F1F2F6"></circle></svg>
+                <span>Not Started</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Continue Learning -->
+        <section style="height: 172px; flex: none; background: #FFFFFF; border: 1px solid #E9EDF5; border-radius: 16px; padding: 14px 18px 14px 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 1px 3px rgba(26, 34, 64, 0.04);">
+          <div style="display: flex; align-items: flex-start;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 19px; font-weight: 700; color: #1A2240;">Continue Learning</div>
+              <div style="font-size: 11px; color: #7A8299;">Pick up where you left off or explore something new.</div>
+            </div>
+            <div style="flex: 1;"></div>
+            <a href="#" style="margin-top: 8px; display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600;">
+              <span>View All</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3F51F0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19"></path><path d="M13 6 L19 12 L13 18"></path></svg>
+            </a>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+            <!-- Maths -->
+            <div style="position: relative; height: 95px; border-radius: 12px; background: #EEF0FD; border: 1px solid #E0E4FB; padding: 12px 14px; display: flex; gap: 14px; overflow: hidden;">
+              <div style="width: 38px; height: 38px; border-radius: 19px; background: linear-gradient(135deg, #6D6BF5, #4450EE); display: flex; align-items: center; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 4.5 H6.5 L13 12 L6.5 19.5 H17"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px; position: relative;">
+                <div style="font-size: 11.5px; font-weight: 700; color: #1A2240;">IGCSE - Mathematics</div>
+                <div style="font-size: 10px; color: #6E768D;">Quadratic Equations</div>
+                <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 92px; height: 5px; border-radius: 3px; background: #DADFF8;"><div style="width: 65%; height: 100%; border-radius: 3px; background: #4F5BEF;"></div></div>
+                  <span style="font-size: 9.5px; color: #6E768D;">65%</span>
+                </div>
+                <div style="margin-top: 7px; align-self: flex-start; height: 20px; padding: 0 10px; border-radius: 10px; background: #4450EE; color: #FFFFFF; font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                  <span>Continue</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19"></path><path d="M13 6 L19 12 L13 18"></path></svg>
+                </div>
+              </div>
+              <svg style="position: absolute; right: 10px; top: 20px;" width="48" height="46" viewBox="0 0 62 60" fill="none" stroke-linecap="round">
+                <path d="M8 4 V54 H58" stroke="#A7AEE5" stroke-width="1.1"></path>
+                <path d="M12 50 C22 50 24 12 32 12 C40 12 42 34 56 34" stroke="#7D86E2" stroke-width="1.5"></path>
+                <path d="M32 12 V54" stroke="#B9BEEA" stroke-width="1" stroke-dasharray="2 3"></path>
+                <path d="M50 4 L54 10 M54 4 L50 10" stroke="#A7AEE5" stroke-width="1"></path>
+              </svg>
+            </div>
+
+            <!-- IIT Physics -->
+            <div style="position: relative; height: 95px; border-radius: 12px; background: #E8F7F1; border: 1px solid #D5EFE4; padding: 12px 14px; display: flex; gap: 14px; overflow: hidden;">
+              <div style="width: 38px; height: 38px; border-radius: 19px; background: linear-gradient(135deg, #2BC2A0, #129B7E); display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8"><circle cx="12" cy="12" r="1.8" fill="#FFFFFF"></circle><ellipse cx="12" cy="12" rx="10" ry="4"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"></ellipse></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px; position: relative;">
+                <div style="font-size: 11.5px; font-weight: 700; color: #1A2240;">IIT Foundation - Physics</div>
+                <div style="font-size: 10px; color: #6E768D;">Mechanics</div>
+                <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 92px; height: 5px; border-radius: 3px; background: #CDEBDF;"><div style="width: 42%; height: 100%; border-radius: 3px; background: #1FAF8C;"></div></div>
+                  <span style="font-size: 9.5px; color: #6E768D;">42%</span>
+                </div>
+                <div style="margin-top: 7px; align-self: flex-start; height: 20px; padding: 0 10px; border-radius: 10px; background: #4450EE; color: #FFFFFF; font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                  <span>Continue</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19"></path><path d="M13 6 L19 12 L13 18"></path></svg>
+                </div>
+              </div>
+              <svg style="position: absolute; right: 10px; top: 22px;" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#86D3BC" stroke-width="0.7"><circle cx="12" cy="12" r="1.4" fill="#86D3BC"></circle><ellipse cx="12" cy="12" rx="10.5" ry="4.2"></ellipse><ellipse cx="12" cy="12" rx="10.5" ry="4.2" transform="rotate(60 12 12)"></ellipse><ellipse cx="12" cy="12" rx="10.5" ry="4.2" transform="rotate(120 12 12)"></ellipse><circle cx="22.5" cy="12" r="0.8" fill="#86D3BC"></circle><circle cx="6.8" cy="3" r="0.8" fill="#86D3BC"></circle></svg>
+            </div>
+
+            <!-- India Explorer -->
+            <div style="position: relative; height: 95px; border-radius: 12px; background: #FFF4EA; border: 1px solid #FBE5D0; padding: 12px 14px; display: flex; gap: 14px; overflow: hidden;">
+              <div style="width: 38px; height: 38px; border-radius: 19px; background: linear-gradient(135deg, #FBBF24, #F08A0C); display: flex; align-items: center; justify-content: center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M10 1 L13 1.5 L14 4 L13 6 L16 8 L19 8.5 L22 7.5 L23 9 L20 11 L18 11.5 L17 13 L15 14.5 L13 18 L11.5 23 L10 20 L8.5 15 L7.5 13 L5 13.5 L3 11.5 L4.5 10 L6.5 9.5 L7 7 L9 5 L8.5 3 Z"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 3px; position: relative;">
+                <div style="font-size: 11.5px; font-weight: 700; color: #1A2240;">India Explorer</div>
+                <div style="font-size: 10px; color: #6E768D;">Indian Geography</div>
+                <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 92px; height: 5px; border-radius: 3px; background: #F5DEC8;"><div style="width: 30%; height: 100%; border-radius: 3px; background: #5B5FEF;"></div></div>
+                  <span style="font-size: 9.5px; color: #6E768D;">30%</span>
+                </div>
+                <div style="margin-top: 7px; align-self: flex-start; height: 20px; padding: 0 10px; border-radius: 10px; background: #4450EE; color: #FFFFFF; font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                  <span>Continue</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19"></path><path d="M13 6 L19 12 L13 18"></path></svg>
+                </div>
+              </div>
+              <svg style="position: absolute; right: 10px; top: 16px;" width="44" height="52" viewBox="0 0 24 24" fill="#F4A340" opacity="0.85"><path d="M10 1 L13 1.5 L14 4 L13 6 L16 8 L19 8.5 L22 7.5 L23 9 L20 11 L18 11.5 L17 13 L15 14.5 L13 18 L11.5 23 L10 20 L8.5 15 L7.5 13 L5 13.5 L3 11.5 L4.5 10 L6.5 9.5 L7 7 L9 5 L8.5 3 Z"></path></svg>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section style="height: 88px; flex: none; background: #FFFFFF; border: 1px solid #E9EDF5; border-radius: 16px; padding: 11px 18px 12px 16px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 3px rgba(26, 34, 64, 0.04);">
+          <div style="font-size: 12px; font-weight: 700; color: #1A2240;">Quick Actions</div>
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px;">
+            <div style="height: 46px; border: 1px solid #EDF0F6; border-radius: 10px; padding: 0 12px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 32px; height: 32px; border-radius: 16px; background: #ECE7FE; display: flex; align-items: center; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C4DEB" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5 A8.5 8.5 0 1 1 5 17.2 L3.5 20.5 L7.2 19.3 A8.5 8.5 0 0 1 12 3.5 Z"></path><path d="M12 8 L12.9 11.1 L16 12 L12.9 12.9 L12 16 L11.1 12.9 L8 12 L11.1 11.1 Z" fill="#7C4DEB" stroke="none"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 11px; font-weight: 700; color: #1A2240;">Ask My AI</div>
+                <div style="font-size: 9.5px; color: #7A8299;">Get instant help</div>
+              </div>
+            </div>
+            <div style="height: 46px; border: 1px solid #EDF0F6; border-radius: 10px; padding: 0 12px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 32px; height: 32px; border-radius: 16px; background: #FDF1D2; display: flex; align-items: center; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E29A06" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 A6 6 0 0 0 8 13.5 C8.8 14.3 9 15.2 9 16 H15 C15 15.2 15.2 14.3 16 13.5 A6 6 0 0 0 12 3 Z"></path><path d="M9.5 19 H14.5"></path><path d="M10.5 21.5 H13.5"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 11px; font-weight: 700; color: #1A2240;">Take a Practice Quiz</div>
+                <div style="font-size: 9.5px; color: #7A8299;">Sharpen your skills</div>
+              </div>
+            </div>
+            <div style="height: 46px; border: 1px solid #EDF0F6; border-radius: 10px; padding: 0 12px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 32px; height: 32px; border-radius: 16px; background: #FCE6F1; display: flex; align-items: center; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D9468F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 L21.5 20 H2.5 Z"></path><path d="M12 10 V14"></path><circle cx="12" cy="17" r="0.9" fill="#D9468F"></circle></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 11px; font-weight: 700; color: #1A2240;">View My Mistakes</div>
+                <div style="font-size: 9.5px; color: #7A8299;">Learn and improve</div>
+              </div>
+            </div>
+            <div style="height: 46px; border: 1px solid #EDF0F6; border-radius: 10px; padding: 0 12px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 32px; height: 32px; border-radius: 16px; background: #DDF4F8; display: flex; align-items: center; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1597B0" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="13" r="8"></circle><circle cx="11" cy="13" r="4"></circle><path d="M11 13 L19.5 4.5"></path><path d="M16.5 4 H20 V7.5"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 11px; font-weight: 700; color: #1A2240;">Update My Goals</div>
+                <div style="font-size: 9.5px; color: #7A8299;">Set new targets</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ===== RIGHT COLUMN ===== -->
+      <div style="width: 369px; flex: none; display: flex; flex-direction: column; gap: 14px;">
+
+        <!-- Your Progress -->
+        <section style="height: 171px; flex: none; background: #FFFFFF; border: 1px solid #E9EDF5; border-radius: 16px; padding: 14px 16px 12px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px rgba(26, 34, 64, 0.04);">
+          <div style="display: flex; align-items: center;">
+            <div style="font-size: 16px; font-weight: 700; color: #1A2240;">Your Progress</div>
+            <div style="flex: 1;"></div>
+            <a href="#" style="display: flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 600;">
+              <span>View Details</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3F51F0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19"></path><path d="M13 6 L19 12 L13 18"></path></svg>
+            </a>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <div style="position: relative; width: 80px; height: 80px;">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <defs><linearGradient id="ringA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22C55E"></stop><stop offset="1" stop-color="#0EA5A4"></stop></linearGradient></defs>
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="#E5F4F0" stroke-width="8"></circle>
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="url(#ringA)" stroke-width="8" stroke-linecap="round" stroke-dasharray="147.4 213.6" transform="rotate(-90 40 40)"></circle>
+                </svg>
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; color: #1A2240;">18/26</div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                <div style="font-size: 12.5px; font-weight: 600; color: #1A2240;">IGCSE</div>
+                <div style="font-size: 10px; color: #7A8299;">Topics secure</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; border-left: 1px solid #EEF1F6;">
+              <div style="position: relative; width: 80px; height: 80px;">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <defs><linearGradient id="ringB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22C55E"></stop><stop offset="1" stop-color="#0EA5A4"></stop></linearGradient></defs>
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="#E5F4F0" stroke-width="8"></circle>
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="url(#ringB)" stroke-width="8" stroke-linecap="round" stroke-dasharray="154.2 213.6" transform="rotate(-90 40 40)"></circle>
+                </svg>
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #1A2240;">4h 20m</div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                <div style="font-size: 12.5px; font-weight: 600; color: #1A2240;">IIT Foundation</div>
+                <div style="font-size: 10px; color: #7A8299;">of 6h this week</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; border-left: 1px solid #EEF1F6;">
+              <div style="position: relative; width: 80px; height: 80px;">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <defs><linearGradient id="ringC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22C55E"></stop><stop offset="1" stop-color="#0EA5A4"></stop></linearGradient></defs>
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="#E5F4F0" stroke-width="8"></circle>
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="url(#ringC)" stroke-width="8" stroke-linecap="round" stroke-dasharray="193.3 213.6" transform="rotate(-90 40 40)"></circle>
+                </svg>
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #1A2240;">3h 10m</div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                <div style="font-size: 12.5px; font-weight: 600; color: #1A2240;">India Explorer</div>
+                <div style="font-size: 10px; color: #7A8299;">of 3h 30m this week</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Subject Mastery -->
+        <section style="flex: none; background: #FFFFFF; border: 1px solid #E9EDF5; border-radius: 16px; padding: 12px 16px 12px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px rgba(26, 34, 64, 0.04);">
+          <div style="height: 18px; display: flex; align-items: center;">
+            <div style="font-size: 12.5px; font-weight: 700; color: #1A2240;">Subject Mastery (IGCSE)</div>
+            <div style="flex: 1;"></div>
+            <div style="display: flex; align-items: center; gap: 4px; margin-right: 12px; font-size: 9.5px; color: #8A6A1F;">
+              <div style="width: 6px; height: 6px; border-radius: 3px; background: #F59E0B;"></div>
+              <span>Review due</span>
+            </div>
+            <a href="#" style="display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600;">
+              <span>View All</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3F51F0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19"></path><path d="M13 6 L19 12 L13 18"></path></svg>
+            </a>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="height: 21px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 20px; height: 20px; border-radius: 10px; background: #19A58A; display: flex; align-items: center; justify-content: center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 4.5 H6.5 L13 12 L6.5 19.5 H17"></path></svg></div>
+              <div style="width: 112px; font-size: 11px; color: #2A3350;">Mathematics</div>
+              <div style="flex: 1; display: flex; gap: 3px;"><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div></div>
+              <div style="width: 74px; text-align: right; font-size: 10.5px; color: #3E4763;">Competent</div>
+            </div>
+            <div style="height: 21px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 20px; height: 20px; border-radius: 10px; background: #8FCBAE; display: flex; align-items: center; justify-content: center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M12 3 L19 6 V11 C19 16 15.5 19.5 12 21 C8.5 19.5 5 16 5 11 V6 Z"></path></svg></div>
+              <div style="width: 112px; font-size: 11px; color: #2A3350;">Physics</div>
+              <div style="flex: 1; display: flex; gap: 3px;"><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div></div>
+              <div style="width: 74px; text-align: right; font-size: 10.5px; color: #3E4763;">Competent</div>
+            </div>
+            <div style="height: 21px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 20px; height: 20px; border-radius: 10px; background: #F07A2B; display: flex; align-items: center; justify-content: center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 H15"></path><path d="M10 3 V9 L4.5 19 A1.4 1.4 0 0 0 5.8 21 H18.2 A1.4 1.4 0 0 0 19.5 19 L14 9 V3"></path></svg></div>
+              <div style="width: 112px; font-size: 11px; color: #2A3350;">Chemistry</div>
+              <div style="flex: 1; display: flex; gap: 3px;"><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div></div>
+              <div style="width: 74px; text-align: right; font-size: 10.5px; color: #3E4763;">Competent</div>
+            </div>
+            <div style="height: 21px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 20px; height: 20px; border-radius: 10px; background: #5DB84A; display: flex; align-items: center; justify-content: center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 C5 10 10 5 20 4 C20 14 15 19 6 19"></path><path d="M5 19 L13 11"></path></svg></div>
+              <div style="width: 112px; font-size: 11px; color: #2A3350;">Biology</div>
+              <div style="flex: 1; display: flex; gap: 3px;"><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div></div>
+              <div style="width: 74px; text-align: right; font-size: 10.5px; color: #3E4763;">Developing</div>
+            </div>
+            <div style="height: 21px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 20px; height: 20px; border-radius: 10px; background: #F5B82E; display: flex; align-items: center; justify-content: center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linejoin="round"><path d="M5 4.5 A1.5 1.5 0 0 1 6.5 3 H19 V18 H6.5 A1.5 1.5 0 0 0 5 19.5 Z"></path><path d="M5 19.5 A1.5 1.5 0 0 0 6.5 21 H19 V18"></path></svg></div>
+              <div style="width: 112px; font-size: 11px; color: #2A3350;">English</div>
+              <div style="flex: 1; display: flex; gap: 3px;"><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div></div>
+              <div style="width: 74px; text-align: right; font-size: 10.5px; color: #3E4763;">Developing</div>
+            </div>
+            <div style="height: 21px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 20px; height: 20px; border-radius: 10px; background: #E26A9C; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20 C3 15.5 6 14 9 14 C12 14 15 15.5 15.5 20"></path><path d="M16 4.5 A3.5 3.5 0 0 1 16 11.5"></path><path d="M18 14.5 C20 15.3 21.3 17 21.5 20"></path></svg></div>
+              <div style="width: 112px; font-size: 11px; color: #2A3350;">Sociology</div>
+              <div style="flex: 1; display: flex; gap: 3px;"><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div></div>
+              <div style="width: 74px; display: flex; align-items: center; justify-content: flex-end; gap: 5px; font-size: 10.5px; color: #3E4763;"><div style="width: 6px; height: 6px; border-radius: 3px; background: #F59E0B;"></div><span>Developing</span></div>
+            </div>
+            <div style="height: 21px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 20px; height: 20px; border-radius: 10px; background: #4C8DF0; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4"><circle cx="12" cy="12" r="9"></circle><ellipse cx="12" cy="12" rx="4" ry="9"></ellipse><path d="M3 12 H21"></path></svg></div>
+              <div style="width: 112px; font-size: 11px; color: #2A3350;">Global Perspectives</div>
+              <div style="flex: 1; display: flex; gap: 3px;"><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div></div>
+              <div style="width: 74px; text-align: right; font-size: 10.5px; color: #3E4763;">Developing</div>
+            </div>
+            <div style="height: 21px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 20px; height: 20px; border-radius: 10px; background: #F29A4A; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 11px; font-weight: 700; line-height: 1;">ع</div>
+              <div style="width: 112px; font-size: 11px; color: #2A3350;">Arabic</div>
+              <div style="flex: 1; display: flex; gap: 3px;"><div style="flex: 1; height: 5px; border-radius: 3px; background: #4F6BED;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div><div style="flex: 1; height: 5px; border-radius: 3px; background: #E6EAF3;"></div></div>
+              <div style="width: 74px; text-align: right; font-size: 10.5px; color: #3E4763;">Introduced</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Upcoming -->
+        <section style="flex: none; background: #FFFFFF; border: 1px solid #E9EDF5; border-radius: 16px; padding: 14px 16px 14px 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 1px 3px rgba(26, 34, 64, 0.04);">
+          <div style="height: 18px; display: flex; align-items: center; gap: 10px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F2847" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"></rect><path d="M3.5 10 H20.5"></path><path d="M8 3 V7"></path><path d="M16 3 V7"></path></svg>
+            <div style="font-size: 13px; font-weight: 700; color: #1A2240;">Upcoming</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="height: 32px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 28px; height: 28px; border-radius: 14px; background: #EAF0FD; display: flex; align-items: center; justify-content: center;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3E6BE6" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3 L19 6 V11 C19 16 15.5 19.5 12 21 C8.5 19.5 5 16 5 11 V6 Z"></path><path d="M9 11.5 L11.2 13.7 L15 9.8" stroke-linecap="round"></path></svg>
+              </div>
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 11px; font-weight: 600; color: #1A2240;">Maths Assessment</div>
+                <div style="font-size: 9.5px; color: #7A8299;">25 Apr 2025 • 10:00 AM</div>
+              </div>
+              <div style="height: 22px; padding: 0 12px; border-radius: 11px; background: #EEF2FD; color: #3F51F0; font-size: 10.5px; font-weight: 600; display: flex; align-items: center;">Study</div>
+            </div>
+            <div style="height: 32px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 28px; height: 28px; border-radius: 14px; background: #ECEBFD; display: flex; align-items: center; justify-content: center;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3 L21.5 20 H2.5 Z"></path><circle cx="12" cy="12.5" r="2"></circle><path d="M8.5 20 C9 17 10.3 16 12 16 C13.7 16 15 17 15.5 20"></path></svg>
+              </div>
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 11px; font-weight: 600; color: #1A2240;">IIT Foundation Test</div>
+                <div style="font-size: 9.5px; color: #7A8299;">28 Apr 2025 • 5:00 PM</div>
+              </div>
+              <div style="height: 22px; padding: 0 12px; border-radius: 11px; background: #EEF2FD; color: #3F51F0; font-size: 10.5px; font-weight: 600; display: flex; align-items: center;">Practice</div>
+            </div>
+            <div style="height: 32px; display: flex; align-items: center; gap: 12px;">
+              <div style="width: 28px; height: 28px; border-radius: 14px; background: #E3F5EA; display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#22A462"></circle><path d="M8 12.5 L11 15 L16 9.5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </div>
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 11px; font-weight: 600; color: #1A2240;">Geography Quiz</div>
+                <div style="font-size: 9.5px; color: #7A8299;">30 Apr 2025 • 4:00 PM</div>
+              </div>
+              <div style="height: 22px; padding: 0 12px; border-radius: 11px; background: #EEF2FD; color: #3F51F0; font-size: 10.5px; font-weight: 600; display: flex; align-items: center;">Explore</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- My Goals -->
+        <section style="flex: none; background: #FFFFFF; border: 1px solid #E9EDF5; border-radius: 16px; padding: 12px 16px 12px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px rgba(26, 34, 64, 0.04);">
+          <div style="height: 20px; display: flex; align-items: center; gap: 10px;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F2847" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"></rect><path d="M3.5 10 H20.5"></path><path d="M8 3 V7"></path><path d="M16 3 V7"></path></svg>
+            <div style="font-size: 13.5px; font-weight: 700; color: #1A2240;">My Goals</div>
+            <div style="flex: 1;"></div>
+            <a href="#" style="display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600;">
+              <span>View All</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3F51F0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19"></path><path d="M13 6 L19 12 L13 18"></path></svg>
+            </a>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <div style="height: 20px; display: flex; align-items: center; gap: 12px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#3F51F0"><path d="M7 3 H17 V9 A5 5 0 0 1 7 9 Z"></path><path d="M7 5 H4 A3 3 0 0 0 7.5 10.5" fill="none" stroke="#3F51F0" stroke-width="2"></path><path d="M17 5 H20 A3 3 0 0 1 16.5 10.5" fill="none" stroke="#3F51F0" stroke-width="2"></path><rect x="10.8" y="13" width="2.4" height="5"></rect><rect x="7.5" y="18" width="9" height="3" rx="1"></rect></svg>
+              <div style="flex: 1; font-size: 11px; color: #2A3350;">Excel in IGCSE (Year 10)</div>
+              <div style="height: 20px; padding: 0 8px; border-radius: 6px; background: #E9F7EF; color: #1F9D5C; font-size: 10px; font-weight: 600; display: flex; align-items: center;">On Track</div>
+            </div>
+            <div style="height: 20px; display: flex; align-items: center; gap: 12px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#3F51F0"><path d="M12 2.5 L20 6 V11.5 C20 16.5 16.5 20.2 12 21.5 C7.5 20.2 4 16.5 4 11.5 V6 Z"></path><path d="M12 7 L13.2 10.3 L16.5 10.5 L13.9 12.6 L14.8 16 L12 14.1 L9.2 16 L10.1 12.6 L7.5 10.5 L10.8 10.3 Z" fill="#FFFFFF"></path></svg>
+              <div style="flex: 1; font-size: 11px; color: #2A3350;">Build IIT Foundation</div>
+              <div style="height: 20px; padding: 0 8px; border-radius: 6px; background: #E9F7EF; color: #1F9D5C; font-size: 10px; font-weight: 600; display: flex; align-items: center;">On Track</div>
+            </div>
+            <div style="height: 20px; display: flex; align-items: center; gap: 12px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#3F51F0"><circle cx="12" cy="7" r="4"></circle><path d="M4 21 C4.5 15.5 8 13 12 13 C16 13 19.5 15.5 20 21 Z"></path></svg>
+              <div style="flex: 1; font-size: 11px; color: #2A3350;">Explore Careers (IAS + Others)</div>
+              <div style="height: 20px; padding: 0 8px; border-radius: 6px; background: #E9F7EF; color: #1F9D5C; font-size: 10px; font-weight: 600; display: flex; align-items: center;">On Track</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- AI Companion -->
+        <section style="position: relative; flex: 1; min-height: 0; border-radius: 16px; padding: 7px; background: #FFFFFF; border: 1px solid #E9EDF5; box-shadow: 0 1px 3px rgba(26, 34, 64, 0.04);">
+          <div style="position: relative; height: 100%; border-radius: 12px; background: linear-gradient(135deg, #F3EEFF 0%, #E9E3FD 100%); border: 1px solid #E1DAFA; padding: 8px 12px 9px 12px; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 30px; height: 30px; border-radius: 15px; background: linear-gradient(135deg, #A78BFA, #7C4DEB); display: flex; align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3 C17 3 21 6.4 21 10.8 C21 15.2 17 18.6 12 18.6 C11 18.6 10 18.5 9.2 18.2 L4.5 20.5 L5.8 16.4 C4 15 3 13 3 10.8 C3 6.4 7 3 12 3 Z" fill="#FFFFFF"></path><path d="M12 14.2 C9.2 12.4 8.3 11 8.3 9.8 A1.9 1.9 0 0 1 12 9 A1.9 1.9 0 0 1 15.7 9.8 C15.7 11 14.8 12.4 12 14.2 Z" fill="#7C4DEB"></path></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 1px;">
+                <div style="font-size: 13.5px; font-weight: 700; color: #2B2350;">Your AI Companion</div>
+                <div style="font-size: 9.5px; color: #6E6690;">Study support, any time</div>
+              </div>
+            </div>
+            <div style="width: 272px; background: #FFFFFF; border-radius: 12px; padding: 7px 12px; font-size: 10px; line-height: 1.45; color: #4A4466; box-shadow: 0 1px 2px rgba(60, 40, 120, 0.06); display: flex; flex-direction: column;">
+              <span>Stuck or stressed about studying? Let's break it down into small, doable steps together.</span>
+              <span style="display: flex; align-items: center; gap: 4px;">One step at a time.
+                <svg width="11" height="11" viewBox="0 0 24 24"><path d="M12 20.5 C5 15.5 3 11.8 3 8.6 A4.6 4.6 0 0 1 12 6.6 A4.6 4.6 0 0 1 21 8.6 C21 11.8 19 15.5 12 20.5 Z" fill="#8B6CF0"></path></svg>
+              </span>
+            </div>
+            <div style="align-self: flex-start; height: 26px; padding: 0 16px; border-radius: 13px; background: #5B4FE8; color: #FFFFFF; font-size: 11px; font-weight: 600; display: flex; align-items: center;">Chat Now</div>
+
+            <svg style="position: absolute; right: 8px; top: 4px;" width="62" height="62" viewBox="0 0 64 64">
+              <defs><clipPath id="clipAvatarCompanion"><circle cx="32" cy="32" r="32"></circle></clipPath></defs>
+              <g clip-path="url(#clipAvatarCompanion)">
+                <rect width="64" height="64" fill="#FCE4EC"></rect>
+                <path d="M13 36 C11 16 21 7 33 7 C45 7 53 17 51 36 C51 46 47 54 45 60 H19 C17 54 13 46 13 36 Z" fill="#3B2A2A"></path>
+                <path d="M9 64 C11 52 20 47 32 47 C44 47 53 52 55 64 Z" fill="#5B8DEF"></path>
+                <rect x="28" y="38" width="8" height="10" fill="#E3AA88"></rect>
+                <ellipse cx="32" cy="29" rx="11" ry="13" fill="#F2C6A6"></ellipse>
+                <path d="M20.5 26 C21 15 28 11.5 34 11.5 C41 11.5 45 17 45 25 C40 19.5 33 18 26 21.5 C23.5 22.8 22 24.5 20.5 26 Z" fill="#3B2A2A"></path>
+                <circle cx="28" cy="30" r="1.3" fill="#2B2020"></circle>
+                <circle cx="36" cy="30" r="1.3" fill="#2B2020"></circle>
+                <circle cx="25.5" cy="34" r="2" fill="#F4A7A0" opacity="0.55"></circle>
+                <circle cx="38.5" cy="34" r="2" fill="#F4A7A0" opacity="0.55"></circle>
+                <path d="M28.5 35 Q32 38.2 35.5 35" stroke="#B5654F" stroke-width="1.4" fill="none" stroke-linecap="round"></path>
+              </g>
+            </svg>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+</body>
+</html>

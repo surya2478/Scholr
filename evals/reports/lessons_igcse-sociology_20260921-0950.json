@@ -1,0 +1,27 @@
+{
+  "subject": "igcse-sociology",
+  "prompt": "lesson_write/v4",
+  "guard": "lesson_guard_v7",
+  "model": "google/gemini-2.5-flash",
+  "lessons": 18,
+  "ready": 15,
+  "not_enough_material": 0,
+  "failed": 3,
+  "kept_old": 0,
+  "errors": [
+    "quota_exceeded"
+  ],
+  "cost_usd": 0.0711,
+  "kept_sections": 62,
+  "dropped_uncited": 0,
+  "dropped_copied": 1,
+  "dropped_unsupported_name": 1,
+  "kept_examples": 12,
+  "dropped_examples_unchecked": 0,
+  "dropped_examples_wrong": 0,
+  "dropped_terms": 0,
+  "dropped_garbled": 0,
+  "dropped_examples_unit": 0,
+  "dropped_examples_past_paper": 0,
+  "dropped_past_paper": 0
+}

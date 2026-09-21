@@ -1,0 +1,377 @@
+# Curriculum structure — Cambridge IGCSE Mathematics 0580 (Extended)
+#
+# Provenance:
+# - Content areas 1–4 names: school Term 1 planner (Sep–Dec 2026).
+# - Chapters and sections (with Extended markers and printed page numbers): contents pages of the
+#   Collins Cambridge IGCSE Maths Student's Book, 4th edition (written for 0580 from 2020).
+# - Verified 15 Sep 2026 against the official Cambridge IGCSE Mathematics 0580 syllabus for 2028–2030
+#   (subjects/mathematics): the nine content areas are the syllabus topics E1–E9 (Number; Algebra and graphs;
+#   Coordinate geometry; Geometry; Mensuration; Trigonometry; Transformations and vectors; Probability;
+#   Statistics) and the components below come from its assessment overview. The 2025–2027 syllabus has the same
+#   paper structure, so papers from June 2025 on match the 2028 format; earlier papers are practice only.
+#   Textbook sections are mapped to content areas by chapter; the subtopic-level mapping (E1.1…) is not stored.
+# tier: extended = "E" in the textbook (Extended only); all = required for Core and Extended.
+# page: printed textbook page where the section starts (used to tag retrieval chunks).
+
+curriculum: { code: CAIE-IGCSE, name: Cambridge IGCSE }
+path: { code: IGCSE, name: IGCSE }
+syllabus:
+  code: "0580"
+  title: Cambridge IGCSE Mathematics
+  version: "for-2028-exam"
+  tiers: [core, extended]
+  verification_status: verified
+  source_note: >-
+    Content areas and component structure verified against the official 0580 syllabus for 2028–2030 (exam
+    session 2028-06). Chapter/section structure from the Collins 4th edition contents.
+subject: { code: igcse-maths, name: Mathematics, config_key: igcse_maths_0580 }
+
+components:
+  - code: "P2"
+    name: Paper 2 — Non-calculator (Extended)
+    tier: extended
+    duration_min: 120
+    marks: 100
+    calculator_allowed: false
+    structure_note: Structured and unstructured questions; 50% of the qualification.
+  - code: "P4"
+    name: Paper 4 — Calculator (Extended)
+    tier: extended
+    duration_min: 120
+    marks: 100
+    calculator_allowed: true
+    structure_note: Structured and unstructured questions; scientific calculator required; 50% of the qualification.
+
+skills:
+  - { code: AO1, name: Knowledge and understanding of mathematical techniques }
+  - { code: AO2, name: Analyse, interpret and communicate mathematically }
+
+topics:
+  - code: "1"
+    name: Number
+    children:
+      - code: ch01
+        name: Number
+        objectives:
+          - { code: "1.1", statement: Square numbers and cube numbers, page: 8 }
+          - { code: "1.2", statement: Multiples of whole numbers, page: 12 }
+          - { code: "1.3", statement: Factors of whole numbers, page: 13 }
+          - { code: "1.4", statement: Prime numbers, page: 15 }
+          - { code: "1.5", statement: Prime factorisation, page: 16 }
+          - { code: "1.6", statement: More about HCF and LCM, page: 18 }
+          - { code: "1.7", statement: Real numbers, page: 20 }
+      - code: ch02
+        name: Fractions and percentages
+        objectives:
+          - { code: "2.1", statement: Equivalent fractions, page: 24 }
+          - { code: "2.2", statement: Fractions and decimals, page: 26 }
+          - { code: "2.3", statement: Recurring decimals, tier: extended, page: 27 }
+          - { code: "2.4", statement: "Percentages, fractions and decimals", page: 30 }
+          - { code: "2.5", statement: Calculating a percentage, page: 34 }
+          - { code: "2.6", statement: Increasing or decreasing quantities by a percentage, page: 36 }
+          - { code: "2.7", statement: One quantity as a percentage of another, page: 40 }
+          - { code: "2.8", statement: Simple interest and compound interest, page: 43 }
+          - { code: "2.9", statement: A formula for compound interest, page: 45 }
+          - { code: "2.10", statement: Reverse percentage, tier: extended, page: 47 }
+      - code: ch03
+        name: The four rules
+        objectives:
+          - { code: "3.1", statement: Order of operations, page: 52 }
+          - { code: "3.2", statement: Choosing the correct operation, page: 54 }
+          - { code: "3.3", statement: Finding a fraction of a quantity, page: 55 }
+          - { code: "3.4", statement: Adding and subtracting fractions, page: 57 }
+          - { code: "3.5", statement: Multiplying and dividing fractions, page: 60 }
+      - code: ch04
+        name: Directed numbers
+        objectives:
+          - { code: "4.1", statement: Introduction to directed numbers, page: 66 }
+          - { code: "4.2", statement: Everyday use of directed numbers, page: 67 }
+          - { code: "4.3", statement: The number line, page: 68 }
+          - { code: "4.4", statement: Adding and subtracting directed numbers, page: 70 }
+          - { code: "4.5", statement: Multiplying and dividing directed numbers, page: 73 }
+      - code: ch05
+        name: Powers and roots
+        objectives:
+          - { code: "5.1", statement: Squares and square roots, page: 78 }
+          - { code: "5.2", statement: Cubes and cube roots, page: 79 }
+          - { code: "5.3", statement: More powers and roots, page: 81 }
+          - { code: "5.4", statement: Exponential growth and decay, tier: extended, page: 82 }
+      - code: ch06
+        name: Ordering and set notation
+        objectives:
+          - { code: "6.1", statement: Inequalities, page: 88 }
+          - { code: "6.2", statement: Sets and Venn diagrams, page: 90 }
+          - { code: "6.3", statement: More about Venn diagrams, tier: extended, page: 94 }
+      - code: ch07
+        name: Ratio, proportion and rate
+        objectives:
+          - { code: "7.1", statement: Ratio, page: 102 }
+          - { code: "7.2", statement: Increases and decreases using ratios, tier: extended, page: 108 }
+          - { code: "7.3", statement: Speed, page: 110 }
+          - { code: "7.4", statement: Rates, page: 113 }
+          - { code: "7.5", statement: Direct proportion, page: 116 }
+          - { code: "7.6", statement: Inverse proportion, page: 117 }
+      - code: ch08
+        name: Estimation and limits of accuracy
+        objectives:
+          - { code: "8.1", statement: Rounding whole numbers, page: 122 }
+          - { code: "8.2", statement: Rounding decimals, page: 123 }
+          - { code: "8.3", statement: Rounding to significant figures, page: 125 }
+          - { code: "8.4", statement: Upper and lower bounds, page: 126 }
+          - { code: "8.5", statement: Upper and lower bounds for calculations, tier: extended, page: 128 }
+      - code: ch09
+        name: Standard form
+        objectives:
+          - { code: "9.1", statement: Standard form, page: 134 }
+          - { code: "9.2", statement: Calculating with standard form, page: 136 }
+      - code: ch10
+        name: Applying number and using calculators
+        objectives:
+          - { code: "10.1", statement: Units of measurement, page: 142 }
+          - { code: "10.2", statement: Converting between metric units, page: 143 }
+          - { code: "10.3", statement: Time, page: 145 }
+          - { code: "10.4", statement: Currency conversions, page: 147 }
+          - { code: "10.5", statement: Using a calculator efficiently, page: 149 }
+
+  - code: "2"
+    name: Algebra and graphs
+    children:
+      - code: ch11
+        name: Algebraic representation and formulae
+        objectives:
+          - { code: "11.1", statement: The language of algebra, page: 162 }
+          - { code: "11.2", statement: Substitution into formulae, page: 165 }
+          - { code: "11.3", statement: Rearranging formulae, page: 167 }
+          - { code: "11.4", statement: More complicated formulae, tier: extended, page: 169 }
+      - code: ch12
+        name: Algebraic manipulation
+        objectives:
+          - { code: "12.1", statement: Simplifying expressions, page: 174 }
+          - { code: "12.2", statement: Expanding brackets, page: 178 }
+          - { code: "12.3", statement: Factorisation, page: 182 }
+          - { code: "12.4", statement: "Multiplying two brackets: 1", page: 184 }
+          - { code: "12.5", statement: "Multiplying two brackets: 2", page: 187 }
+          - { code: "12.6", statement: Expanding three brackets, tier: extended, page: 190 }
+          - { code: "12.7", statement: Quadratic factorisation, tier: extended, page: 192 }
+          - { code: "12.8", statement: Algebraic fractions, tier: extended, page: 197 }
+      - code: ch13
+        name: Solutions of equations and inequalities
+        objectives:
+          - { code: "13.1", statement: Solving linear equations, page: 204 }
+          - { code: "13.2", statement: Setting up equations, page: 210 }
+          - { code: "13.3", statement: Solving quadratic equations by factorisation, tier: extended, page: 212 }
+          - { code: "13.4", statement: Solving quadratic equations by the quadratic formula, tier: extended, page: 217 }
+          - { code: "13.5", statement: Solving quadratic equations by completing the square, tier: extended, page: 219 }
+          - { code: "13.6", statement: Simultaneous equations, page: 222 }
+          - { code: "13.7", statement: Linear and non-linear simultaneous equations, tier: extended, page: 229 }
+          - { code: "13.8", statement: Solving inequalities, tier: extended, page: 232 }
+      - code: ch14
+        name: Graphs in practical situations
+        objectives:
+          - { code: "14.1", statement: Conversion graphs, page: 238 }
+          - { code: "14.2", statement: Travel graphs, page: 242 }
+          - { code: "14.3", statement: Speed-time graphs, tier: extended, page: 246 }
+          - { code: "14.4", statement: Curved graphs, tier: extended, page: 251 }
+      - code: ch16
+        name: Graphs of functions
+        objectives:
+          - { code: "16.1", statement: Quadratic graphs, page: 280 }
+          - { code: "16.2", statement: Turning points on a quadratic graph, tier: extended, page: 285 }
+          - { code: "16.3", statement: Reciprocal graphs, page: 286 }
+          - { code: "16.4", statement: More graphs, tier: extended, page: 288 }
+          - { code: "16.5", statement: Exponential graphs, tier: extended, page: 292 }
+          - { code: "16.6", statement: Estimating gradients, tier: extended, page: 296 }
+      - code: ch17
+        name: Number sequences
+        objectives:
+          - { code: "17.1", statement: Patterns in number sequences, page: 302 }
+          - { code: "17.2", statement: The nth term of a sequence, page: 304 }
+          - { code: "17.3", statement: General rules from patterns, page: 309 }
+          - { code: "17.4", statement: Further sequences, tier: extended, page: 314 }
+      - code: ch18
+        name: Indices
+        objectives:
+          - { code: "18.1", statement: Using indices, page: 320 }
+          - { code: "18.2", statement: Negative indices, page: 322 }
+          - { code: "18.3", statement: Multiplying and dividing with indices, page: 324 }
+          - { code: "18.4", statement: Fractional indices, tier: extended, page: 327 }
+      - code: ch19
+        name: Proportion
+        objectives:
+          - { code: "19.1", statement: Direct proportion (algebraic), tier: extended, page: 334 }
+          - { code: "19.2", statement: Inverse proportion (algebraic), tier: extended, page: 339 }
+      - code: ch20
+        name: Linear programming
+        objectives:
+          - { code: "20.1", statement: Graphical inequalities, tier: extended, page: 344 }
+          - { code: "20.2", statement: More than one inequality, tier: extended, page: 347 }
+          - { code: "20.3", statement: Linear programming, tier: extended, page: 349 }
+      - code: ch21
+        name: Functions
+        objectives:
+          - { code: "21.1", statement: Function notation, tier: extended, page: 354 }
+          - { code: "21.2", statement: Inverse functions, tier: extended, page: 355 }
+          - { code: "21.3", statement: Composite functions, tier: extended, page: 357 }
+          - { code: "21.4", statement: More about composite functions, tier: extended, page: 359 }
+      - code: ch22
+        name: Differentiation
+        objectives:
+          - { code: "22.1", statement: The gradient of a curve, tier: extended, page: 364 }
+          - { code: "22.2", statement: More complex curves, tier: extended, page: 366 }
+          - { code: "22.3", statement: Turning points, tier: extended, page: 369 }
+
+  - code: "3"
+    name: Coordinate geometry
+    children:
+      - code: ch15
+        name: Straight-line graphs
+        objectives:
+          - { code: "15.1", statement: Drawing straight-line graphs, page: 258 }
+          - { code: "15.2", statement: "The equation y = mx + c", page: 261 }
+          - { code: "15.3", statement: More about straight-line graphs, tier: extended, page: 265 }
+          - { code: "15.4", statement: Solving equations graphically, page: 267 }
+          - { code: "15.5", statement: Parallel lines, page: 270 }
+          - { code: "15.6", statement: Points and lines, tier: extended, page: 272 }
+          - { code: "15.7", statement: Perpendicular lines, tier: extended, page: 274 }
+
+  - code: "4"
+    name: Geometry
+    children:
+      - code: ch23
+        name: Angle properties
+        objectives:
+          - { code: "23.1", statement: Angle facts, page: 384 }
+          - { code: "23.2", statement: Parallel lines, page: 386 }
+          - { code: "23.3", statement: Angles in a triangle, page: 390 }
+          - { code: "23.4", statement: Angles in a quadrilateral, page: 392 }
+          - { code: "23.5", statement: Regular polygons, page: 395 }
+          - { code: "23.6", statement: Irregular polygons, tier: extended, page: 398 }
+          - { code: "23.7", statement: Tangents and diameters, page: 400 }
+          - { code: "23.8", statement: Angles in a circle, tier: extended, page: 402 }
+          - { code: "23.9", statement: Cyclic quadrilaterals, tier: extended, page: 405 }
+          - { code: "23.10", statement: Alternate segment theorem, tier: extended, page: 408 }
+      - code: ch24
+        name: Geometrical terms and relationships
+        objectives:
+          - { code: "24.1", statement: Measuring and drawing angles, page: 414 }
+          - { code: "24.2", statement: Bearings, page: 417 }
+          - { code: "24.3", statement: Nets, page: 420 }
+          - { code: "24.4", statement: Congruent shapes, page: 423 }
+          - { code: "24.5", statement: Congruent triangles, tier: extended, page: 424 }
+          - { code: "24.6", statement: Similar shapes, page: 427 }
+          - { code: "24.7", statement: Areas of similar triangles, tier: extended, page: 430 }
+          - { code: "24.8", statement: Areas and volumes of similar shapes, tier: extended, page: 433 }
+      - code: ch25
+        name: Geometrical constructions
+        objectives:
+          - { code: "25.1", statement: Constructing shapes, page: 440 }
+          - { code: "25.2", statement: Scale drawings, page: 442 }
+      - code: ch28
+        name: Symmetry
+        objectives:
+          - { code: "28.1", statement: Lines of symmetry, page: 520 }
+          - { code: "28.2", statement: Rotational symmetry, page: 522 }
+          - { code: "28.3", statement: Symmetry of special two-dimensional shapes, page: 523 }
+          - { code: "28.4", statement: Symmetry of three-dimensional shapes, tier: extended, page: 525 }
+          - { code: "28.5", statement: Symmetry in circles, tier: extended, page: 526 }
+
+  - code: "5"
+    name: Mensuration
+    children:
+      - code: ch27
+        name: Mensuration
+        objectives:
+          - { code: "27.1", statement: Perimeter and area of a rectangle, page: 488 }
+          - { code: "27.2", statement: Area of a triangle, page: 491 }
+          - { code: "27.3", statement: Area of a parallelogram, page: 494 }
+          - { code: "27.4", statement: Area of a trapezium, page: 495 }
+          - { code: "27.5", statement: Circumference and area of a circle, page: 498 }
+          - { code: "27.6", statement: Surface area and volume of a cuboid, page: 501 }
+          - { code: "27.7", statement: Volume and surface area of a prism, page: 503 }
+          - { code: "27.8", statement: Volume and surface area of a cylinder, page: 506 }
+          - { code: "27.9", statement: "Sectors and arcs: 1", page: 508 }
+          - { code: "27.10", statement: "Sectors and arcs: 2", tier: extended, page: 510 }
+          - { code: "27.11", statement: Volume of a pyramid, page: 512 }
+          - { code: "27.12", statement: Volume and surface area of a cone, page: 514 }
+          - { code: "27.13", statement: Volume and surface area of a sphere, page: 516 }
+
+  - code: "6"
+    name: Trigonometry
+    children:
+      - code: ch26
+        name: Trigonometry
+        objectives:
+          - { code: "26.1", statement: "Pythagoras' theorem", page: 448 }
+          - { code: "26.2", statement: Trigonometric ratios, page: 452 }
+          - { code: "26.3", statement: Calculating angles, page: 454 }
+          - { code: "26.4", statement: "Using sine, cosine and tangent functions", page: 455 }
+          - { code: "26.5", statement: Which ratio to use, page: 459 }
+          - { code: "26.6", statement: Applications of trigonometric ratios, tier: extended, page: 462 }
+          - { code: "26.7", statement: Problems in three dimensions, tier: extended, page: 466 }
+          - { code: "26.8", statement: Sine and cosine of obtuse angles, tier: extended, page: 468 }
+          - { code: "26.9", statement: The sine rule and the cosine rule, tier: extended, page: 470 }
+          - { code: "26.10", statement: Using sine to find the area of a triangle, tier: extended, page: 477 }
+          - { code: "26.11", statement: "Sine, cosine and tangent of any angle", tier: extended, page: 479 }
+
+  - code: "7"
+    name: Transformations and vectors
+    children:
+      - code: ch29
+        name: Vectors
+        objectives:
+          - { code: "29.1", statement: Introduction to vectors, page: 532 }
+          - { code: "29.2", statement: Using vectors, tier: extended, page: 535 }
+          - { code: "29.3", statement: The magnitude of a vector, tier: extended, page: 540 }
+      - code: ch30
+        name: Transformations
+        objectives:
+          - { code: "30.1", statement: Translations, page: 544 }
+          - { code: "30.2", statement: "Reflections: 1", page: 546 }
+          - { code: "30.3", statement: "Reflections: 2", tier: extended, page: 548 }
+          - { code: "30.4", statement: "Rotations: 1", page: 550 }
+          - { code: "30.5", statement: "Rotations: 2", tier: extended, page: 553 }
+          - { code: "30.6", statement: "Enlargements: 1", page: 554 }
+          - { code: "30.7", statement: "Enlargements: 2", tier: extended, page: 559 }
+          - { code: "30.8", statement: Combined transformations, tier: extended, page: 561 }
+
+  - code: "8"
+    name: Probability
+    children:
+      - code: ch33
+        name: Probability
+        objectives:
+          - { code: "33.1", statement: The probability scale, page: 644 }
+          - { code: "33.2", statement: Calculating probabilities, page: 646 }
+          - { code: "33.3", statement: Probability that an event will not happen, page: 649 }
+          - { code: "33.4", statement: Probability in practice, page: 651 }
+          - { code: "33.5", statement: Using Venn diagrams, page: 654 }
+          - { code: "33.6", statement: Possibility diagrams, page: 657 }
+          - { code: "33.7", statement: Tree diagrams, page: 661 }
+          - { code: "33.8", statement: Conditional probability, tier: extended, page: 665 }
+
+  - code: "9"
+    name: Statistics
+    children:
+      - code: ch31
+        name: Statistical representation
+        objectives:
+          - { code: "31.1", statement: Frequency tables, page: 578 }
+          - { code: "31.2", statement: Pictograms, page: 581 }
+          - { code: "31.3", statement: Bar charts, page: 583 }
+          - { code: "31.4", statement: Pie charts, page: 587 }
+          - { code: "31.5", statement: Scatter diagrams, page: 591 }
+          - { code: "31.6", statement: Histograms, page: 596 }
+          - { code: "31.7", statement: Histograms with bars of unequal width, tier: extended, page: 599 }
+      - code: ch32
+        name: Statistical measures
+        objectives:
+          - { code: "32.1", statement: The mode, page: 608 }
+          - { code: "32.2", statement: The median, page: 610 }
+          - { code: "32.3", statement: The mean, page: 612 }
+          - { code: "32.4", statement: The range, page: 615 }
+          - { code: "32.5", statement: Which average to use, page: 618 }
+          - { code: "32.6", statement: Stem-and-leaf diagrams, page: 620 }
+          - { code: "32.7", statement: Using frequency tables, page: 624 }
+          - { code: "32.8", statement: Grouped data, tier: extended, page: 628 }
+          - { code: "32.9", statement: Cumulative frequency diagrams, tier: extended, page: 631 }
+          - { code: "32.10", statement: Box-and-whisker plots, tier: extended, page: 638 }

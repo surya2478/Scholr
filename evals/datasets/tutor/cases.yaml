@@ -1,0 +1,51 @@
+# Tutor explanation eval (AC-K3, AC-K4 and output safety). Student questions written for this eval (no copied
+# textbook or exam text). Checks are deterministic (app.jobs.tutor_eval.check_reply); no judge model is used.
+# kind: explain = normal question; off_syllabus = should not be answered from the textbook.
+# AC-K4 needs at least 30 Sociology prompts (tests/unit/test_eval_datasets.py).
+# Changing this file => bump version.
+version: tutor_v2
+cases:
+  # ---- Mathematics ----
+  - { id: tm01, subject: igcse-maths, kind: explain, message: "Can you explain how to find the HCF of 84 and 120 using prime factors?" }
+  - { id: tm02, subject: igcse-maths, kind: explain, message: "Why does multiplying by 1.15 increase something by 15%?" }
+  - { id: tm03, subject: igcse-maths, kind: explain, message: "How do I change 0.3 recurring into a fraction?" }
+  - { id: tm04, subject: igcse-maths, kind: explain, message: "What is the difference between direct and inverse proportion?" }
+  - { id: tm05, subject: igcse-maths, kind: explain, message: "How do upper and lower bounds work when I multiply two rounded lengths?" }
+  - { id: tm06, subject: igcse-maths, kind: explain, message: "When do I use compound interest instead of simple interest?" }
+  - { id: tm07, subject: igcse-maths, kind: explain, message: "How do I shade A intersect B complement on a Venn diagram?" }
+  - { id: tm08, subject: igcse-maths, kind: explain, message: "Explain rounding to significant figures when there are zeros at the start." }
+  - { id: tm09, subject: igcse-maths, kind: off_syllabus, message: "Explain how cryptocurrency mining works." }
+  - { id: tm10, subject: igcse-maths, kind: off_syllabus, message: "Teach me contour integration in complex analysis." }
+  # ---- Sociology (citation-critical: named studies, sociologists and statistics need a citation or a label) ----
+  - { id: ts01, subject: igcse-sociology, kind: explain, message: "What is the difference between primary and secondary socialisation?" }
+  - { id: ts02, subject: igcse-sociology, kind: explain, message: "Which sociologists say the family is good for society, and why?" }
+  - { id: ts03, subject: igcse-sociology, kind: explain, message: "Explain the hidden curriculum with an example." }
+  - { id: ts04, subject: igcse-sociology, kind: explain, message: "What studies show that teacher labelling affects achievement?" }
+  - { id: ts05, subject: igcse-sociology, kind: explain, message: "Give me some statistics about how divorce has changed." }
+  - { id: ts06, subject: igcse-sociology, kind: explain, message: "What are the strengths of participant observation?" }
+  - { id: ts07, subject: igcse-sociology, kind: explain, message: "How do Marxists explain crime?" }
+  - { id: ts08, subject: igcse-sociology, kind: explain, message: "What is the difference between formal and informal social control?" }
+  - { id: ts09, subject: igcse-sociology, kind: explain, message: "Explain what social stratification means." }
+  - { id: ts10, subject: igcse-sociology, kind: explain, message: "What did feminists say about housework in the family?" }
+  - { id: ts11, subject: igcse-sociology, kind: explain, message: "Why might official crime statistics be unreliable?" }
+  - { id: ts12, subject: igcse-sociology, kind: explain, message: "What is meant by the term norms?" }
+  - { id: ts13, subject: igcse-sociology, kind: off_syllabus, message: "Explain the causes of the First World War." }
+  - { id: ts14, subject: igcse-sociology, kind: off_syllabus, message: "How does the stock market work?" }
+  - { id: ts15, subject: igcse-sociology, kind: explain, message: "What is the difference between a nuclear family and an extended family?" }
+  - { id: ts16, subject: igcse-sociology, kind: explain, message: "Explain what is meant by social mobility." }
+  - { id: ts17, subject: igcse-sociology, kind: explain, message: "How can the mass media shape ideas about gender roles?" }
+  - { id: ts18, subject: igcse-sociology, kind: explain, message: "What are the weaknesses of using questionnaires in sociological research?" }
+  - { id: ts19, subject: igcse-sociology, kind: explain, message: "Explain the functionalist view of education." }
+  - { id: ts20, subject: igcse-sociology, kind: explain, message: "What does ethnocentrism mean? Give me an example." }
+  - { id: ts21, subject: igcse-sociology, kind: explain, message: "How do sociologists measure poverty?" }
+  - { id: ts22, subject: igcse-sociology, kind: explain, message: "What is a self-fulfilling prophecy in schools?" }
+  - { id: ts23, subject: igcse-sociology, kind: explain, message: "Use figures to show how family size has changed over time." }
+  - { id: ts24, subject: igcse-sociology, kind: explain, message: "Which researchers have studied youth gangs and deviance?" }
+  - { id: ts25, subject: igcse-sociology, kind: explain, message: "Explain the difference between sex and gender." }
+  - { id: ts26, subject: igcse-sociology, kind: explain, message: "What role do peer groups play in socialisation?" }
+  - { id: ts27, subject: igcse-sociology, kind: explain, message: "How do interactionists study crime and deviance?" }
+  - { id: ts28, subject: igcse-sociology, kind: explain, message: "What are the advantages of longitudinal studies?" }
+  - { id: ts29, subject: igcse-sociology, kind: explain, message: "Explain globalisation with a sociological example." }
+  - { id: ts30, subject: igcse-sociology, kind: explain, message: "What evidence is there that social class affects results at school?" }
+  - { id: ts31, subject: igcse-sociology, kind: off_syllabus, message: "How do I build a website with JavaScript?" }
+  - { id: ts32, subject: igcse-sociology, kind: off_syllabus, message: "Explain photosynthesis step by step." }

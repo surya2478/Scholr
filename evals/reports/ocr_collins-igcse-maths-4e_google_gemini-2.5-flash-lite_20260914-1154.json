@@ -1,0 +1,146 @@
+{
+  "created_at": "2026-09-14T11:54:48+00:00",
+  "source": "collins-igcse-maths-4e",
+  "candidate_model": "google/gemini-2.5-flash-lite",
+  "reference_models": [
+    "google/gemini-3.5-flash"
+  ],
+  "seed": 7,
+  "summary": {
+    "pages": 12,
+    "mean_word_f1": 0.9499,
+    "min_word_f1": 0.7308,
+    "mean_math_f1": 0.4923,
+    "min_math_f1": 0.0,
+    "verdict": "review"
+  },
+  "candidate_cost_per_page_usd": 0.00053,
+  "reference_cost_per_page_usd": 0.02632,
+  "candidate_mean_output_tokens": 746,
+  "remaining_pages": 704,
+  "projected_remaining_cost_usd": 0.37,
+  "lowest_pages": [
+    {
+      "page_number": 612,
+      "word_f1": 0.7308,
+      "math_f1": 0.0769,
+      "reference_words": 247,
+      "candidate_words": 429
+    },
+    {
+      "page_number": 407,
+      "word_f1": 0.9368,
+      "math_f1": 0.0,
+      "reference_words": 93,
+      "candidate_words": 97
+    },
+    {
+      "page_number": 379,
+      "word_f1": 0.9379,
+      "math_f1": 0.8442,
+      "reference_words": 171,
+      "candidate_words": 151
+    },
+    {
+      "page_number": 8,
+      "word_f1": 0.9486,
+      "math_f1": 0.2957,
+      "reference_words": 214,
+      "candidate_words": 214
+    },
+    {
+      "page_number": 10,
+      "word_f1": 0.9487,
+      "math_f1": 0.8594,
+      "reference_words": 222,
+      "candidate_words": 246
+    }
+  ],
+  "pages": [
+    {
+      "page_number": 5,
+      "word_f1": 1.0,
+      "math_f1": null,
+      "reference_words": 524,
+      "candidate_words": 524
+    },
+    {
+      "page_number": 7,
+      "word_f1": 1.0,
+      "math_f1": 1.0,
+      "reference_words": 168,
+      "candidate_words": 168
+    },
+    {
+      "page_number": 8,
+      "word_f1": 0.9486,
+      "math_f1": 0.2957,
+      "reference_words": 214,
+      "candidate_words": 214
+    },
+    {
+      "page_number": 10,
+      "word_f1": 0.9487,
+      "math_f1": 0.8594,
+      "reference_words": 222,
+      "candidate_words": 246
+    },
+    {
+      "page_number": 13,
+      "word_f1": 0.9727,
+      "math_f1": 0.8657,
+      "reference_words": 267,
+      "candidate_words": 282
+    },
+    {
+      "page_number": 20,
+      "word_f1": 0.9927,
+      "math_f1": 0.9014,
+      "reference_words": 273,
+      "candidate_words": 275
+    },
+    {
+      "page_number": 132,
+      "word_f1": 0.9729,
+      "math_f1": 0.0,
+      "reference_words": 323,
+      "candidate_words": 341
+    },
+    {
+      "page_number": 379,
+      "word_f1": 0.9379,
+      "math_f1": 0.8442,
+      "reference_words": 171,
+      "candidate_words": 151
+    },
+    {
+      "page_number": 401,
+      "word_f1": 0.958,
+      "math_f1": 0.08,
+      "reference_words": 235,
+      "candidate_words": 241
+    },
+    {
+      "page_number": 407,
+      "word_f1": 0.9368,
+      "math_f1": 0.0,
+      "reference_words": 93,
+      "candidate_words": 97
+    },
+    {
+      "page_number": 612,
+      "word_f1": 0.7308,
+      "math_f1": 0.0769,
+      "reference_words": 247,
+      "candidate_words": 429
+    },
+    {
+      "page_number": 653,
+      "word_f1": 1.0,
+      "math_f1": null,
+      "reference_words": 347,
+      "candidate_words": 347
+    }
+  ],
+  "note": "Reference is another model's transcription, not ground truth. Spot-check lowest_pages by eye."
+}

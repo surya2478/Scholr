@@ -1,0 +1,12 @@
+# External subject config (Phase 3). The student learns this at the AhaGuru IIT Foundation classes, not here.
+#
+# stage: external means Scholr never teaches, tutors, marks or generates questions for this subject. It
+# records what happened in class (external_training_log) and reinforces the concepts underneath it in a
+# subject it does teach. That is why this file has no retrieval, pedagogy or evaluation block: inventing one
+# would describe behaviour that does not exist.
+key: iit_chemistry_foundation
+path: IIT
+subject_code: iit-chemistry
+syllabus: { code: STD9, tier: foundation, exam_session: none }
+subject_type: mixed
+stage: external

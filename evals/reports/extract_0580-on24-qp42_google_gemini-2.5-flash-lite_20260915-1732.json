@@ -1,0 +1,77 @@
+{
+  "created_at": "2026-09-15T17:32:42+00:00",
+  "paper": "0580-on24-qp42",
+  "role": "paper_extractor_lite",
+  "model": "google/gemini-2.5-flash-lite",
+  "prompt": "past_paper_extract/v2",
+  "answer_source": "mark_scheme_table",
+  "mark_scheme_table": {
+    "rows": 55,
+    "marks_total": 130,
+    "parse_issues": [],
+    "unmatched_extractor_refs": []
+  },
+  "items": 52,
+  "verified": 0,
+  "marks_total": 122,
+  "expected_total": 130,
+  "paper_issues": [
+    "page_failed:14:provider_error"
+  ],
+  "item_issues": 3,
+  "failed_pages": {
+    "14": "provider_error"
+  },
+  "cost_usd": 0.013,
+  "comparison_with_bank": {
+    "reference_items": 49,
+    "candidate_items": 52,
+    "matched": 46,
+    "missing_refs": [
+      "7(a)(i)",
+      "7(a)(ii)",
+      "7(a)(iii)"
+    ],
+    "extra_refs": [
+      "5(c)(i)",
+      "6(c)(i)(a)",
+      "6(c)(i)(b)",
+      "6(c)(i)(c)",
+      "6(c)(i)(d)",
+      "6(c)(ii)"
+    ],
+    "marks_agree": 46,
+    "type_agree": 45,
+    "answer_agree": 46,
+    "exact_compared": 9,
+    "exact_agree": 7,
+    "verified_disagreements": [],
+    "differences": {
+      "6(a)": [
+        "exact"
+      ],
+      "5(c)(ii)": [
+        "type"
+      ],
+      "9(b)": [
+        "exact"
+      ]
+    }
+  },
+  "item_level_verified": 49,
+  "item_level_verified_disagreements": [
+    "5(c)(ii)",
+    "9(b)"
+  ],
+  "differing_fields": {
+    "6(a)": [
+      "exact"
+    ],
+    "5(c)(ii)": [
+      "type"
+    ],
+    "9(b)": [
+      "exact"
+    ]
+  }
+}

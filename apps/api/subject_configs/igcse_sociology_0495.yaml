@@ -1,0 +1,93 @@
+# Subject Expertise Engine config (ARCHITECTURE §8). Validated by app.modules.subjects.config.
+# Changing this file => run the Sociology evals and report results.
+key: igcse_sociology_0495
+path: IGCSE
+subject_code: igcse-sociology
+syllabus: { code: "0495", tier: none, exam_session: "2027-06" }
+subject_type: essay
+retrieval:
+  allowed_authority_tiers: [A, B, C]   # student notes excluded from grounding
+  citation_required_for: [named_study, sociologist, statistic, definition]
+pedagogy:
+  help_ladder: essay
+  socratic_prompts: [evidence, counterargument, application_to_example]
+question_types: [define, identify, describe, explain, discuss, to_what_extent]
+question_sources: [past_paper, textbook, school, generated_format_checked]
+evaluation:
+  pipeline: essay_levels
+  criteria: { AO1: knowledge_understanding, AO2: interpretation_application, AO3: analysis_evaluation }
+  level_descriptors_source: mark_scheme
+  dual_marking: true
+  max_disagreement: { short_answer_marks: 1, essay_levels: 0 }
+  confidence_threshold: 0.8
+  evaluator_role: essay_marker_a
+  second_evaluator_role: essay_marker_b
+  calibrated: false   # AC-E5 not yet met: needs teacher-marked answers (U3)
+  # Guidance written in our own words from the 2025-syllabus mark scheme structure (not copied text).
+  level_guide:
+    points: >-
+      Point marking: one mark for each valid point up to the number the question asks for, and where the question
+      says "explain", a further mark for each of those points that is developed (explained, applied or linked to the
+      question). Credit valid points worded differently or not listed. No credit for repetition, for a key term used
+      without showing understanding, or for self-contradiction.
+    "8": >-
+      Discuss (8 marks). Level 3 (7-8): good knowledge; three points well developed with evidence and analysis;
+      sociological terms used accurately throughout. Level 2 (4-6): some knowledge; most points have some evidence or
+      analysis; some terms; some points only partly developed. Level 1 (1-3): limited knowledge; descriptive points
+      with little evidence; few terms. 0: nothing creditable.
+    "10": >-
+      Evaluate (10 marks). Level 3 (8-10): good knowledge of the debate; two developed points on each side; terms
+      used consistently; a relevant conclusion that judges the question. Level 2 (4-7): some knowledge; some developed
+      or partly developed points, likely two-sided, may conclude; a one-sided answer cannot score above 5. Level 1
+      (1-3): limited, list-like or one-sided, no conclusion. 0: nothing creditable.
+    "12": >-
+      Research design (12 marks): three separate criteria, each 0-4 then added. Methods and evidence: accurate
+      description of the primary methods, sampling and secondary evidence asked for. Reasons for choices: reasons for
+      each choice using evaluative concepts (reliability, validity, representativeness, generalisability). Application
+      to context: links each choice to the specific topic being investigated rather than generic statements.
+    "14": >-
+      Evaluate (14 marks). Level 4 (12-14): excellent knowledge; three developed points with evidence and analysis on
+      both sides; balanced; a conclusion or judgement. Level 3 (8-11): good knowledge; one or two developed points per
+      side or a range of developed and partial points; may lack balance; may conclude. Level 2 (4-7): some knowledge;
+      partly developed points, simple two-sided or one-sided; a one-sided answer cannot score above 6. Level 1 (1-3):
+      limited, list-like, descriptive, no conclusion. 0: nothing creditable.
+mistake_categories:
+  [conceptual, reasoning, misreading, time_management, vocabulary, question_interpretation, command_word, evidence]
+common_mistakes:
+  - description_not_explanation
+  - no_evidence
+  - one_sided
+  - no_counterargument
+  - concept_misdefined
+  - not_answering_command_word
+  - generic_example
+mastery_rules: default_v1
+tools: [word_count, command_word_check]
+skill_weights: { AO1: 0.39, AO2: 0.39, AO3: 0.22 }   # 0495 syllabus 2025–2027, weighting of the qualification
+
+# Which assessment objectives a question part carries, for tagging the past-paper bank (AC-R1). Taken from
+# the syllabus's own "These questions assess ..." statements for 2025–2027, expressed as a mark tariff so it
+# also holds for the 2023 and 2024 papers, which were set under the previous syllabus with different part
+# letters. Checked against every 2025 paper in the bank, where the structure is known exactly.
+# `source_based` wins over the tariff bands: Paper 1 Q1(a)(i–iii) is answered from the printed source.
+ao_tagging:
+  rule_version: sociology_ao_v1
+  source_based_ref: '^0495/1\d/[^/]+/Q1\(a\)\((i{1,3})\)$'
+  source_based: [AO2, AO3]
+  bands:
+    - { min_marks: 8, skills: [AO1, AO2, AO3] }   # discuss / evaluate / to what extent
+    - { min_marks: 0, skills: [AO1, AO2] }        # define, identify, describe, short explain
+
+# Weighting of each AO within a paper (0495 syllabus 2025–2027, "assessment objectives as a percentage of
+# each component"). Used by the readiness view to compare her marks against the real exam's balance.
+# What a candidate actually answers in each paper (0495 syllabus 2025-2027, "Details of the assessment").
+# Both papers offer a choice, so the bank holds more questions than anyone sits: a timed sitting must ask
+# which she is answering rather than serving all three (AC-R3).
+paper_structure:
+  P1: { compulsory: ["Q1"], choose_from: ["Q2", "Q3"], choose_count: 1 }
+  P2: { compulsory: [], choose_from: ["Q1", "Q2", "Q3"], choose_count: 2 }
+
+component_skill_weights:
+  P1: { AO1: 0.35, AO2: 0.40, AO3: 0.25 }
+  P2: { AO1: 0.43, AO2: 0.37, AO3: 0.20 }
+language: en

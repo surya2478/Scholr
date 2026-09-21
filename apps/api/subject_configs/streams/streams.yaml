@@ -1,0 +1,19 @@
+# Streams the student sees on Learn (docs/STUDENT-APP.md, D1). A subject joins a stream through the `path` in
+# its own config; `subjects` only sets the order they are listed in. Code never names a stream.
+version: streams_v1
+streams:
+  - key: IGCSE
+    name: Cambridge IGCSE
+    description: Your school subjects, taught and marked against the Cambridge syllabus.
+    status: open
+    subjects: [igcse-maths, igcse-sociology, igcse-physics, igcse-chemistry, igcse-biology]
+  - key: IIT
+    name: IIT Foundation
+    description: Your coaching classes, and the IGCSE ground underneath them.
+    status: open
+    subjects: [iit-maths, iit-physics, iit-chemistry, iit-biology]
+  - key: INDIA
+    name: India Foundation
+    description: History, geography, polity and economics of India. Coming after the December review.
+    status: later
+    subjects: []

@@ -1,0 +1,10 @@
+# Subject Expertise Engine config — Cambridge IGCSE Chemistry 0620.
+#
+# stage: planned — see igcse_physics_0625.yaml. Chemistry additionally needs the deterministic equation
+# balancer and mole-calculation checks before it can mark anything.
+key: igcse_chemistry_0620
+path: IGCSE
+subject_code: igcse-chemistry
+syllabus: { code: "0620", tier: extended, exam_session: "2028-06" }
+subject_type: mixed
+stage: planned

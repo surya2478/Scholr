@@ -1,0 +1,142 @@
+# Curriculum structure — Cambridge IGCSE Chemistry 0620
+#
+# Provenance: the official Cambridge IGCSE Chemistry 0620 syllabus for 2026, 2027 and 2028
+# (subjects/IGCSE/Chemistry), read 16 Sep 2026. Topic and subtopic codes and titles are extracted from the
+# syllabus's own subject-content section, not transcribed by hand. The assessment overview below is from the
+# same document. Term 1 coverage — topics 2, 7, 8 and 12 — is from the school's "Year 10 Topic Planner for Term 1
+# (September - December 2026)", given by the parent.
+#
+# Scholr does not teach this subject yet: subject_configs/igcse_chemistry_0620.yaml sets `stage: planned`, so there is no
+# question bank, retrieval corpus or marking behind it. The syllabus is verified, which is what a subject
+# needs before it can move to `stage: taught`; the rest of the engine is the Physics/Chemistry slice in
+# docs/ROADMAP.md. Today these rows name the IGCSE ground under an IIT Foundation class (docs/PHASE-3.md).
+
+curriculum: { code: CAIE-IGCSE, name: Cambridge IGCSE }
+path: { code: IGCSE, name: IGCSE }
+syllabus:
+  code: "0620"
+  title: Cambridge IGCSE Chemistry
+  version: "for-2028-exam"
+  tiers: [core, extended]
+  first_exam_year: 2026
+  last_exam_year: 2028
+  verification_status: verified
+  source_note: >-
+    Verified 16 Sep 2026 against the official 0620 syllabus for 2026-2028: 12 topics and
+    49 subtopics, with the Extended assessment overview (Papers 2, 4 and 6). Term 1 coverage
+    from the school's Year 10 Term 1 planner.
+subject: { code: igcse-chemistry, name: Chemistry, config_key: igcse_chemistry_0620 }
+
+# Extended route. All three sciences share this structure in the 2026-2028 syllabuses.
+components:
+  - code: "P2"
+    name: Paper 2 — Multiple Choice (Extended)
+    tier: extended
+    duration_min: 45
+    marks: 40
+    structure_note: 40 four-option multiple-choice questions; 30% of the qualification.
+  - code: "P4"
+    name: Paper 4 — Theory (Extended)
+    tier: extended
+    duration_min: 75
+    marks: 80
+    structure_note: Short-answer and structured questions; 50% of the qualification.
+  - code: "P6"
+    name: Paper 6 — Alternative to Practical
+    duration_min: 60
+    marks: 40
+    structure_note: >-
+      Questions based on the experimental skills in section 4 of the syllabus; 20% of the qualification. The
+      alternative is Paper 5 (Practical Test, 1 h 15 min, 40 marks) — the school's planner lists Paper 6.
+
+skills:
+  - { code: AO1, name: "Knowledge with understanding" }
+  - { code: AO2, name: "Handling information and problem-solving" }
+  - { code: AO3, name: "Experimental skills and investigations" }
+
+topics:
+  - code: "1"
+    name: "States of matter"
+    objectives:
+      - { code: "1.1", statement: "Solids, liquids and gases" }
+      - { code: "1.2", statement: "Diffusion" }
+  - code: "2"
+    name: "Atoms, elements and compounds"
+    objectives:
+      - { code: "2.1", statement: "Elements, compounds and mixtures" }   # Term 1
+      - { code: "2.2", statement: "Atomic structure and the Periodic Table" }   # Term 1
+      - { code: "2.3", statement: "Isotopes" }   # Term 1
+      - { code: "2.4", statement: "Ions and ionic bonds" }   # Term 1
+      - { code: "2.5", statement: "Simple molecules and covalent bonds" }   # Term 1
+      - { code: "2.6", statement: "Giant covalent structures" }   # Term 1
+      - { code: "2.7", statement: "Metallic bonding" }   # Term 1
+  - code: "3"
+    name: "Stoichiometry"
+    objectives:
+      - { code: "3.1", statement: "Formulae" }
+      - { code: "3.2", statement: "Relative masses of atoms and molecules" }
+      - { code: "3.3", statement: "The mole and the Avogadro constant" }
+  - code: "4"
+    name: "Electrochemistry"
+    objectives:
+      - { code: "4.1", statement: "Electrolysis" }
+      - { code: "4.2", statement: "Hydrogen–oxygen fuel cells" }
+  - code: "5"
+    name: "Chemical energetics"
+    objectives:
+      - { code: "5.1", statement: "Exothermic and endothermic reactions" }
+  - code: "6"
+    name: "Chemical reactions"
+    objectives:
+      - { code: "6.1", statement: "Physical and chemical changes" }
+      - { code: "6.2", statement: "Rate of reaction" }
+      - { code: "6.3", statement: "Reversible reactions and equilibrium" }
+      - { code: "6.4", statement: "Redox" }
+  - code: "7"
+    name: "Acids, bases and salts"
+    objectives:
+      - { code: "7.1", statement: "The characteristic properties of acids and bases" }   # Term 1
+      - { code: "7.2", statement: "Oxides" }   # Term 1
+      - { code: "7.3", statement: "Preparation of salts" }   # Term 1
+  - code: "8"
+    name: "The Periodic Table"
+    objectives:
+      - { code: "8.1", statement: "Arrangement of elements" }   # Term 1
+      - { code: "8.2", statement: "Group I properties" }   # Term 1
+      - { code: "8.3", statement: "Group VII properties" }   # Term 1
+      - { code: "8.4", statement: "Transition elements" }   # Term 1
+      - { code: "8.5", statement: "Noble gases" }   # Term 1
+  - code: "9"
+    name: "Metals"
+    objectives:
+      - { code: "9.1", statement: "Properties of metals" }
+      - { code: "9.2", statement: "Uses of metals" }
+      - { code: "9.3", statement: "Alloys and their properties" }
+      - { code: "9.4", statement: "Reactivity series" }
+      - { code: "9.5", statement: "Corrosion of metals" }
+      - { code: "9.6", statement: "Extraction of metals" }
+  - code: "10"
+    name: "Chemistry of the environment"
+    objectives:
+      - { code: "10.1", statement: "Water" }
+      - { code: "10.2", statement: "Fertilisers" }
+      - { code: "10.3", statement: "Air quality and climate" }
+  - code: "11"
+    name: "Organic chemistry"
+    objectives:
+      - { code: "11.1", statement: "Formulae, functional groups and terminology" }
+      - { code: "11.2", statement: "Naming organic compounds" }
+      - { code: "11.3", statement: "Fuels" }
+      - { code: "11.4", statement: "Alkanes" }
+      - { code: "11.5", statement: "Alkenes" }
+      - { code: "11.6", statement: "Alcohols" }
+      - { code: "11.7", statement: "Carboxylic acids" }
+      - { code: "11.8", statement: "Polymers" }
+  - code: "12"
+    name: "Experimental techniques and chemical analysis"
+    objectives:
+      - { code: "12.1", statement: "Experimental design" }   # Term 1
+      - { code: "12.2", statement: "Acid–base titrations" }   # Term 1
+      - { code: "12.3", statement: "Chromatography" }   # Term 1
+      - { code: "12.4", statement: "Separation and purification" }   # Term 1
+      - { code: "12.5", statement: "Identification of ions and gases" }   # Term 1

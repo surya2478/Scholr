@@ -1,0 +1,27 @@
+{
+  "subject": "igcse-sociology",
+  "reports": [
+    "0495-mj23-er",
+    "0495-mj24-er",
+    "0495-mj25-er"
+  ],
+  "prompt": "examiner_report_extract/v2",
+  "segmenter": "er-seg-v1",
+  "model": "google/gemini-2.5-flash-lite",
+  "calls": 43,
+  "failed": 0,
+  "segments": 207,
+  "kept": 700,
+  "copied": 7,
+  "too_long": 0,
+  "bad_ref": 27,
+  "duplicate": 0,
+  "unknown_blocks": 0,
+  "empty_segments": 2,
+  "cost_usd": 0.0191805,
+  "by_kind": {
+    "advice": 173,
+    "common_error": 233,
+    "what_scored": 294
+  }
+}

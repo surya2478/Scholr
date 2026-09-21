@@ -1,0 +1,181 @@
+# Curriculum structure — Cambridge IGCSE Biology 0610
+#
+# Provenance: the official Cambridge IGCSE Biology 0610 syllabus for 2026, 2027 and 2028
+# (subjects/IGCSE/Biology), read 16 Sep 2026. Topic and subtopic codes and titles are extracted from the
+# syllabus's own subject-content section, not transcribed by hand. The assessment overview below is from the
+# same document. Term 1 coverage — topics 1, 2, 3, 4 and 19 — is from the school's "Year 10 Topic Planner for Term 1
+# (September - December 2026)", given by the parent.
+#
+# Scholr does not teach this subject yet: subject_configs/igcse_biology_0610.yaml sets `stage: planned`, so there is no
+# question bank, retrieval corpus or marking behind it. The syllabus is verified, which is what a subject
+# needs before it can move to `stage: taught`; the rest of the engine is the Physics/Chemistry slice in
+# docs/ROADMAP.md. Today these rows name the IGCSE ground under an IIT Foundation class (docs/PHASE-3.md).
+
+curriculum: { code: CAIE-IGCSE, name: Cambridge IGCSE }
+path: { code: IGCSE, name: IGCSE }
+syllabus:
+  code: "0610"
+  title: Cambridge IGCSE Biology
+  version: "for-2028-exam"
+  tiers: [core, extended]
+  first_exam_year: 2026
+  last_exam_year: 2028
+  verification_status: verified
+  source_note: >-
+    Verified 16 Sep 2026 against the official 0610 syllabus for 2026-2028: 21 topics and
+    61 subtopics, with the Extended assessment overview (Papers 2, 4 and 6). Term 1 coverage
+    from the school's Year 10 Term 1 planner.
+subject: { code: igcse-biology, name: Biology, config_key: igcse_biology_0610 }
+
+# Extended route. All three sciences share this structure in the 2026-2028 syllabuses.
+components:
+  - code: "P2"
+    name: Paper 2 — Multiple Choice (Extended)
+    tier: extended
+    duration_min: 45
+    marks: 40
+    structure_note: 40 four-option multiple-choice questions; 30% of the qualification.
+  - code: "P4"
+    name: Paper 4 — Theory (Extended)
+    tier: extended
+    duration_min: 75
+    marks: 80
+    structure_note: Short-answer and structured questions; 50% of the qualification.
+  - code: "P6"
+    name: Paper 6 — Alternative to Practical
+    duration_min: 60
+    marks: 40
+    structure_note: >-
+      Questions based on the experimental skills in section 4 of the syllabus; 20% of the qualification. The
+      alternative is Paper 5 (Practical Test, 1 h 15 min, 40 marks) — the school's planner lists Paper 6.
+
+skills:
+  - { code: AO1, name: "Knowledge with understanding" }
+  - { code: AO2, name: "Handling information and problem-solving" }
+  - { code: AO3, name: "Experimental skills and investigations" }
+
+topics:
+  - code: "1"
+    name: "Characteristics and classification of living organisms"
+    objectives:
+      - { code: "1.1", statement: "Characteristics of living organisms" }   # Term 1
+      - { code: "1.2", statement: "Concept and uses of classification systems" }   # Term 1
+      - { code: "1.3", statement: "Features of organisms" }   # Term 1
+  - code: "2"
+    name: "Organisation of the organism"
+    objectives:
+      - { code: "2.1", statement: "Cell structure" }   # Term 1
+      - { code: "2.2", statement: "Size of specimens" }   # Term 1
+  - code: "3"
+    name: "Movement into and out of cells"
+    objectives:
+      - { code: "3.1", statement: "Diffusion" }   # Term 1
+      - { code: "3.2", statement: "Osmosis" }   # Term 1
+      - { code: "3.3", statement: "Active transport" }   # Term 1
+  - code: "4"
+    name: "Biological molecules"
+    objectives:
+      - { code: "4.1", statement: "Biological molecules" }   # Term 1
+  - code: "5"
+    name: "Enzymes"
+    objectives:
+      - { code: "5.1", statement: "Enzymes" }
+  - code: "6"
+    name: "Plant nutrition"
+    objectives:
+      - { code: "6.1", statement: "Photosynthesis" }
+      - { code: "6.2", statement: "Leaf structure" }
+  - code: "7"
+    name: "Human nutrition"
+    objectives:
+      - { code: "7.1", statement: "Diet" }
+      - { code: "7.2", statement: "Digestive system" }
+      - { code: "7.3", statement: "Physical digestion" }
+      - { code: "7.4", statement: "Chemical digestion" }
+      - { code: "7.5", statement: "Absorption" }
+  - code: "8"
+    name: "Transport in plants"
+    objectives:
+      - { code: "8.1", statement: "Xylem and phloem" }
+      - { code: "8.2", statement: "Water uptake" }
+      - { code: "8.3", statement: "Transpiration" }
+      - { code: "8.4", statement: "Translocation" }
+  - code: "9"
+    name: "Transport in animals"
+    objectives:
+      - { code: "9.1", statement: "Circulatory systems" }
+      - { code: "9.2", statement: "Heart" }
+      - { code: "9.3", statement: "Blood vessels" }
+      - { code: "9.4", statement: "Blood" }
+  - code: "10"
+    name: "Diseases and immunity"
+    objectives:
+      - { code: "10.1", statement: "Diseases and immunity" }
+  - code: "11"
+    name: "Gas exchange in humans"
+    objectives:
+      - { code: "11.1", statement: "Gas exchange in humans" }
+  - code: "12"
+    name: "Respiration"
+    objectives:
+      - { code: "12.1", statement: "Respiration" }
+      - { code: "12.2", statement: "Aerobic respiration" }
+      - { code: "12.3", statement: "Anaerobic respiration" }
+  - code: "13"
+    name: "Excretion in humans"
+    objectives:
+      - { code: "13.1", statement: "Excretion in humans" }
+  - code: "14"
+    name: "Coordination and response"
+    objectives:
+      - { code: "14.1", statement: "Coordination and response" }
+      - { code: "14.2", statement: "Sense organs" }
+      - { code: "14.3", statement: "Hormones" }
+      - { code: "14.4", statement: "Homeostasis" }
+      - { code: "14.5", statement: "Tropic responses" }
+  - code: "15"
+    name: "Drugs"
+    objectives:
+      - { code: "15.1", statement: "Drugs" }
+  - code: "16"
+    name: "Reproduction"
+    objectives:
+      - { code: "16.1", statement: "Asexual reproduction" }
+      - { code: "16.2", statement: "Sexual reproduction" }
+      - { code: "16.3", statement: "Sexual reproduction in plants" }
+      - { code: "16.4", statement: "Sexual reproduction in humans" }
+      - { code: "16.5", statement: "Sex hormones in humans" }
+      - { code: "16.6", statement: "Sexually transmitted infections" }
+  - code: "17"
+    name: "Inheritance"
+    objectives:
+      - { code: "17.1", statement: "Chromosomes, genes and proteins" }
+      - { code: "17.2", statement: "Mitosis" }
+      - { code: "17.3", statement: "Meiosis" }
+      - { code: "17.4", statement: "Monohybrid inheritance" }
+  - code: "18"
+    name: "Variation and selection"
+    objectives:
+      - { code: "18.1", statement: "Variation" }
+      - { code: "18.2", statement: "Adaptive features" }
+      - { code: "18.3", statement: "Selection" }
+  - code: "19"
+    name: "Organisms and their environment"
+    objectives:
+      - { code: "19.1", statement: "Energy flow" }   # Term 1
+      - { code: "19.2", statement: "Food chains and food webs" }   # Term 1
+      - { code: "19.3", statement: "Nutrient cycles" }   # Term 1
+      - { code: "19.4", statement: "Populations" }   # Term 1
+  - code: "20"
+    name: "Human influences on ecosystems"
+    objectives:
+      - { code: "20.1", statement: "Food supply" }
+      - { code: "20.2", statement: "Habitat destruction" }
+      - { code: "20.3", statement: "Pollution" }
+      - { code: "20.4", statement: "Conservation" }
+  - code: "21"
+    name: "Biotechnology and genetic modification"
+    objectives:
+      - { code: "21.1", statement: "Biotechnology and genetic modification" }
+      - { code: "21.2", statement: "Biotechnology" }
+      - { code: "21.3", statement: "Genetic modification" }

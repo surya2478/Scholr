@@ -1,0 +1,21 @@
+# Student-facing reasons for plan items and plan notices (ARCHITECTURE §16 "reasons shown from templates").
+# Changing this file => bump `version`.
+version: planner_reasons_v2
+reasons:
+  assessment_soon: "You have an assessment on this soon — let's get ready."
+  open_mistake_high: "Fix a mistake that keeps costing you marks."
+  open_mistake_medium: "Tidy up a mistake from recent practice."
+  retention_high: "It's been a while since you practised this — revise it so it sticks."
+  retention_medium: "A quick refresh to keep this one fresh."
+  current_school_topic: "This is what you're learning at school right now."
+  new_school_topic: "Get a head start on a topic your class is covering now."
+  external_class_gap: "Something from your IIT class leans on this — a short session here will help."
+  low_mastery: "Build confidence on something that's still developing."
+  ready_for_challenge: "You've mastered this — try a stretch question."
+  # Daily practice set (docs/STUDENT-APP.md step 4). The set also reuses the reasons above.
+  on_todays_plan: "It's on your plan for today."
+  lesson_read: "You've studied this — now try a question on it."
+notices:
+  overload: "Today is full, so optional practice was left out. Anything that didn't fit comes back in the next few days."
+  lighter_day: "Lighter day today — short and focused."
+  no_capacity: "No study time is planned for today. Enjoy the break!"

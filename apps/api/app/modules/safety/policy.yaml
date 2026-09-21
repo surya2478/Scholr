@@ -1,0 +1,26 @@
+# Safety response templates and crisis resources (ARCHITECTURE §17). Responses are fixed text, never generated.
+# The parent reviews this file (PHASE-1 AC-S4). Changing it => bump `version` and run app.jobs.safety_eval.
+version: safety_templates_v1
+reviewed_by_parent: false
+
+crisis_resources:
+  # CONTEXT U5: a person must verify each entry (name, number, hours, region) before go-live.
+  # Entries are shown to the student only when verified is true.
+  verified: false
+  entries: []
+
+responses:
+  crisis_response: >-
+    I'm really glad you told me. What you're going through matters, and you don't have to handle it on your own.
+    Please talk to a parent or another adult you trust right now. If you are in danger or might hurt yourself,
+    contact emergency services straight away. The adults who look after you will be able to see that you need
+    support.
+  supportive_response: >-
+    Thank you for telling me — that sounds really hard. It's okay to take a break. Talking to a parent, a teacher
+    or another adult you trust can help a lot. Whenever you're ready, I'm here to help with your studies.
+  personal_info: >-
+    Please don't share personal details like phone numbers or your address here, and never arrange to meet
+    someone you only know online. If someone online is asking you for this, tell a parent or an adult you trust.
+  integrity_redirect: >-
+    I can't write assessed work for you, but I can help you do it yourself: we could plan the structure, check
+    your understanding of the key ideas, or look at a paragraph you have written.

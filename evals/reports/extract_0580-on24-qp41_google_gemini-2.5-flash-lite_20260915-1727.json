@@ -1,0 +1,101 @@
+{
+  "created_at": "2026-09-15T17:27:52+00:00",
+  "paper": "0580-on24-qp41",
+  "role": "paper_extractor_lite",
+  "model": "google/gemini-2.5-flash-lite",
+  "prompt": "past_paper_extract/v2",
+  "answer_source": "mark_scheme_table",
+  "mark_scheme_table": {
+    "rows": 47,
+    "marks_total": 130,
+    "parse_issues": [],
+    "unmatched_extractor_refs": [
+      "4(a)(iii)",
+      "4(c)",
+      "8(c)(v)",
+      "4(d)",
+      "7(b)(i)",
+      "7(b)(ii)"
+    ]
+  },
+  "items": 41,
+  "verified": 31,
+  "marks_total": 107,
+  "expected_total": 130,
+  "paper_issues": [],
+  "item_issues": 16,
+  "failed_pages": {},
+  "cost_usd": 0.0141,
+  "comparison_with_bank": {
+    "reference_items": 47,
+    "candidate_items": 41,
+    "matched": 41,
+    "missing_refs": [
+      "10(b)(i)",
+      "10(b)(ii)",
+      "4(a)(iii)(a)",
+      "4(a)(iii)(b)",
+      "6(c)",
+      "9(d)"
+    ],
+    "extra_refs": [],
+    "marks_agree": 41,
+    "type_agree": 37,
+    "answer_agree": 41,
+    "exact_compared": 7,
+    "exact_agree": 4,
+    "verified_disagreements": [
+      "4(a)(ii)",
+      "9(b)",
+      "10(a)(i)"
+    ],
+    "differences": {
+      "1(d)": [
+        "type",
+        "exact"
+      ],
+      "1(e)(ii)": [
+        "exact"
+      ],
+      "4(a)(ii)": [
+        "exact"
+      ],
+      "9(b)": [
+        "type"
+      ],
+      "9(c)": [
+        "type"
+      ],
+      "10(a)(i)": [
+        "type"
+      ]
+    }
+  },
+  "item_level_verified": 31,
+  "item_level_verified_disagreements": [
+    "4(a)(ii)",
+    "9(b)",
+    "10(a)(i)"
+  ],
+  "differing_fields": {
+    "1(d)": [
+      "type",
+      "exact"
+    ],
+    "1(e)(ii)": [
+      "exact"
+    ],
+    "4(a)(ii)": [
+      "exact"
+    ],
+    "9(b)": [
+      "type"
+    ],
+    "9(c)": [
+      "type"
+    ],
+    "10(a)(i)": [
+      "type"
+    ]
+  }
+}

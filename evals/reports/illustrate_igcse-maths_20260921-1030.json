@@ -1,0 +1,25 @@
+{
+  "subject": "igcse-maths",
+  "prompt": "lesson_illustrate/v1",
+  "model": "google/gemini-2.5-flash-lite",
+  "lessons": 187,
+  "with_diagram": 11,
+  "no_diagram": 176,
+  "no_vocabulary": 159,
+  "failed": 0,
+  "kinds": {
+    "straight_line_graph": 1,
+    "venn_factors": 1,
+    "number_line": 4,
+    "right_triangle": 2,
+    "coordinate_grid": 3,
+    "bar_model": 2
+  },
+  "cost_usd": 0.0053,
+  "dropped_kind": 0,
+  "dropped_numbers": 12,
+  "dropped_caption": 2,
+  "dropped_uncited": 0,
+  "dropped_ungrounded": 3,
+  "errors": []
+}

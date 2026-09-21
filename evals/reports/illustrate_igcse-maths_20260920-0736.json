@@ -1,0 +1,21 @@
+{
+  "subject": "igcse-maths",
+  "prompt": "lesson_illustrate/v1",
+  "model": "google/gemini-2.5-flash-lite",
+  "lessons": 187,
+  "with_diagram": 5,
+  "no_diagram": 182,
+  "no_vocabulary": 169,
+  "failed": 0,
+  "kinds": {
+    "bar_model": 2,
+    "number_line": 4
+  },
+  "cost_usd": 0.0027,
+  "dropped_kind": 0,
+  "dropped_numbers": 9,
+  "dropped_caption": 2,
+  "dropped_uncited": 0,
+  "dropped_ungrounded": 2,
+  "errors": []
+}

@@ -1,0 +1,46 @@
+{
+  "created_at": "2026-09-15T17:34:32+00:00",
+  "paper": "0495-mj23-qp11",
+  "role": "paper_extractor_lite",
+  "model": "google/gemini-2.5-flash-lite",
+  "prompt": "past_paper_extract/v1",
+  "answer_source": "extractor",
+  "mark_scheme_table": null,
+  "items": 7,
+  "verified": 0,
+  "marks_total": 45,
+  "expected_total": null,
+  "paper_issues": [
+    "page_failed:3:invalid_output"
+  ],
+  "item_issues": 0,
+  "failed_pages": {
+    "3": "invalid_output"
+  },
+  "cost_usd": 0.0025,
+  "comparison_with_bank": {
+    "reference_items": 0,
+    "candidate_items": 7,
+    "matched": 0,
+    "missing_refs": [],
+    "extra_refs": [
+      "1(a)",
+      "1(b)",
+      "1(c)",
+      "1(d)",
+      "1(e)",
+      "1(f)",
+      "1(g)"
+    ],
+    "marks_agree": 0,
+    "type_agree": 0,
+    "answer_agree": 0,
+    "exact_compared": 0,
+    "exact_agree": 0,
+    "verified_disagreements": [],
+    "differences": {}
+  },
+  "item_level_verified": 7,
+  "item_level_verified_disagreements": [],
+  "differing_fields": {}
+}

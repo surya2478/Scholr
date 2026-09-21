@@ -1,0 +1,229 @@
+{
+  "created_at": "2026-09-14T14:12:46+00:00",
+  "source": "collins-igcse-maths-4e",
+  "options": {
+    "role": "page_ocr_math",
+    "prompt": "page_ocr_math_md",
+    "output": "markdown",
+    "dpi": 150,
+    "bands": 1,
+    "models": null,
+    "postprocess": [
+      "unicode_math_to_latex"
+    ]
+  },
+  "candidate_model": "google/gemini-2.5-flash-lite",
+  "reference_models": [
+    "google/gemini-3.5-flash"
+  ],
+  "seed": 7,
+  "summary": {
+    "pages": 12,
+    "mean_content_f1": 0.9655,
+    "min_content_f1": 0.8444,
+    "mean_word_f1": 0.9009,
+    "mean_math_f1": 0.6773,
+    "mean_math_recall": 0.6164,
+    "unicode_leaks": 0,
+    "escape_damage": 0,
+    "math_segment_ratio": 1.433,
+    "verdict": "review"
+  },
+  "candidate_cost_per_page_usd": 0.00047,
+  "reference_cost_per_page_usd": 0.02745,
+  "candidate_mean_output_tokens": 597,
+  "remaining_pages": 602,
+  "projected_remaining_cost_usd": 0.28,
+  "lowest_pages": [
+    {
+      "page_number": 612,
+      "content_f1": 0.993,
+      "word_f1": 0.7269,
+      "math_f1": 0.5123,
+      "math_recall": 0.1892,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 37,
+      "candidate_math_segments": 21
+    },
+    {
+      "page_number": 403,
+      "content_f1": 0.8444,
+      "word_f1": 0.8793,
+      "math_f1": 0.466,
+      "math_recall": 0.3,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 20,
+      "candidate_math_segments": 15
+    },
+    {
+      "page_number": 103,
+      "content_f1": 0.9775,
+      "word_f1": 0.8426,
+      "math_f1": 0.3314,
+      "math_recall": 0.3333,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 21,
+      "candidate_math_segments": 33
+    },
+    {
+      "page_number": 39,
+      "content_f1": 0.9837,
+      "word_f1": 0.9231,
+      "math_f1": 0.94,
+      "math_recall": 0.5455,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 11,
+      "candidate_math_segments": 20
+    },
+    {
+      "page_number": 25,
+      "content_f1": 0.972,
+      "word_f1": 0.9893,
+      "math_f1": 0.6895,
+      "math_recall": 0.6087,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 23,
+      "candidate_math_segments": 22
+    }
+  ],
+  "pages": [
+    {
+      "page_number": 13,
+      "content_f1": 0.9904,
+      "word_f1": 0.9621,
+      "math_f1": 0.8261,
+      "math_recall": 1.0,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 11,
+      "candidate_math_segments": 13
+    },
+    {
+      "page_number": 15,
+      "content_f1": 0.966,
+      "word_f1": 0.8367,
+      "math_f1": 0.3497,
+      "math_recall": 1.0,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 5,
+      "candidate_math_segments": 60
+    },
+    {
+      "page_number": 19,
+      "content_f1": 0.9588,
+      "word_f1": 0.9091,
+      "math_f1": 0.8785,
+      "math_recall": 0.9,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 10,
+      "candidate_math_segments": 22
+    },
+    {
+      "page_number": 25,
+      "content_f1": 0.972,
+      "word_f1": 0.9893,
+      "math_f1": 0.6895,
+      "math_recall": 0.6087,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 23,
+      "candidate_math_segments": 22
+    },
+    {
+      "page_number": 39,
+      "content_f1": 0.9837,
+      "word_f1": 0.9231,
+      "math_f1": 0.94,
+      "math_recall": 0.5455,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 11,
+      "candidate_math_segments": 20
+    },
+    {
+      "page_number": 83,
+      "content_f1": 0.9698,
+      "word_f1": 0.9711,
+      "math_f1": 0.9099,
+      "math_recall": 0.7,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 40,
+      "candidate_math_segments": 43
+    },
+    {
+      "page_number": 94,
+      "content_f1": 0.9598,
+      "word_f1": 0.9017,
+      "math_f1": 0.9534,
+      "math_recall": 0.8205,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 39,
+      "candidate_math_segments": 32
+    },
+    {
+      "page_number": 103,
+      "content_f1": 0.9775,
+      "word_f1": 0.8426,
+      "math_f1": 0.3314,
+      "math_recall": 0.3333,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 21,
+      "candidate_math_segments": 33
+    },
+    {
+      "page_number": 132,
+      "content_f1": 0.9882,
+      "word_f1": 0.9584,
+      "math_f1": 0.4127,
+      "math_recall": 0.0,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 6,
+      "candidate_math_segments": 16
+    },
+    {
+      "page_number": 308,
+      "content_f1": 0.9826,
+      "word_f1": 0.91,
+      "math_f1": 0.8585,
+      "math_recall": 1.0,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 17,
+      "candidate_math_segments": 47
+    },
+    {
+      "page_number": 403,
+      "content_f1": 0.8444,
+      "word_f1": 0.8793,
+      "math_f1": 0.466,
+      "math_recall": 0.3,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 20,
+      "candidate_math_segments": 15
+    },
+    {
+      "page_number": 612,
+      "content_f1": 0.993,
+      "word_f1": 0.7269,
+      "math_f1": 0.5123,
+      "math_recall": 0.1892,
+      "unicode_leaks": 0,
+      "escape_damage": 0,
+      "reference_math_segments": 37,
+      "candidate_math_segments": 21
+    }
+  ],
+  "note": "Reference is another model's transcription, not ground truth. Spot-check lowest_pages by eye."
+}

@@ -1,0 +1,51 @@
+# Curriculum structure — IIT Foundation Grade 9 (Biology) — AhaGuru
+#
+# Provenance: lesson list extracted 16 Sep 2026 from the course pages saved under subjects/IIT
+# (gitignored). Only lesson titles and the two test formats are stored — no question or solution text.
+#
+# Scholr does NOT teach this subject (subject_configs/iit_biology_foundation.yaml sets taught_here: false). These rows exist
+# so a class can be logged against the lesson it covered, and so the concepts underneath it can be traced to
+# the IGCSE work Scholr does teach. See docs/PHASE-3.md.
+
+curriculum: { code: IIT-FOUNDATION, name: IIT Foundation (AhaGuru) }
+path: { code: IIT, name: IIT Foundation }
+syllabus:
+  code: "STD9-BIO"
+  title: AhaGuru Biology for Std 9 (NEET / CBSE)
+  version: "grade-9-2026"
+  tiers: [foundation]
+  verification_status: unverified
+  source_note: >-
+    Lesson list read from the student's own AhaGuru course pages (Grade 9, Biology), 16 Sep 2026. Unverified:
+    the provider publishes no syllabus document, so the list is only as current as those pages (U14).
+subject: { code: iit-biology, name: IIT Foundation Biology, config_key: iit_biology_foundation }
+
+components:
+  - code: CT
+    name: Consolidated Test — multiple choice (Physics, Chemistry, Maths, Biology combined)
+    duration_min: 120
+    structure_note: 45 multiple-choice questions across all four subjects; one paper for the whole programme.
+  - code: DE
+    name: Terminal descriptive exam (CBSE pattern)
+    duration_min: 180
+    marks: 80
+    structure_note: >-
+      Five sections — about 20 one-mark objective questions, 2-mark very short answers, 3-mark short answers,
+      5-mark long answers and 4-mark case-study questions, with internal choice in some questions.
+
+topics:
+  - code: cells
+    name: "Cells and tissues"
+    objectives:
+      - { code: L1, statement: "The fundamental unit of life" }
+      - { code: L2, statement: "Tissues" }
+  - code: health
+    name: "Diversity and health"
+    objectives:
+      - { code: L3, statement: "Diversity in living organisms" }
+      - { code: L4, statement: "Why do we fall ill?" }
+  - code: environment
+    name: "Environment and food"
+    objectives:
+      - { code: L5, statement: "Natural resources" }
+      - { code: L6, statement: "Improvement in food resources" }

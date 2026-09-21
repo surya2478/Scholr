@@ -1,0 +1,175 @@
+{
+  "created_at": "2026-09-14T15:44:01+00:00",
+  "paper": "0580-mj24-qp41",
+  "role": "paper_extractor_lite",
+  "model": "google/gemini-2.5-flash-lite",
+  "prompt": "past_paper_extract/v2",
+  "answer_source": "mark_scheme_table",
+  "mark_scheme_table": {
+    "rows": 48,
+    "marks_total": 130,
+    "parse_issues": [],
+    "unmatched_extractor_refs": [
+      "7(d)",
+      "7(e)"
+    ]
+  },
+  "items": 48,
+  "verified": 0,
+  "marks_total": 130,
+  "expected_total": 130,
+  "paper_issues": [
+    "ref_not_in_mark_scheme:7(d)",
+    "ref_not_in_mark_scheme:7(e)"
+  ],
+  "item_issues": 17,
+  "failed_pages": {},
+  "cost_usd": 0.0143,
+  "comparison_with_bank": {
+    "reference_items": 48,
+    "candidate_items": 48,
+    "matched": 48,
+    "missing_refs": [],
+    "extra_refs": [],
+    "marks_agree": 47,
+    "type_agree": 42,
+    "answer_agree": 43,
+    "exact_compared": 16,
+    "exact_agree": 5,
+    "verified_disagreements": [],
+    "differences": {
+      "8(c)": [
+        "answer"
+      ],
+      "1(a)(iv)": [
+        "exact"
+      ],
+      "1(a)(v)": [
+        "exact"
+      ],
+      "1(b)": [
+        "exact"
+      ],
+      "2(a)(ii)": [
+        "answer"
+      ],
+      "3(a)(i)": [
+        "exact"
+      ],
+      "4(a)(i)": [
+        "exact"
+      ],
+      "4(a)(ii)": [
+        "exact"
+      ],
+      "9(a)(i)": [
+        "exact"
+      ],
+      "4(b)(iii)": [
+        "type",
+        "answer"
+      ],
+      "5(a)(i)": [
+        "type"
+      ],
+      "9(a)(ii)": [
+        "exact"
+      ],
+      "6(b)(ii)": [
+        "type",
+        "answer"
+      ],
+      "6(d)(i)": [
+        "type"
+      ],
+      "8(b)(ii)": [
+        "exact"
+      ],
+      "9(c)": [
+        "marks",
+        "type",
+        "answer"
+      ],
+      "9(b)": [
+        "type"
+      ],
+      "9(d)": [
+        "exact"
+      ],
+      "9(e)": [
+        "exact"
+      ]
+    }
+  },
+  "item_level_verified": 31,
+  "item_level_verified_disagreements": [
+    "2(a)(ii)",
+    "4(b)(iii)",
+    "5(a)(i)",
+    "6(d)(i)",
+    "8(b)(ii)"
+  ],
+  "differing_fields": {
+    "8(c)": [
+      "answer"
+    ],
+    "1(a)(iv)": [
+      "exact"
+    ],
+    "1(a)(v)": [
+      "exact"
+    ],
+    "1(b)": [
+      "exact"
+    ],
+    "2(a)(ii)": [
+      "answer"
+    ],
+    "3(a)(i)": [
+      "exact"
+    ],
+    "4(a)(i)": [
+      "exact"
+    ],
+    "4(a)(ii)": [
+      "exact"
+    ],
+    "9(a)(i)": [
+      "exact"
+    ],
+    "4(b)(iii)": [
+      "type",
+      "answer"
+    ],
+    "5(a)(i)": [
+      "type"
+    ],
+    "9(a)(ii)": [
+      "exact"
+    ],
+    "6(b)(ii)": [
+      "type",
+      "answer"
+    ],
+    "6(d)(i)": [
+      "type"
+    ],
+    "8(b)(ii)": [
+      "exact"
+    ],
+    "9(c)": [
+      "marks",
+      "type",
+      "answer"
+    ],
+    "9(b)": [
+      "type"
+    ],
+    "9(d)": [
+      "exact"
+    ],
+    "9(e)": [
+      "exact"
+    ]
+  }
+}

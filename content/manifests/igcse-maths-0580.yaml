@@ -1,0 +1,346 @@
+# Source manifest — Cambridge IGCSE Mathematics 0580 (Extended)
+# Raw files live in subjects/ (gitignored). Private study use for one student; never redistributed.
+subject: igcse-maths
+curriculum: CAIE-IGCSE
+syllabus: "0580"
+
+defaults: &cambridge
+  publisher: Cambridge University Press & Assessment (UCLES)
+  owner: Cambridge University Press & Assessment
+  licence: >-
+    Copyright UCLES / Cambridge University Press & Assessment. Obtained for the student's private
+    study. Stored privately; excerpts shown only in short form with references; not redistributed.
+  acquired_via: Provided by parent (subjects/IGCSE/mathematics)
+  private: true
+
+papacambridge: &papacambridge
+  publisher: Cambridge University Press & Assessment (UCLES)
+  owner: Cambridge University Press & Assessment
+  licence: >-
+    Copyright UCLES / Cambridge University Press & Assessment. Obtained for the student's private
+    study. Stored privately; excerpts shown only in short form with references; not redistributed.
+  acquired_via: "Downloaded from pastpapers.papacambridge.com at the parent's request (15 Sep 2026)"
+  private: true
+
+sources:
+  - key: 0580-mj24-qp21
+    <<: *cambridge
+    title: "0580/21 Paper 2 (Extended) Question Paper, May/June 2024"
+    file: IGCSE/mathematics/569924-june-2024-question-paper-21.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ24
+    component: "21"
+    notes: >-
+      Pre-2025 paper structure (Paper 2: 1h30, 70 marks, calculator allowed). Content remains useful;
+      paper format differs from the syllabus examined in 2028 (to verify against 2028 syllabus).
+  - key: 0580-mj24-ms21
+    <<: *cambridge
+    title: "0580/21 Paper 2 (Extended) Mark Scheme, May/June 2024"
+    file: IGCSE/mathematics/569920-june-2024-mark-scheme-paper-21.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ24
+    component: "21"
+  - key: 0580-mj24-qp41
+    <<: *cambridge
+    title: "0580/41 Paper 4 (Extended) Question Paper, May/June 2024"
+    file: IGCSE/mathematics/671439-june-2024-question-paper-41.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ24
+    component: "41"
+    notes: Pre-2025 paper structure (Paper 4 — 2h30, 130 marks, calculator allowed).
+  - key: 0580-mj24-ms41
+    <<: *cambridge
+    title: "0580/41 Paper 4 (Extended) Mark Scheme, May/June 2024"
+    file: IGCSE/mathematics/671437-june-2024-mark-scheme-paper-41.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ24
+    component: "41"
+  - key: 0580-mj24-qp11
+    <<: *cambridge
+    title: "0580/11 Paper 1 (Core) Question Paper, May/June 2024"
+    file: IGCSE/mathematics/569923-june-2024-question-paper-11.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ24
+    component: "11"
+    notes: Core tier — used for warm-up/foundation practice only.
+  - key: 0580-mj24-ms11
+    <<: *cambridge
+    title: "0580/11 Paper 1 (Core) Mark Scheme, May/June 2024"
+    file: IGCSE/mathematics/569919-june-2024-mark-scheme-paper-11.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ24
+    component: "11"
+  - key: 0580-mj24-qp31
+    <<: *cambridge
+    title: "0580/31 Paper 3 (Core) Question Paper, May/June 2024"
+    file: IGCSE/mathematics/569925-june-2024-question-paper-31.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ24
+    component: "31"
+    notes: Core tier — used for warm-up/foundation practice only.
+  - key: 0580-mj24-ms31
+    <<: *cambridge
+    title: "0580/31 Paper 3 (Core) Mark Scheme, May/June 2024"
+    file: IGCSE/mathematics/569921-june-2024-mark-scheme-paper-31.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ24
+    component: "31"
+  - key: 0580-mj24-er
+    <<: *cambridge
+    title: "0580 Principal Examiner Report for Teachers, May/June 2024"
+    file: IGCSE/mathematics/569918-june-2024-examiner-report.pdf
+    authority_tier: A
+    content_kind: examiner_report
+    exam_series: MJ24
+
+  - key: collins-igcse-maths-4e
+    title: "Collins Cambridge IGCSE™ Maths Student's Book, Fourth Edition"
+    publisher: HarperCollins Publishers (Collins)
+    edition: "4th"
+    owner: HarperCollins Publishers
+    licence: >-
+      Copyrighted textbook; family's copy used for the student's private study only. Stored privately;
+      short excerpts with page references only; never redistributed.
+    acquired_via: Provided by parent (subjects/IGCSE/mathematics); school course textbook
+    private: true
+    file: IGCSE/mathematics/820413893-750341644-Collins-Cambridge-IGCSE-Mathematics.pdf
+    authority_tier: B
+    content_kind: explanation
+    # Low-cost model, plain-Markdown LaTeX prompt, 220 DPI (screened 14 Sep 2026:
+    # evals/reports/ocr_collins-igcse-maths-4e_page_ocr_math_md_markdown_dpi220_*).
+    ocr_role: page_ocr_math
+    ocr_prompt: page_ocr_math_md
+    ocr_output: markdown
+    ocr_dpi: 220
+    ocr_postprocess: [unicode_math_to_latex]
+    notes: >-
+      Scanned PDF (781 pages, no text layer) — requires vision OCR. Some pages carry pencil
+      annotations from a previous user; OCR must ignore handwriting.
+
+  # ---- Downloaded from PapaCambridge (15 Sep 2026) ----
+  - key: 0580-mj23-er
+    <<: *papacambridge
+    title: "0580 Principal Examiner Report for Teachers, May/June 2023"
+    file: IGCSE/mathematics/papacambridge/0580_s23_er.pdf
+    authority_tier: A
+    content_kind: examiner_report
+    exam_series: MJ23
+  - key: 0580-mj23-ms21
+    <<: *papacambridge
+    title: "0580/21 Paper 2 (Extended) Mark Scheme, May/June 2023"
+    file: IGCSE/mathematics/papacambridge/0580_s23_ms_21.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ23
+    component: "21"
+  - key: 0580-mj23-ms22
+    <<: *papacambridge
+    title: "0580/22 Paper 2 (Extended) Mark Scheme, May/June 2023"
+    file: IGCSE/mathematics/papacambridge/0580_s23_ms_22.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ23
+    component: "22"
+  - key: 0580-mj23-ms41
+    <<: *papacambridge
+    title: "0580/41 Paper 4 (Extended) Mark Scheme, May/June 2023"
+    file: IGCSE/mathematics/papacambridge/0580_s23_ms_41.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ23
+    component: "41"
+  - key: 0580-mj23-ms42
+    <<: *papacambridge
+    title: "0580/42 Paper 4 (Extended) Mark Scheme, May/June 2023"
+    file: IGCSE/mathematics/papacambridge/0580_s23_ms_42.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ23
+    component: "42"
+  - key: 0580-mj23-qp21
+    <<: *papacambridge
+    title: "0580/21 Paper 2 (Extended) Question Paper, May/June 2023"
+    file: IGCSE/mathematics/papacambridge/0580_s23_qp_21.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ23
+    component: "21"
+    notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
+  - key: 0580-mj23-qp22
+    <<: *papacambridge
+    title: "0580/22 Paper 2 (Extended) Question Paper, May/June 2023"
+    file: IGCSE/mathematics/papacambridge/0580_s23_qp_22.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ23
+    component: "22"
+    notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
+  - key: 0580-mj23-qp41
+    <<: *papacambridge
+    title: "0580/41 Paper 4 (Extended) Question Paper, May/June 2023"
+    file: IGCSE/mathematics/papacambridge/0580_s23_qp_41.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ23
+    component: "41"
+    notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
+  - key: 0580-mj23-qp42
+    <<: *papacambridge
+    title: "0580/42 Paper 4 (Extended) Question Paper, May/June 2023"
+    file: IGCSE/mathematics/papacambridge/0580_s23_qp_42.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ23
+    component: "42"
+    notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
+  - key: 0580-mj25-er
+    <<: *papacambridge
+    title: "0580 Principal Examiner Report for Teachers, May/June 2025"
+    file: IGCSE/mathematics/papacambridge/0580_s25_er.pdf
+    authority_tier: A
+    content_kind: examiner_report
+    exam_series: MJ25
+  - key: 0580-mj25-ms21
+    <<: *papacambridge
+    title: "0580/21 Paper 2 (Extended) Mark Scheme, May/June 2025"
+    file: IGCSE/mathematics/papacambridge/0580_s25_ms_21.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ25
+    component: "21"
+  - key: 0580-mj25-ms22
+    <<: *papacambridge
+    title: "0580/22 Paper 2 (Extended) Mark Scheme, May/June 2025"
+    file: IGCSE/mathematics/papacambridge/0580_s25_ms_22.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ25
+    component: "22"
+  - key: 0580-mj25-ms41
+    <<: *papacambridge
+    title: "0580/41 Paper 4 (Extended) Mark Scheme, May/June 2025"
+    file: IGCSE/mathematics/papacambridge/0580_s25_ms_41.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ25
+    component: "41"
+  - key: 0580-mj25-ms42
+    <<: *papacambridge
+    title: "0580/42 Paper 4 (Extended) Mark Scheme, May/June 2025"
+    file: IGCSE/mathematics/papacambridge/0580_s25_ms_42.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ25
+    component: "42"
+  - key: 0580-mj25-qp21
+    <<: *papacambridge
+    title: "0580/21 Paper 2 (Extended) Question Paper, May/June 2025"
+    file: IGCSE/mathematics/papacambridge/0580_s25_qp_21.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ25
+    component: "21"
+    notes: "Current structure (from 2025): Paper 2 non-calculator / Paper 4 calculator, 2h, 100 marks."
+  - key: 0580-mj25-qp22
+    <<: *papacambridge
+    title: "0580/22 Paper 2 (Extended) Question Paper, May/June 2025"
+    file: IGCSE/mathematics/papacambridge/0580_s25_qp_22.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ25
+    component: "22"
+    notes: "Current structure (from 2025): Paper 2 non-calculator / Paper 4 calculator, 2h, 100 marks."
+  - key: 0580-mj25-qp41
+    <<: *papacambridge
+    title: "0580/41 Paper 4 (Extended) Question Paper, May/June 2025"
+    file: IGCSE/mathematics/papacambridge/0580_s25_qp_41.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ25
+    component: "41"
+    notes: "Current structure (from 2025): Paper 2 non-calculator / Paper 4 calculator, 2h, 100 marks."
+  - key: 0580-mj25-qp42
+    <<: *papacambridge
+    title: "0580/42 Paper 4 (Extended) Question Paper, May/June 2025"
+    file: IGCSE/mathematics/papacambridge/0580_s25_qp_42.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ25
+    component: "42"
+    notes: "Current structure (from 2025): Paper 2 non-calculator / Paper 4 calculator, 2h, 100 marks."
+  - key: 0580-on24-ms21
+    <<: *papacambridge
+    title: "0580/21 Paper 2 (Extended) Mark Scheme, October/November 2024"
+    file: IGCSE/mathematics/papacambridge/0580_w24_ms_21.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: ON24
+    component: "21"
+  - key: 0580-on24-ms22
+    <<: *papacambridge
+    title: "0580/22 Paper 2 (Extended) Mark Scheme, October/November 2024"
+    file: IGCSE/mathematics/papacambridge/0580_w24_ms_22.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: ON24
+    component: "22"
+  - key: 0580-on24-ms41
+    <<: *papacambridge
+    title: "0580/41 Paper 4 (Extended) Mark Scheme, October/November 2024"
+    file: IGCSE/mathematics/papacambridge/0580_w24_ms_41.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: ON24
+    component: "41"
+  - key: 0580-on24-ms42
+    <<: *papacambridge
+    title: "0580/42 Paper 4 (Extended) Mark Scheme, October/November 2024"
+    file: IGCSE/mathematics/papacambridge/0580_w24_ms_42.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: ON24
+    component: "42"
+  - key: 0580-on24-qp21
+    <<: *papacambridge
+    title: "0580/21 Paper 2 (Extended) Question Paper, October/November 2024"
+    file: IGCSE/mathematics/papacambridge/0580_w24_qp_21.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: ON24
+    component: "21"
+    notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
+  - key: 0580-on24-qp22
+    <<: *papacambridge
+    title: "0580/22 Paper 2 (Extended) Question Paper, October/November 2024"
+    file: IGCSE/mathematics/papacambridge/0580_w24_qp_22.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: ON24
+    component: "22"
+    notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
+  - key: 0580-on24-qp41
+    <<: *papacambridge
+    title: "0580/41 Paper 4 (Extended) Question Paper, October/November 2024"
+    file: IGCSE/mathematics/papacambridge/0580_w24_qp_41.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: ON24
+    component: "41"
+    notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
+  - key: 0580-on24-qp42
+    <<: *papacambridge
+    title: "0580/42 Paper 4 (Extended) Question Paper, October/November 2024"
+    file: IGCSE/mathematics/papacambridge/0580_w24_qp_42.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: ON24
+    component: "42"
+    notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."

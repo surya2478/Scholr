@@ -1,0 +1,82 @@
+# Curriculum structure — IIT Foundation Grade 9 (Physics) — AhaGuru
+#
+# Provenance: lesson list extracted 16 Sep 2026 from the course pages saved under subjects/IIT
+# (gitignored). Only lesson titles and the two test formats are stored — no question or solution text.
+#
+# Scholr does NOT teach this subject (subject_configs/iit_physics_foundation.yaml sets taught_here: false). These rows exist
+# so a class can be logged against the lesson it covered, and so the concepts underneath it can be traced to
+# the IGCSE work Scholr does teach. See docs/PHASE-3.md.
+
+curriculum: { code: IIT-FOUNDATION, name: IIT Foundation (AhaGuru) }
+path: { code: IIT, name: IIT Foundation }
+syllabus:
+  code: "STD9-PHY"
+  title: AhaGuru Physics for Std 9 (IIT-JEE / CBSE / NEET)
+  version: "grade-9-2026"
+  tiers: [foundation]
+  verification_status: unverified
+  source_note: >-
+    Lesson list read from the student's own AhaGuru course pages (Grade 9, Physics), 16 Sep 2026. Unverified:
+    the provider publishes no syllabus document, so the list is only as current as those pages (U14).
+subject: { code: iit-physics, name: IIT Foundation Physics, config_key: iit_physics_foundation }
+
+components:
+  - code: CT
+    name: Consolidated Test — multiple choice (Physics, Chemistry, Maths, Biology combined)
+    duration_min: 120
+    structure_note: 45 multiple-choice questions across all four subjects; one paper for the whole programme.
+  - code: DE
+    name: Terminal descriptive exam (CBSE pattern)
+    duration_min: 180
+    marks: 80
+    structure_note: >-
+      Five sections — about 20 one-mark objective questions, 2-mark very short answers, 3-mark short answers,
+      5-mark long answers and 4-mark case-study questions, with internal choice in some questions.
+
+topics:
+  - code: kinematics
+    name: "Motion"
+    objectives:
+      - { code: L1, statement: "Position and time" }
+      - { code: L2, statement: "Distance and displacement" }
+      - { code: L3, statement: "Speed and average speed" }
+      - { code: L4, statement: "Velocity and average velocity" }
+      - { code: L5, statement: "Uniform motion" }
+      - { code: L6, statement: "Acceleration basics" }
+      - { code: L7, statement: "Acceleration and deceleration" }
+      - { code: L8, statement: "Uniformly accelerated motion" }
+      - { code: L9, statement: "Uniformly accelerated motion - sign convention" }
+  - code: forces
+    name: "Forces and momentum"
+    objectives:
+      - { code: L10, statement: "Mechanics: force and motion" }
+      - { code: L11, statement: "Mechanics: net force on a body" }
+      - { code: L12, statement: "Mechanics: Newton's first law for multiple forces (1D)" }
+      - { code: L13, statement: "Mechanics: Newton's second law for multiple forces (1D)" }
+      - { code: L14, statement: "Mechanics: force and uniformly accelerated motion (1D)" }
+      - { code: L16, statement: "Conservation of momentum - head-on collisions" }
+  - code: gravity
+    name: "Gravitation and fluids"
+    objectives:
+      - { code: L15, statement: "Gravitation" }
+      - { code: L24, statement: "Fluids basics" }
+      - { code: L25, statement: "Archimedes' principle" }
+  - code: energy
+    name: "Work, energy and power"
+    objectives:
+      - { code: L17, statement: "Introduction to energy" }
+      - { code: L18, statement: "Work and energy" }
+      - { code: L19, statement: "Work, energy and power" }
+  - code: waves
+    name: "Light and sound"
+    objectives:
+      - { code: L20, statement: "Light" }
+      - { code: L21, statement: "Sound" }
+  - code: electricity
+    name: "Electricity"
+    objectives:
+      - { code: L22, statement: "Static electricity" }
+  - code: circular
+    name: "Circular motion"
+    objectives:
+      - { code: L23, statement: "Circular motion" }

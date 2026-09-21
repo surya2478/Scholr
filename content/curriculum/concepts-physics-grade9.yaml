@@ -1,0 +1,150 @@
+# Shared concept map — IIT Foundation Physics (Grade 9) ↔ Cambridge IGCSE Physics 0625
+#
+# Same job as concepts-maths-grade9.yaml: it lets Scholr answer "she struggled with Newton's second law in
+# Thursday's class — what IGCSE work stands under that?". See docs/PHASE-3.md.
+#
+# 0625 is at `stage: planned` — Scholr can name a topic to revise but has no questions or marking for it yet,
+# so these suggestions point at the course book rather than at practice. They become practice the day the
+# Physics slice lands, with no change to this file.
+#
+# Written 16 Sep 2026 from the two topic structures. A teaching judgement, not an official mapping. The IIT
+# course is one lesson per idea; 0625 groups the same ground into eight subtopics, so several lessons share a
+# concept — that is expected, not a mistake.
+#
+# NOTE ON GRAIN: 0625's subtopics are coarse (1.2 "Motion" covers all of kinematics). Where the IIT course
+# goes deeper than the subtopic name suggests, `note` says what part of it the class was on.
+
+subjects: [igcse-physics, iit-physics]
+
+concepts:
+  # --- measurement ---
+  - name: Physical quantities and measurement
+    description: Measuring length, volume and time; units, precision and the difference between scalars and vectors.
+    objectives:
+      igcse-physics: ["1.1"]
+
+  # --- kinematics ---
+  - name: Position, distance and displacement
+    description: Where something is, how far it has travelled, and how far it has ended up from where it started.
+    prerequisites: ["Physical quantities and measurement"]
+    objectives:
+      igcse-physics: ["1.2"]
+      iit-physics: [L1, L2]
+
+  - name: Speed and velocity
+    description: Rate of change of distance and of displacement, including average values over a journey.
+    prerequisites: ["Position, distance and displacement"]
+    objectives:
+      igcse-physics: ["1.2"]
+      iit-physics: [L3, L4, L5]
+
+  - name: Acceleration
+    description: Rate of change of velocity, speeding up and slowing down.
+    prerequisites: ["Speed and velocity"]
+    objectives:
+      igcse-physics: ["1.2"]
+      iit-physics: [L6, L7]
+
+  - name: Uniformly accelerated motion
+    description: The equations of motion under constant acceleration, and the sign convention that keeps them honest.
+    prerequisites: ["Acceleration"]
+    note: >-
+      0625 covers this inside 1.2 Motion, largely through distance-time and speed-time graphs. The IIT course
+      works it algebraically with an explicit sign convention, which 0625 assumes rather than teaches.
+    objectives:
+      igcse-physics: ["1.2"]
+      iit-physics: [L8, L9]
+
+  # --- forces ---
+  - name: Mass, weight and gravity
+    description: Mass as the amount of matter, weight as the force of gravity on it, and the field that causes it.
+    prerequisites: ["Physical quantities and measurement"]
+    objectives:
+      igcse-physics: ["1.3"]
+      iit-physics: [L15]
+
+  - name: Forces and their effects
+    description: What a force does to a body, how forces are drawn, and the resultant of several of them.
+    prerequisites: ["Physical quantities and measurement"]
+    objectives:
+      igcse-physics: ["1.5"]
+      iit-physics: [L10, L11]
+
+  - name: Newton's laws of motion
+    description: Balanced forces and constant velocity; unbalanced force, mass and acceleration.
+    prerequisites: ["Forces and their effects", "Acceleration"]
+    objectives:
+      igcse-physics: ["1.5"]
+      iit-physics: [L12, L13, L14]
+
+  - name: Circular motion
+    description: Motion on a curved path and the force that keeps a body on it.
+    prerequisites: ["Newton's laws of motion"]
+    objectives:
+      igcse-physics: ["1.5"]
+      iit-physics: [L23]
+
+  - name: Momentum and collisions
+    description: Mass times velocity, its conservation, and what that says about a collision.
+    prerequisites: ["Newton's laws of motion", "Speed and velocity"]
+    objectives:
+      igcse-physics: ["1.6"]
+      iit-physics: [L16]
+
+  # --- energy ---
+  - name: Energy stores and transfers
+    description: The stores energy sits in, how it moves between them, and why the total does not change.
+    prerequisites: ["Forces and their effects"]
+    objectives:
+      igcse-physics: ["1.7"]
+      iit-physics: [L17]
+
+  - name: Work, energy and power
+    description: Work as force times distance, energy as the capacity to do it, power as the rate of doing it.
+    prerequisites: ["Energy stores and transfers"]
+    objectives:
+      igcse-physics: ["1.7"]
+      iit-physics: [L18, L19]
+
+  # --- pressure and fluids ---
+  - name: Pressure
+    description: Force spread over an area, in solids and in fluids, and how depth changes it.
+    prerequisites: ["Forces and their effects"]
+    objectives:
+      igcse-physics: ["1.8"]
+      iit-physics: [L24]
+
+  - name: Upthrust and floating
+    description: Why a fluid pushes up on what is in it, and when that is enough to float.
+    prerequisites: ["Pressure", "Mass, weight and gravity"]
+    note: >-
+      Archimedes' principle is not a named 0625 subtopic. Its ground — pressure in a fluid, density and weight
+      — is 1.8 and 1.4, so that is where reinforcement lands.
+    objectives:
+      igcse-physics: ["1.8", "1.4"]
+      iit-physics: [L25]
+
+  - name: Density
+    description: Mass per unit volume, and measuring it for regular and irregular objects.
+    prerequisites: ["Physical quantities and measurement"]
+    objectives:
+      igcse-physics: ["1.4"]
+
+  # --- waves and electricity ---
+  - name: Light
+    description: How light travels, reflects and refracts.
+    objectives:
+      igcse-physics: ["3.2", "3.1"]
+      iit-physics: [L20]
+
+  - name: Sound
+    description: Sound as a wave in a material, how fast it travels, and what pitch and loudness are.
+    objectives:
+      igcse-physics: ["3.4", "3.1"]
+      iit-physics: [L21]
+
+  - name: Static electricity
+    description: Charge, how objects gain and lose it, and the forces and fields between charges.
+    objectives:
+      igcse-physics: ["4.2"]
+      iit-physics: [L22]

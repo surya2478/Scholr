@@ -1,0 +1,97 @@
+# Shared concept map — IIT Foundation Biology (Grade 9) ↔ Cambridge IGCSE Biology 0610
+#
+# Same job as the maths, physics and chemistry maps. See docs/PHASE-3.md.
+#
+# 0610 is at `stage: planned` — Scholr can name a topic to revise but has no questions or marking for it yet,
+# so these suggestions point at the course book rather than at practice.
+#
+# The IIT course is six broad NCERT chapters and 0610 is a long, finely divided syllabus, so each lesson
+# reaches several subtopics. Where an NCERT chapter spans ground 0610 splits across topics — "Why do we fall
+# ill?" and "Improvement in food resources" especially — `note` says which part the mapping stands on.
+# Written 16 Sep 2026 from the two topic structures; a teaching judgement, not an official mapping.
+
+subjects: [igcse-biology, iit-biology]
+
+concepts:
+  - name: Characteristics of living organisms
+    description: What makes something alive, and the features used to sort living things into groups.
+    objectives:
+      igcse-biology: ["1.1", "1.2", "1.3"]
+
+  - name: Cell structure and organisation
+    description: The parts of plant and animal cells, what each does, and working at the scale of a cell.
+    prerequisites: ["Characteristics of living organisms"]
+    objectives:
+      igcse-biology: ["2.1", "2.2"]
+      iit-biology: [L1]
+
+  - name: Tissues, organs and organ systems
+    description: Cells of one kind working together, and the levels of organisation built from them.
+    prerequisites: ["Cell structure and organisation"]
+    note: >-
+      0610 has no "tissues" subtopic of its own. Cell, tissue, organ, organ system and organism are one
+      statement inside 2.1 Cell structure, and the tissues themselves are met again in transport (8.1 xylem
+      and phloem) and in the digestive and circulatory systems. Reinforcement targets 2.1.
+    objectives:
+      igcse-biology: ["2.1", "8.1"]
+      iit-biology: [L2]
+
+  - name: Classification and diversity of organisms
+    description: The main groups of living things, and the shared features that place an organism in one.
+    prerequisites: ["Characteristics of living organisms"]
+    objectives:
+      igcse-biology: ["1.2", "1.3"]
+      iit-biology: [L3]
+
+  - name: Movement into and out of cells
+    description: Diffusion, osmosis and active transport, and why a cell depends on all three.
+    prerequisites: ["Cell structure and organisation"]
+    objectives:
+      igcse-biology: ["3.1", "3.2", "3.3"]
+
+  - name: Biological molecules
+    description: Carbohydrates, proteins, fats and water — what they are for and how they are tested.
+    prerequisites: ["Cell structure and organisation"]
+    objectives:
+      igcse-biology: ["4.1"]
+
+  - name: Disease and immunity
+    description: Pathogens, how disease spreads, and how the body defends itself.
+    prerequisites: ["Characteristics of living organisms"]
+    objectives:
+      igcse-biology: ["10.1"]
+      iit-biology: [L4]
+
+  - name: Health, diet and drugs
+    description: What a balanced diet does, what deficiency causes, and how drugs act on the body.
+    prerequisites: ["Disease and immunity", "Biological molecules"]
+    note: >-
+      The IIT chapter "Why do we fall ill?" covers health broadly. 0610 splits it: infection and immunity in
+      topic 10, diet in 7.1, drugs in topic 15. The mapping names all three rather than pretending it is one.
+    objectives:
+      igcse-biology: ["7.1", "15.1"]
+      iit-biology: [L4]
+
+  - name: Ecosystems and energy flow
+    description: Food chains and webs, how energy moves through them, and what limits a population.
+    prerequisites: ["Characteristics of living organisms"]
+    objectives:
+      igcse-biology: ["19.1", "19.2", "19.4"]
+      iit-biology: [L5]
+
+  - name: Nutrient cycles and pollution
+    description: How carbon, water and nitrogen move through an ecosystem, and what pollution does to that.
+    prerequisites: ["Ecosystems and energy flow"]
+    objectives:
+      igcse-biology: ["19.3", "20.3", "20.4"]
+      iit-biology: [L5]
+
+  - name: Food supply and selection
+    description: How crop and animal yields are increased, and the selection that underlies breeding.
+    prerequisites: ["Ecosystems and energy flow"]
+    note: >-
+      "Improvement in food resources" is an agriculture chapter with no single 0610 counterpart. Its IGCSE
+      ground is food supply (20.1), selection (18.3) and, for modern methods, genetic modification (21.3).
+    objectives:
+      igcse-biology: ["20.1", "18.3", "21.3"]
+      iit-biology: [L6]

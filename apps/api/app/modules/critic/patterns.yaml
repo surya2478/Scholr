@@ -1,0 +1,62 @@
+# Study Critic wording (Phase 2, AC-C2). Changing this file => bump `version`.
+#
+# Every line is an observation with its own numbers. None of them diagnoses her: no "struggling", no
+# "unmotivated", no "lacks discipline". The reader decides what it means — and the student reads exactly the
+# same words as the parent (AC-C3), which is the real test of whether a line is fair to write at all.
+#
+# `student` is addressed to her; `guardian` describes the same observation to a parent. The facts in braces
+# come from critic/rules.py and are counts and days only — never answer text.
+version: critic_patterns_v1
+
+patterns:
+  inconsistency:
+    title: Gaps between study days
+    student: >-
+      You had {gaps} gaps of {longest_gap} days or more in the last four weeks, over {active_days} days of
+      study. Shorter, more regular sessions usually stick better than long ones far apart.
+    guardian: >-
+      {gaps} gaps of {longest_gap}+ days in the last four weeks, across {active_days} active days.
+    why: Spacing practice out is one of the few study habits with strong evidence behind it.
+
+  cramming:
+    title: Most of the week in one day
+    student: >-
+      In {weeks} of the last four weeks, one day carried {biggest_share}% of everything you studied that
+      week. That one day is doing a lot of work — and what is learned in a rush tends to fade fastest.
+    guardian: >-
+      {weeks} weeks where a single day carried {biggest_share}% of that week's study time.
+    why: Massed practice feels productive and is recalled poorly a fortnight later.
+
+  unrealistic_plan:
+    title: Plans bigger than the days
+    student: >-
+      Across {weeks} weeks you finished {finished} of {planned} planned items. A plan you can finish is
+      worth more than one you cannot — it may be worth planning less.
+    guardian: >-
+      {finished} of {planned} planned items finished across {weeks} weeks.
+    why: A plan that is regularly unfinished is describing the wrong day, not the wrong student.
+
+  help_dependency:
+    title: Leaning on help more than before
+    student: >-
+      Earlier in the month {before}% of your answers used a hint or a worked solution; more recently it is
+      {after}%. Worth noticing — it can mean the work got harder, or that a topic needs another look.
+    guardian: >-
+      Answers using a hint or worked solution rose from {before}% to {after}% across the last four weeks.
+    why: >-
+      A rise can mean either harder work or a gap opening up. The pattern says which number moved, not which
+      reason it was.
+
+  subject_imbalance:
+    title: One subject much quieter
+    student: >-
+      {subject} got {minutes} minutes in the last four weeks — {share}% of your study time. Nothing wrong
+      with a favourite, as long as the quiet one is not the one you need most.
+    guardian: >-
+      {subject} received {share}% of study time ({minutes} minutes) over four weeks.
+    why: Subject balance is easier to correct early than in the term before an exam.
+
+# Shown when nothing fires. Silence needs saying too, or an empty panel reads as "not working".
+nothing:
+  student: Nothing stands out in how you have been studying this month.
+  guardian: Nothing stands out in how she has been studying this month.

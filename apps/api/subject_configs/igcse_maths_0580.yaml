@@ -1,0 +1,53 @@
+# Subject Expertise Engine config (ARCHITECTURE §8). Validated by app.modules.subjects.config.
+# Changing this file => run the Maths evals and report results.
+key: igcse_maths_0580
+path: IGCSE
+subject_code: igcse-maths
+syllabus: { code: "0580", tier: extended, exam_session: "2028-06" }
+subject_type: quantitative
+answer_input: expression   # typed answers use the MathLive maths keyboard
+retrieval:
+  allowed_authority_tiers: [A, B, C, D]
+  related_subjects: []
+  grounding_critical_intents: [syllabus_scope, notation, exam_technique]
+pedagogy:
+  help_ladder: default
+  self_explanation_every_n_correct: 3
+  worked_example_style: step_by_step
+  worked_example_check: sympy   # a lesson's worked example is kept only if SymPy agrees with its answer
+  # Which topics may carry which picture. Curated: code can check a diagram's numbers, not whether it belongs
+  # on the topic, and a model asked to judge that put a wave on a thermal lesson (20 Sep 2026).
+  diagrams:
+    venn_factors: ["1.5", "1.6"]                      # prime factorisation, HCF and LCM
+    number_line: ["4.1", "4.2", "4.3", "4.4", "6.1", "8.4", "8.5", "13.8"]   # directed numbers, inequalities, bounds
+    bar_model: ["3.3", "3.4", "7.1"]                                         # a fraction of a quantity, sharing in a ratio
+    right_triangle: ["26.1", "26.2", "26.5", "26.6", "23.3"]                 # Pythagoras and trigonometry
+    coordinate_grid: ["15.6", "29.1", "29.2", "30.1", "30.2", "30.3"]        # points and lines, vectors, transformations
+    straight_line_graph: ["15.1", "15.2", "15.3", "15.4", "16.6"]            # drawing lines, y = mx + c, gradients
+question_types: [short_numeric, structured_multi_part, algebraic_expression, show_that]
+question_sources: [past_paper, textbook, template, generated_verified]
+difficulty_model: { scale: "1-5", anchors: { 3: "Paper 2/4 mid-paper item" } }
+evaluation:
+  pipeline: structured_math
+  criteria: [concept, method, reasoning, accuracy, final_answer]
+  mark_scheme_notation: [M, A, B, SC, FT, oe, cao, isw, nfww, soi, dep]
+  accuracy_rules: { default_sig_figs: 3, angle_dp: 1 }
+  confidence_threshold: 0.75
+  # Low-cost marker (budget decision 14 Sep 2026); screen: evals/reports/marking_igcse-maths_maths_marker_*
+  evaluator_role: maths_marker
+mistake_categories:
+  [conceptual, calculation, formula, reasoning, misreading, carelessness, time_management, accuracy, question_interpretation]
+common_mistakes:
+  - sign_error
+  - order_of_operations
+  - misread_question
+  - wrong_formula
+  - premature_rounding
+  - insufficient_accuracy
+  - word_problem_translation
+  - units_omitted
+  - incomplete_working
+mastery_rules: default_v1
+tools: [sympy_equivalence, sympy_solve, sig_fig_check]
+# calculator_modes: set per component once the 2028 syllabus is verified (CONTEXT U11).
+language: en

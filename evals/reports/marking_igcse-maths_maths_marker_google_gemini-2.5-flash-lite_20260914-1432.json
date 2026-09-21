@@ -1,0 +1,321 @@
+{
+  "role": "maths_marker",
+  "model": "google/gemini-2.5-flash-lite",
+  "pass_thresholds": {
+    "unsafe_final_max": 0,
+    "error_rate_max": 0.05,
+    "review_rate_max": 0.25,
+    "tool_agreement_min": 0.9
+  },
+  "summary": {
+    "calls": 24,
+    "errors": {},
+    "error_rate": 0.0,
+    "unsafe_final": 0,
+    "review_rate": 0.167,
+    "tool_agreement": 0.958,
+    "full_marks_when_correct": 0.833,
+    "zero_marks_when_wrong": 1.0,
+    "mean_cost_usd": 0.00025,
+    "verdict": "candidate_ok"
+  },
+  "rows": [
+    {
+      "source_ref": "0580/11/MJ24/Q11(a)",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.000219
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q11(a)",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002781
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q14",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 2,
+      "status": "needs_review",
+      "confidence": 0.5,
+      "issues": [
+        "partial_marks_with_correct_final_answer"
+      ],
+      "cost_usd": 0.0002823
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q14",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 2,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0003494
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q18",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 2,
+      "available": 2,
+      "status": "needs_review",
+      "confidence": 0.5,
+      "issues": [
+        "award_sum_mismatch"
+      ],
+      "cost_usd": 0.0002187
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q18",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 2,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0003067
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q19(a)",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002173
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q19(a)",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002576
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q19(b)",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002138
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q19(b)",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002714
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q1(a)",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "disagree",
+      "marks": 0,
+      "available": 1,
+      "status": "needs_review",
+      "confidence": 0.5,
+      "issues": [
+        "tool_llm_disagreement",
+        "partial_marks_with_correct_final_answer"
+      ],
+      "cost_usd": 0.0002383
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q1(a)",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002842
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q1(b)",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 1,
+      "status": "needs_review",
+      "confidence": 0.5,
+      "issues": [
+        "award_sum_mismatch"
+      ],
+      "cost_usd": 0.0002044
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q1(b)",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002427
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q1(c)",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002135
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q1(c)",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002371
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q20(a)",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002049
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q20(a)",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002464
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q20(b)",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002038
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q20(b)",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002845
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q4",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002084
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q4",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002611
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q6(a)",
+      "case": "correct",
+      "tool": "correct",
+      "agreement": "agree",
+      "marks": 1,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002123
+    },
+    {
+      "source_ref": "0580/11/MJ24/Q6(a)",
+      "case": "wrong",
+      "tool": "incorrect",
+      "agreement": "agree",
+      "marks": 0,
+      "available": 1,
+      "status": "final",
+      "confidence": 1.0,
+      "issues": [],
+      "cost_usd": 0.0002585
+    }
+  ]
+}

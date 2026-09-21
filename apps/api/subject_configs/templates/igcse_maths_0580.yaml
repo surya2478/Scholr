@@ -1,0 +1,129 @@
+# Parametric question templates (ARCHITECTURE §11: past paper → textbook → parametric template with SymPy answer).
+# Written for Scholr (not copied from any textbook or paper). Each generated item is saved only if SymPy computes the
+# exact answer and the deterministic answer checker accepts the printed answer against it (AC-E1).
+# Placeholders: {name} in stem/mark_scheme are parameters; `exact` is a SymPy expression over the parameters.
+version: templates_v1
+templates:
+  - id: hcf_two_numbers
+    objective: "1.6"
+    marks: 2
+    difficulty: 2
+    command_word: Find
+    stem: "Find the highest common factor (HCF) of {a} and {b}."
+    params: { k: [6, 8, 12, 14, 15, 18], m: [2, 3, 5, 7], n: [4, 9, 11, 13] }
+    derived: { a: "k*m", b: "k*n" }
+    exact: "gcd(a, b)"
+    accuracy: exact
+    mark_scheme: "B2 for {answer}. B1 for a common factor greater than 1."
+
+  - id: lcm_two_numbers
+    objective: "1.6"
+    marks: 2
+    difficulty: 2
+    command_word: Find
+    stem: "Find the lowest common multiple (LCM) of {a} and {b}."
+    params: { a: [6, 8, 9, 10, 12, 14, 15], b: [16, 18, 20, 21, 25, 28] }
+    exact: "lcm(a, b)"
+    accuracy: exact
+    mark_scheme: "B2 for {answer}. B1 for a common multiple of both numbers."
+
+  - id: percentage_increase
+    objective: "2.6"
+    marks: 2
+    difficulty: 2
+    command_word: Increase
+    stem: "Increase ${p} by {r}%."
+    params: { p: [40, 64, 85, 120, 250, 360], r: [5, 12, 15, 18, 35] }
+    exact: "p*(1 + r/100)"
+    accuracy: sf3
+    mark_scheme: "M1 for {p} × (1 + {r}/100) oe. A1 {answer}."
+
+  - id: compound_interest_value
+    objective: "2.9"
+    marks: 3
+    difficulty: 3
+    command_word: Calculate
+    stem: "${P} is invested at {r}% per year compound interest. Calculate the value of the investment after {n} years."
+    params: { P: [500, 800, 1200, 2500, 4000], r: [2, 3, 4, 5, 6], n: [2, 3, 4, 5] }
+    exact: "P*(1 + r/100)**n"
+    accuracy: sf3
+    mark_scheme: "M2 for {P} × (1 + {r}/100)^{n} oe (M1 for one year's interest). A1 {answer}."
+
+  - id: reverse_percentage
+    objective: "2.10"
+    marks: 3
+    difficulty: 3
+    command_word: Find
+    stem: "In a sale the price of a jacket is reduced by {r}%. The sale price is ${q}. Find the original price."
+    params: { r: [10, 15, 20, 25, 30], q: [36, 51, 68, 72, 84, 90] }
+    exact: "q/(1 - r/100)"
+    accuracy: sf3
+    mark_scheme: "M2 for {q} ÷ (1 − {r}/100) oe (M1 for recognising {q} is (100 − {r})%). A1 {answer}."
+
+  - id: average_speed
+    objective: "7.3"
+    marks: 2
+    difficulty: 2
+    command_word: Calculate
+    stem: "A train travels {d} km in {t} hours. Calculate its average speed in km/h."
+    params: { d: [150, 180, 225, 310, 420], t: [2, 2.5, 3, 4] }
+    exact: "d/t"
+    accuracy: sf3
+    mark_scheme: "M1 for {d} ÷ {t}. A1 {answer}."
+
+  - id: inverse_proportion
+    objective: "7.6"
+    marks: 3
+    difficulty: 3
+    command_word: Find
+    stem: "y is inversely proportional to x. When x = {x1}, y = {y1}. Find y when x = {x2}."
+    params: { x1: [2, 3, 4, 5], y1: [12, 18, 20, 30], x2: [6, 8, 10, 15] }
+    exact: "x1*y1/x2"
+    accuracy: sf3
+    mark_scheme: "M1 for y = k/x. M1 for k = {x1} × {y1}. A1 {answer}."
+
+  - id: round_three_sf
+    objective: "8.3"
+    marks: 1
+    difficulty: 1
+    command_word: Write
+    stem: "Write {v} correct to 3 significant figures."
+    params: { a: [1, 2, 3, 4, 5, 6, 7, 8, 9], b: [2, 3, 4, 5, 6, 7, 8, 9], c: [1, 3, 5, 6, 7, 9], d: [2, 4, 6, 8] }
+    derived: { v: "(1000*a + 100*b + 10*c + d)/100" }
+    exact: "v"
+    accuracy: sf3
+    mark_scheme: "B1 for {answer}."
+
+  - id: upper_bound_nearest_unit
+    objective: "8.4"
+    marks: 1
+    difficulty: 2
+    command_word: Write
+    stem: "The length of a rod is {L} cm, correct to the nearest centimetre. Write down the upper bound of the length."
+    params: { L: [14, 23, 37, 48, 56, 72] }
+    exact: "L + 1/2"
+    accuracy: exact
+    mark_scheme: "B1 for {answer}."
+
+  - id: add_fractions
+    objective: "3.4"
+    marks: 2
+    difficulty: 2
+    command_word: Work out
+    stem: "Work out {n1}/{d1} + {n2}/{d2}. Give your answer as a fraction in its simplest form."
+    params: { n1: [1, 2, 3], d1: [4, 5, 7], n2: [1, 2, 5], d2: [3, 6, 8] }
+    exact: "Rational(n1, d1) + Rational(n2, d2)"
+    accuracy: exact
+    answer_format: fraction
+    mark_scheme: "M1 for a correct common denominator. A1 {answer}."
+
+  - id: exponential_decay
+    objective: "5.4"
+    marks: 3
+    difficulty: 3
+    command_word: Calculate
+    stem: "A car is worth ${V}. Its value decreases by {r}% each year. Calculate its value after {n} years."
+    params: { V: [12000, 18500, 24000, 32000], r: [8, 10, 12, 15], n: [2, 3, 4] }
+    exact: "V*(1 - r/100)**n"
+    accuracy: sf3
+    mark_scheme: "M2 for {V} × (1 − {r}/100)^{n} oe (M1 for one year's decrease). A1 {answer}."

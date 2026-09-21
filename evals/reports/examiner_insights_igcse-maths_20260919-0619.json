@@ -1,0 +1,25 @@
+{
+  "subject": "igcse-maths",
+  "reports": [
+    "0580-mj24-er"
+  ],
+  "prompt": "examiner_report_extract/v2",
+  "segmenter": "er-seg-v1",
+  "model": "google/gemini-2.5-flash-lite",
+  "calls": 59,
+  "failed": 0,
+  "segments": 113,
+  "kept": 307,
+  "copied": 8,
+  "too_long": 0,
+  "bad_ref": 14,
+  "duplicate": 7,
+  "unknown_blocks": 0,
+  "empty_segments": 2,
+  "cost_usd": 0.011061699999999997,
+  "by_kind": {
+    "advice": 40,
+    "common_error": 195,
+    "what_scored": 72
+  }
+}

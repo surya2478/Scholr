@@ -1,0 +1,89 @@
+# Curriculum structure — IIT Foundation Grade 9 (Mathematics) — AhaGuru
+#
+# Provenance: lesson list extracted 16 Sep 2026 from the course pages saved under subjects/IIT
+# (gitignored). Only lesson titles and the two test formats are stored — no question or solution text.
+#
+# Scholr does NOT teach this subject (subject_configs/iit_maths_foundation.yaml sets taught_here: false). These rows exist
+# so a class can be logged against the lesson it covered, and so the concepts underneath it can be traced to
+# the IGCSE work Scholr does teach. See docs/PHASE-3.md.
+
+curriculum: { code: IIT-FOUNDATION, name: IIT Foundation (AhaGuru) }
+path: { code: IIT, name: IIT Foundation }
+syllabus:
+  code: "STD9-MATH"
+  title: AhaGuru Math Foundation for Std 9
+  version: "grade-9-2026"
+  tiers: [foundation]
+  verification_status: unverified
+  source_note: >-
+    Lesson list read from the student's own AhaGuru course pages (Grade 9, Mathematics), 16 Sep 2026. Unverified:
+    the provider publishes no syllabus document, so the list is only as current as those pages (U14).
+subject: { code: iit-maths, name: IIT Foundation Mathematics, config_key: iit_maths_foundation }
+
+components:
+  - code: CT
+    name: Consolidated Test — multiple choice (Physics, Chemistry, Maths, Biology combined)
+    duration_min: 120
+    structure_note: 45 multiple-choice questions across all four subjects; one paper for the whole programme.
+  - code: DE
+    name: Terminal descriptive exam (CBSE pattern)
+    duration_min: 180
+    marks: 80
+    structure_note: >-
+      Five sections — about 20 one-mark objective questions, 2-mark very short answers, 3-mark short answers,
+      5-mark long answers and 4-mark case-study questions, with internal choice in some questions.
+
+topics:
+  - code: number
+    name: "Number system"
+    objectives:
+      - { code: L1, statement: "Number System: rational numbers" }
+      - { code: L2, statement: "Number System: irrational numbers" }
+      - { code: L3, statement: "Exponents" }
+  - code: algebra
+    name: "Algebra"
+    objectives:
+      - { code: L4, statement: "Polynomials I - remainder and factor theorem" }
+      - { code: L5, statement: "Polynomials II - factorisation and identities" }
+      - { code: L7, statement: "Linear equations in two variables" }
+      - { code: L25, statement: "Algebraic identities" }
+  - code: coordinate
+    name: "Coordinate geometry"
+    objectives:
+      - { code: L6, statement: "Coordinate geometry" }
+      - { code: L28, statement: "Coordinate geometry - distance and section formula" }
+  - code: geometry
+    name: "Geometry"
+    objectives:
+      - { code: L8, statement: "Euclid's geometry" }
+      - { code: L9, statement: "Lines and angles I - angles and parallel lines" }
+      - { code: L10, statement: "Lines and angles II - angles in triangles" }
+      - { code: L11, statement: "Quadrilaterals I - types and properties" }
+      - { code: L12, statement: "Quadrilaterals II - midpoint theorem and other theorems" }
+      - { code: L13, statement: "Triangles I - congruency of triangles" }
+      - { code: L14, statement: "Triangles II - inequalities in a triangle" }
+      - { code: L15, statement: "Areas I - area of a parallelogram" }
+      - { code: L16, statement: "Areas II - area of a triangle" }
+      - { code: L20, statement: "Circles" }
+      - { code: L21, statement: "Review of basic practical geometry" }
+      - { code: L22, statement: "Constructions" }
+  - code: mensuration
+    name: "Mensuration"
+    objectives:
+      - { code: L17, statement: "Measuring space - Heron's formula" }
+      - { code: L18, statement: "Surface area and volume I - cube and cuboid" }
+      - { code: L19, statement: "Surface area and volume II - cylinder, cone, hemisphere and sphere" }
+      - { code: L29, statement: "Measuring space - plane figures" }
+  - code: data
+    name: "Statistics and probability"
+    objectives:
+      - { code: L23, statement: "Statistics" }
+      - { code: L24, statement: "Probability" }
+  - code: commercial
+    name: "Commercial arithmetic"
+    objectives:
+      - { code: L26, statement: "Compound interest" }
+  - code: trig
+    name: "Trigonometry"
+    objectives:
+      - { code: L27, statement: "Trigonometric ratios" }

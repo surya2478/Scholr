@@ -1,0 +1,57 @@
+# Curriculum structure — IIT Foundation Grade 9 (Chemistry) — AhaGuru
+#
+# Provenance: lesson list extracted 16 Sep 2026 from the course pages saved under subjects/IIT
+# (gitignored). Only lesson titles and the two test formats are stored — no question or solution text.
+#
+# Scholr does NOT teach this subject (subject_configs/iit_chemistry_foundation.yaml sets taught_here: false). These rows exist
+# so a class can be logged against the lesson it covered, and so the concepts underneath it can be traced to
+# the IGCSE work Scholr does teach. See docs/PHASE-3.md.
+
+curriculum: { code: IIT-FOUNDATION, name: IIT Foundation (AhaGuru) }
+path: { code: IIT, name: IIT Foundation }
+syllabus:
+  code: "STD9-CHEM"
+  title: AhaGuru Chemistry for Std 9 (IIT-JEE / CBSE / NEET)
+  version: "grade-9-2026"
+  tiers: [foundation]
+  verification_status: unverified
+  source_note: >-
+    Lesson list read from the student's own AhaGuru course pages (Grade 9, Chemistry), 16 Sep 2026. Unverified:
+    the provider publishes no syllabus document, so the list is only as current as those pages (U14).
+subject: { code: iit-chemistry, name: IIT Foundation Chemistry, config_key: iit_chemistry_foundation }
+
+components:
+  - code: CT
+    name: Consolidated Test — multiple choice (Physics, Chemistry, Maths, Biology combined)
+    duration_min: 120
+    structure_note: 45 multiple-choice questions across all four subjects; one paper for the whole programme.
+  - code: DE
+    name: Terminal descriptive exam (CBSE pattern)
+    duration_min: 180
+    marks: 80
+    structure_note: >-
+      Five sections — about 20 one-mark objective questions, 2-mark very short answers, 3-mark short answers,
+      5-mark long answers and 4-mark case-study questions, with internal choice in some questions.
+
+topics:
+  - code: matter
+    name: "Matter"
+    objectives:
+      - { code: L1, statement: "Atomic picture of matter" }
+      - { code: L2, statement: "Atoms are building blocks" }
+      - { code: L3, statement: "Matter in our surroundings" }
+      - { code: L4, statement: "Air pressure" }
+  - code: atom
+    name: "Atomic structure and bonding"
+    objectives:
+      - { code: L5, statement: "Structure of the atom" }
+      - { code: L7, statement: "Chemical bonding" }
+  - code: quantitative
+    name: "Quantitative chemistry"
+    objectives:
+      - { code: L6, statement: "Mole concept" }
+  - code: mixtures
+    name: "Mixtures and purity"
+    objectives:
+      - { code: L8, statement: "Is matter around us pure? - part 1" }
+      - { code: L9, statement: "Is matter around us pure? - part 2" }

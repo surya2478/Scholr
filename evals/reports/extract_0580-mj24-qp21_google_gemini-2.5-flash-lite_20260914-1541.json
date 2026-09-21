@@ -1,0 +1,147 @@
+{
+  "created_at": "2026-09-14T15:41:38+00:00",
+  "paper": "0580-mj24-qp21",
+  "role": "paper_extractor_lite",
+  "model": "google/gemini-2.5-flash-lite",
+  "prompt": "past_paper_extract/v2",
+  "answer_source": "mark_scheme_table",
+  "mark_scheme_table": {
+    "rows": 28,
+    "marks_total": 70,
+    "parse_issues": [],
+    "unmatched_extractor_refs": []
+  },
+  "items": 28,
+  "verified": 13,
+  "marks_total": 70,
+  "expected_total": 70,
+  "paper_issues": [],
+  "item_issues": 15,
+  "failed_pages": {},
+  "cost_usd": 0.0101,
+  "comparison_with_bank": {
+    "reference_items": 28,
+    "candidate_items": 28,
+    "matched": 28,
+    "missing_refs": [],
+    "extra_refs": [],
+    "marks_agree": 28,
+    "type_agree": 20,
+    "answer_agree": 24,
+    "exact_compared": 10,
+    "exact_agree": 3,
+    "verified_disagreements": [
+      "11"
+    ],
+    "differences": {
+      "3(a)": [
+        "type"
+      ],
+      "7(a)": [
+        "exact"
+      ],
+      "7(b)": [
+        "answer",
+        "exact"
+      ],
+      "11": [
+        "type",
+        "answer"
+      ],
+      "12": [
+        "type"
+      ],
+      "13": [
+        "exact"
+      ],
+      "15": [
+        "type"
+      ],
+      "16(a)": [
+        "answer"
+      ],
+      "16(b)": [
+        "exact"
+      ],
+      "17": [
+        "exact"
+      ],
+      "18": [
+        "type",
+        "answer"
+      ],
+      "19(a)": [
+        "type"
+      ],
+      "19(b)": [
+        "type"
+      ],
+      "20": [
+        "type"
+      ],
+      "22": [
+        "exact"
+      ],
+      "21": [
+        "exact"
+      ]
+    }
+  },
+  "item_level_verified": 13,
+  "item_level_verified_disagreements": [
+    "11"
+  ],
+  "differing_fields": {
+    "3(a)": [
+      "type"
+    ],
+    "7(a)": [
+      "exact"
+    ],
+    "7(b)": [
+      "answer",
+      "exact"
+    ],
+    "11": [
+      "type",
+      "answer"
+    ],
+    "12": [
+      "type"
+    ],
+    "13": [
+      "exact"
+    ],
+    "15": [
+      "type"
+    ],
+    "16(a)": [
+      "answer"
+    ],
+    "16(b)": [
+      "exact"
+    ],
+    "17": [
+      "exact"
+    ],
+    "18": [
+      "type",
+      "answer"
+    ],
+    "19(a)": [
+      "type"
+    ],
+    "19(b)": [
+      "type"
+    ],
+    "20": [
+      "type"
+    ],
+    "22": [
+      "exact"
+    ],
+    "21": [
+      "exact"
+    ]
+  }
+}

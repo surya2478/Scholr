@@ -1,0 +1,85 @@
+# Cross-subject concept map — the mathematics the sciences stand on
+#
+# The other concept files pair one external course with its IGCSE counterpart. This one runs sideways: it
+# names skills that belong to Maths but are *used* in Physics and Chemistry, so Scholr can answer "she is
+# stuck on Motion — is the maths underneath it solid?" (Phase 2, AC-G2).
+#
+# Why these are new concepts rather than extra objectives bolted onto the Maths map: a concept in that file
+# is owned by it, and the seeder treats each file as the whole truth for the concepts it names. Listing
+# "Coordinates and straight-line graphs" here would delete its Maths links. These are also a different grain
+# — "reading a gradient off a graph" is the transferable skill, narrower than the topic that teaches it.
+#
+# Written 16 Sep 2026 from the 0580, 0625 and 0620 syllabuses. 0625 and 0620 are `stage: planned`, so a link
+# into them is a topic to look at, never work Scholr will set.
+
+subjects: [igcse-maths, igcse-physics, igcse-chemistry]
+
+concepts:
+  - name: Rearranging a formula
+    description: Making a different quantity the subject of an equation before substituting numbers.
+    objectives:
+      igcse-maths: ["11.3", "11.4"]
+      igcse-physics: ["1.4", "1.7", "1.8"]
+      igcse-chemistry: ["3.3"]
+
+  - name: Substituting into a formula
+    description: Putting values into a relationship and evaluating it, keeping units straight.
+    prerequisites: ["Rearranging a formula"]
+    objectives:
+      igcse-maths: ["11.2"]
+      igcse-physics: ["1.3", "1.4", "1.6", "1.7"]
+
+  - name: Reading a gradient from a graph
+    description: What the slope of a line means, and getting it off the axes rather than guessing.
+    objectives:
+      igcse-maths: ["15.2", "14.2", "16.6"]
+      igcse-physics: ["1.2"]
+
+  - name: Area under a graph
+    description: What the area beneath a plotted line represents, and working it out from the shapes.
+    prerequisites: ["Reading a gradient from a graph"]
+    note: >-
+      0580 teaches this through travel graphs (14.3 speed-time); 0625 uses it for distance from a speed-time
+      graph inside 1.2 Motion. Same skill, different name in each syllabus.
+    objectives:
+      igcse-maths: ["14.3", "27.4"]
+      igcse-physics: ["1.2"]
+
+  - name: Ratio and proportion in calculations
+    description: Scaling quantities together, and the reasoning behind "twice as much of this needs...".
+    objectives:
+      igcse-maths: ["7.1", "7.5", "7.6"]
+      igcse-chemistry: ["3.1", "3.2", "3.3", "12.2"]
+
+  - name: Standard form and units
+    description: Very large and very small numbers, and converting between units without losing a factor.
+    objectives:
+      igcse-maths: ["9.1", "9.2", "10.1", "10.2"]
+      igcse-physics: ["1.1"]
+      igcse-chemistry: ["3.3"]
+
+  - name: Rounding and significant figures
+    description: How many figures an answer is entitled to, given the numbers that went into it.
+    prerequisites: ["Standard form and units"]
+    objectives:
+      igcse-maths: ["8.3", "8.1", "8.2"]
+      igcse-physics: ["1.1"]
+
+  - name: Vectors and direction
+    description: Quantities that carry a direction, and adding them without treating them as plain numbers.
+    objectives:
+      igcse-maths: ["29.1", "29.2", "29.3"]
+      igcse-physics: ["1.2", "1.5", "1.6"]
+
+  - name: Percentages in context
+    description: Percentage of a quantity and percentage change, applied outside a maths question.
+    objectives:
+      igcse-maths: ["2.5", "2.6", "2.7"]
+      igcse-chemistry: ["3.3", "12.5"]
+
+  - name: Averages from data
+    description: Mean, median and range, and reading them off a table of results.
+    objectives:
+      igcse-maths: ["32.3", "32.2", "32.4", "32.7"]
+      igcse-physics: ["1.1"]
+      igcse-chemistry: ["12.1"]

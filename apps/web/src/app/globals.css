@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* Design tokens for Scholr Friendly Portal */
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-fun: "Fredoka", cursive, sans-serif;
+  --font-hand: "Caveat", cursive;
+
+  --color-ground: #FBF9F5;
+  --color-sidebar: #FFFFFF;
+  --color-line: #F3ECE2;
+  --color-line-soft: #F7F2EB;
+  --color-tile: #FFFDF9;
+  --color-ink: #1E293B;
+  --color-ink-2: #334155;
+  --color-muted: #64748B;
+  --color-faint: #94A3B8;
+
+  /* Primary warm orange/amber brand */
+  --color-brand: #F97316;
+  --color-brand-strong: #EA580C;
+  --color-brand-soft: #FFF4E8;
+
+  /* Feedback tones */
+  --color-good: #10B981;
+  --color-good-soft: #ECFDF5;
+  --color-warn: #F59E0B;
+  --color-warn-soft: #FEF3C7;
+  --color-alert: #EF4444;
+  --color-alert-soft: #FEE2E2;
+}
+
+html,
+body {
+  background-color: var(--color-ground);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-fun {
+  font-family: var(--font-fun), 'Fredoka', cursive, sans-serif;
+}
+
+.font-hand {
+  font-family: var(--font-hand), 'Caveat', cursive;
+}
+
+/* Warm, friendly card */
+.card {
+  background: #FFFFFF;
+  border: 2px solid rgba(254, 215, 170, 0.7);
+  border-radius: 24px;
+  box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease-in-out;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-width: 1px;
+}
+
+/* Soft bouncing and floating animations from CuriousJr reference */
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: gentle-bounce 3s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: gentle-bounce 3.5s ease-in-out 1s infinite;
+}
+
+/* Custom warm scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F3ECE2;
+}
+::-webkit-scrollbar-thumb {
+  background: #E0CEB7;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #CDB79E;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}

@@ -1,0 +1,21 @@
+{
+  "subject": "igcse-physics",
+  "prompt": "lesson_illustrate/v1",
+  "model": "google/gemini-2.5-flash-lite",
+  "lessons": 24,
+  "with_diagram": 4,
+  "no_diagram": 20,
+  "no_vocabulary": 14,
+  "failed": 0,
+  "kinds": {
+    "wave": 3,
+    "force_arrows": 1
+  },
+  "cost_usd": 0.0014,
+  "dropped_kind": 0,
+  "dropped_numbers": 5,
+  "dropped_caption": 0,
+  "dropped_uncited": 0,
+  "dropped_ungrounded": 0,
+  "errors": []
+}

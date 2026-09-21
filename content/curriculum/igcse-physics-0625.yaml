@@ -1,0 +1,102 @@
+# Curriculum structure — Cambridge IGCSE Physics 0625
+#
+# Provenance: the official Cambridge IGCSE Physics 0625 syllabus for 2026, 2027 and 2028
+# (subjects/IGCSE/Physics), read 16 Sep 2026. Topic and subtopic codes and titles are extracted from the
+# syllabus's own subject-content section, not transcribed by hand. The assessment overview below is from the
+# same document. Term 1 coverage — the whole of topic 1 (Motion, forces and energy) — is from the school's "Year 10 Topic Planner for Term 1
+# (September - December 2026)", given by the parent.
+#
+# Scholr does not teach this subject yet: subject_configs/igcse_physics_0625.yaml sets `stage: planned`, so there is no
+# question bank, retrieval corpus or marking behind it. The syllabus is verified, which is what a subject
+# needs before it can move to `stage: taught`; the rest of the engine is the Physics/Chemistry slice in
+# docs/ROADMAP.md. Today these rows name the IGCSE ground under an IIT Foundation class (docs/PHASE-3.md).
+
+curriculum: { code: CAIE-IGCSE, name: Cambridge IGCSE }
+path: { code: IGCSE, name: IGCSE }
+syllabus:
+  code: "0625"
+  title: Cambridge IGCSE Physics
+  version: "for-2028-exam"
+  tiers: [core, extended]
+  first_exam_year: 2026
+  last_exam_year: 2028
+  verification_status: verified
+  source_note: >-
+    Verified 16 Sep 2026 against the official 0625 syllabus for 2026-2028: 6 topics and
+    24 subtopics, with the Extended assessment overview (Papers 2, 4 and 6). Term 1 coverage
+    from the school's Year 10 Term 1 planner.
+subject: { code: igcse-physics, name: Physics, config_key: igcse_physics_0625 }
+
+# Extended route. All three sciences share this structure in the 2026-2028 syllabuses.
+components:
+  - code: "P2"
+    name: Paper 2 — Multiple Choice (Extended)
+    tier: extended
+    duration_min: 45
+    marks: 40
+    structure_note: 40 four-option multiple-choice questions; 30% of the qualification.
+  - code: "P4"
+    name: Paper 4 — Theory (Extended)
+    tier: extended
+    duration_min: 75
+    marks: 80
+    structure_note: Short-answer and structured questions; 50% of the qualification.
+  - code: "P6"
+    name: Paper 6 — Alternative to Practical
+    duration_min: 60
+    marks: 40
+    structure_note: >-
+      Questions based on the experimental skills in section 4 of the syllabus; 20% of the qualification. The
+      alternative is Paper 5 (Practical Test, 1 h 15 min, 40 marks) — the school's planner lists Paper 6.
+
+skills:
+  - { code: AO1, name: "Knowledge with understanding" }
+  - { code: AO2, name: "Handling information and problem-solving" }
+  - { code: AO3, name: "Experimental skills and investigations" }
+
+topics:
+# `pages`: printed pages of the coursebook (Physics for Cambridge IGCSE, 3rd ed.) where each objective is covered,
+# read from its contents on 19 Sep 2026. The book does not follow syllabus order, so an objective lists every
+# place it is covered; retrieval chunks are tagged by the latest start at or before their page.
+  - code: "1"
+    name: "Motion, forces and energy"
+    objectives:
+      - { code: "1.1", statement: "Physical quantities and measurement techniques", pages: [3, 9, 59] }   # Term 1
+      - { code: "1.2", statement: "Motion", pages: [20] }   # Term 1
+      - { code: "1.3", statement: "Mass and weight", pages: [47] }   # Term 1
+      - { code: "1.4", statement: "Density", pages: [5] }   # Term 1
+      - { code: "1.5", statement: "Forces", pages: [44, 49, 52, 68, 86] }   # Term 1
+      - { code: "1.6", statement: "Momentum", pages: [54] }   # Term 1
+      - { code: "1.7", statement: "Energy, work and power", pages: [104, 125, 141] }   # Term 1
+      - { code: "1.8", statement: "Pressure", pages: [93] }   # Term 1
+  - code: "2"
+    name: "Thermal physics"
+    objectives:
+      - { code: "2.1", statement: "Kinetic particle model of matter", pages: [155, 164] }
+      - { code: "2.2", statement: "Thermal properties and temperature", pages: [162, 172] }
+      - { code: "2.3", statement: "Transfer of thermal energy", pages: [191] }
+  - code: "3"
+    name: "Waves"
+    objectives:
+      - { code: "3.1", statement: "General properties of waves", pages: [260] }
+      - { code: "3.2", statement: "Light", pages: [231] }
+      - { code: "3.3", statement: "Electromagnetic spectrum", pages: [279] }
+      - { code: "3.4", statement: "Sound", pages: [216] }
+  - code: "4"
+    name: "Electricity and magnetism"
+    objectives:
+      - { code: "4.1", statement: "Simple phenomena of magnetism", pages: [295] }
+      - { code: "4.2", statement: "Electrical quantities", pages: [310, 323] }
+      - { code: "4.3", statement: "Electric circuits", pages: [349] }
+      - { code: "4.4", statement: "Electrical safety", pages: [365] }
+      - { code: "4.5", statement: "Electromagnetic effects", pages: [378, 395] }
+  - code: "5"
+    name: "Nuclear physics"
+    objectives:
+      - { code: "5.1", statement: "The nuclear model of the atom", pages: [415] }
+      - { code: "5.2", statement: "Radioactivity", pages: [429] }
+  - code: "6"
+    name: "Space physics"
+    objectives:
+      - { code: "6.1", statement: "The Earth and the Solar System", pages: [453] }
+      - { code: "6.2", statement: "Stars and the Universe", pages: [468] }

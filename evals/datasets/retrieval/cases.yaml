@@ -1,0 +1,49 @@
+# Retrieval benchmark (AC-K2): recall@8 of the expected objective and agreement of the retrieval state.
+# Questions are written for this benchmark in a student's words (not copied from any textbook or paper).
+# expected_objective: objective code from content/curriculum/*.yaml. expected_state: the state a well-grounded
+# system should reach — HIGH/MEDIUM when the course textbook covers it; NONE when it is off-syllabus.
+# Changing this file => bump version and re-run app.jobs.retrieval_eval.
+version: retrieval_v1
+cases:
+  # ---- Mathematics (Collins IGCSE Maths 4e) ----
+  - { id: m01, subject: igcse-maths, query: "what is the difference between a square number and a cube number", expected_objective: "1.1", expected_state: HIGH }
+  - { id: m02, subject: igcse-maths, query: "how do I find the highest common factor and lowest common multiple of two numbers", expected_objective: "1.6", expected_state: HIGH }
+  - { id: m03, subject: igcse-maths, query: "write a number as a product of its prime factors", expected_objective: "1.5", expected_state: HIGH }
+  - { id: m04, subject: igcse-maths, query: "which numbers are rational and which are irrational", expected_objective: "1.7", expected_state: HIGH }
+  - { id: m05, subject: igcse-maths, query: "turn a recurring decimal like 0.272727 into a fraction", expected_objective: "2.3", expected_state: HIGH }
+  - { id: m06, subject: igcse-maths, query: "how to increase an amount by 15 percent using a multiplier", expected_objective: "2.6", expected_state: HIGH }
+  - { id: m07, subject: igcse-maths, query: "difference between simple interest and compound interest", expected_objective: "2.8", expected_state: HIGH }
+  - { id: m08, subject: igcse-maths, query: "find the original price before a percentage discount was applied", expected_objective: "2.10", expected_state: HIGH }
+  - { id: m09, subject: igcse-maths, query: "what order do I do operations in, brackets first?", expected_objective: "3.1", expected_state: HIGH }
+  - { id: m10, subject: igcse-maths, query: "how do you divide one fraction by another fraction", expected_objective: "3.5", expected_state: HIGH }
+  - { id: m11, subject: igcse-maths, query: "multiplying two negative numbers gives what sign", expected_objective: "4.5", expected_state: HIGH }
+  - { id: m12, subject: igcse-maths, query: "exponential decay of a car's value each year", expected_objective: "5.4", expected_state: HIGH }
+  - { id: m13, subject: igcse-maths, query: "shading regions on a Venn diagram with three sets", expected_objective: "6.3", expected_state: HIGH }
+  - { id: m14, subject: igcse-maths, query: "share an amount of money in a given ratio", expected_objective: "7.1", expected_state: HIGH }
+  - { id: m15, subject: igcse-maths, query: "calculate average speed from distance and time", expected_objective: "7.3", expected_state: HIGH }
+  - { id: m16, subject: igcse-maths, query: "if y is inversely proportional to x how do I find the constant", expected_objective: "7.6", expected_state: HIGH }
+  - { id: m17, subject: igcse-maths, query: "round a number to three significant figures", expected_objective: "8.3", expected_state: HIGH }
+  - { id: m18, subject: igcse-maths, query: "upper bound of the area of a rectangle when lengths are rounded", expected_objective: "8.5", expected_state: HIGH }
+  - { id: m19, subject: igcse-maths, query: "how does the stock market price index work for investing", expected_objective: null, expected_state: NONE }
+  - { id: m20, subject: igcse-maths, query: "prove Fermat's last theorem", expected_objective: null, expected_state: NONE }
+  # ---- Sociology (CUP coursebook 2e) ----
+  - { id: s01, subject: igcse-sociology, query: "what is the difference between positivist and interpretivist approaches", expected_objective: "1.1", expected_state: HIGH }
+  - { id: s02, subject: igcse-sociology, query: "primary data versus secondary data with examples", expected_objective: "1.2", expected_state: HIGH }
+  - { id: s03, subject: igcse-sociology, query: "strengths and weaknesses of using questionnaires in research", expected_objective: "1.3", expected_state: HIGH }
+  - { id: s04, subject: igcse-sociology, query: "how do children learn norms and values through socialisation", expected_objective: "2.1", expected_state: HIGH }
+  - { id: s05, subject: igcse-sociology, query: "formal and informal social control examples", expected_objective: "2.2", expected_state: HIGH }
+  - { id: s06, subject: igcse-sociology, query: "how does gender or ethnicity shape a person's identity", expected_objective: "2.3", expected_state: MEDIUM }
+  - { id: s07, subject: igcse-sociology, query: "what is social stratification and social class", expected_objective: "3.1", expected_state: HIGH }
+  - { id: s08, subject: igcse-sociology, query: "how have governments tried to reduce poverty and inequality", expected_objective: "3.2", expected_state: MEDIUM }
+  - { id: s09, subject: igcse-sociology, query: "effects of globalisation on poorer countries", expected_objective: "3.3", expected_state: MEDIUM }
+  - { id: s10, subject: igcse-sociology, query: "what is a nuclear family compared with an extended family", expected_objective: "4.1", expected_state: HIGH }
+  - { id: s11, subject: igcse-sociology, query: "functions of the family for society", expected_objective: "4.2", expected_state: HIGH }
+  - { id: s12, subject: igcse-sociology, query: "why are divorce rates changing", expected_objective: "4.3", expected_state: MEDIUM }
+  - { id: s13, subject: igcse-sociology, query: "what is the hidden curriculum in schools", expected_objective: "5.2", expected_state: HIGH }
+  - { id: s14, subject: igcse-sociology, query: "why do some social groups achieve better exam results", expected_objective: "5.3", expected_state: HIGH }
+  - { id: s15, subject: igcse-sociology, query: "difference between crime and deviance", expected_objective: "6.1", expected_state: HIGH }
+  - { id: s16, subject: igcse-sociology, query: "explanations for why young people commit crime", expected_objective: "6.2", expected_state: MEDIUM }
+  - { id: s17, subject: igcse-sociology, query: "how do different countries punish offenders", expected_objective: "6.3", expected_state: MEDIUM }
+  - { id: s18, subject: igcse-sociology, query: "how to solve simultaneous equations", expected_objective: null, expected_state: NONE }
+  - { id: s19, subject: igcse-sociology, query: "best football team in the premier league", expected_objective: null, expected_state: NONE }
+  - { id: s20, subject: igcse-sociology, query: "photosynthesis in plants", expected_objective: null, expected_state: NONE }

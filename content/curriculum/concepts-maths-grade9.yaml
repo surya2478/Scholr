@@ -1,0 +1,294 @@
+# Shared concept map — IIT Foundation Maths (Grade 9) ↔ Cambridge IGCSE Mathematics 0580
+#
+# A concept is curriculum-neutral: both curricula's objectives point at it, each with its own depth, question
+# style and mastery (ARCHITECTURE §3, docs/PHASE-3.md). This file is what lets Scholr answer "she struggled
+# with Heron's formula in Saturday's class — what IGCSE work would actually help?".
+#
+# `prerequisites` are the concepts a student must already hold to learn this one. The trace walks them, so a
+# weak prerequisite is reinforced before the concept the class was actually about.
+#
+# Written 16 Sep 2026 from the two syllabus structures. It is a teaching judgement, not an official mapping:
+# the IGCSE objectives listed are the ones that build the same idea, not equivalents. Where the IIT lesson
+# goes beyond 0580 (the factor theorem, Heron's formula), the mapping names the IGCSE ground it stands on and
+# says so in `note`.
+
+subjects: [igcse-maths, iit-maths]
+
+concepts:
+  # --- number ---
+  - name: Directed numbers and the number line
+    description: Signed numbers, their order, and the four operations on them.
+    objectives:
+      igcse-maths: ["4.1", "4.2", "4.3", "4.4", "4.5"]
+
+  - name: Fraction arithmetic
+    description: Equivalent fractions and the four operations on fractions.
+    prerequisites: ["Directed numbers and the number line"]
+    objectives:
+      igcse-maths: ["2.1", "3.3", "3.4", "3.5"]
+
+  - name: Rational numbers
+    description: Numbers expressible as a ratio of integers, and their decimal forms.
+    prerequisites: ["Fraction arithmetic"]
+    objectives:
+      igcse-maths: ["1.7", "2.2", "2.3"]
+      iit-maths: [L1]
+
+  - name: Powers and roots
+    description: Squares, cubes and their roots as operations and as notation.
+    prerequisites: ["Directed numbers and the number line"]
+    objectives:
+      igcse-maths: ["1.1", "5.1", "5.2", "5.3"]
+
+  - name: Irrational numbers and surds
+    description: Numbers that are not ratios of integers; exact work with roots.
+    prerequisites: ["Rational numbers", "Powers and roots"]
+    objectives:
+      igcse-maths: ["1.7", "5.3"]
+      iit-maths: [L2]
+
+  - name: Index laws
+    description: Multiplying, dividing and raising powers, including negative and fractional indices.
+    prerequisites: ["Powers and roots"]
+    objectives:
+      igcse-maths: ["18.1", "18.2", "18.3", "18.4", "9.1", "9.2"]
+      iit-maths: [L3]
+
+  - name: Percentages
+    description: Percentage of a quantity, percentage change, and one quantity as a percentage of another.
+    prerequisites: ["Fraction arithmetic"]
+    objectives:
+      igcse-maths: ["2.4", "2.5", "2.6", "2.7"]
+
+  - name: Compound growth
+    description: Repeated percentage change, compound interest and its formula.
+    prerequisites: ["Percentages", "Index laws"]
+    objectives:
+      igcse-maths: ["2.8", "2.9", "2.10", "5.4"]
+      iit-maths: [L26]
+
+  # --- algebra ---
+  - name: Algebraic notation and substitution
+    description: Reading algebraic expressions, collecting like terms, and substituting values.
+    prerequisites: ["Directed numbers and the number line"]
+    objectives:
+      igcse-maths: ["11.1", "11.2", "12.1"]
+
+  - name: Expanding brackets
+    description: Multiplying out single, double and triple brackets.
+    prerequisites: ["Algebraic notation and substitution"]
+    objectives:
+      igcse-maths: ["12.2", "12.4", "12.5", "12.6"]
+
+  - name: Algebraic identities
+    description: The standard expansion and difference-of-squares identities, used in both directions.
+    prerequisites: ["Expanding brackets"]
+    objectives:
+      igcse-maths: ["12.4", "12.5", "12.6"]
+      iit-maths: [L25]
+
+  - name: Factorisation
+    description: Writing an expression as a product — common factors, grouping and quadratics.
+    prerequisites: ["Expanding brackets", "Algebraic identities"]
+    objectives:
+      igcse-maths: ["12.3", "12.7", "12.8"]
+      iit-maths: [L5]
+
+  - name: Polynomial evaluation and factor structure
+    description: Treating a polynomial as a function of x, evaluating it, and reading its factors.
+    prerequisites: ["Factorisation", "Algebraic notation and substitution"]
+    note: >-
+      0580 does not teach the remainder or factor theorem. The IGCSE ground under the IIT lesson is
+      substitution into an expression and quadratic factorisation, so that is what reinforcement targets.
+    objectives:
+      igcse-maths: ["11.2", "11.3", "12.3", "12.7"]
+      iit-maths: [L4]
+
+  - name: Linear equations
+    description: Solving a linear equation and setting one up from a situation.
+    prerequisites: ["Algebraic notation and substitution"]
+    objectives:
+      igcse-maths: ["13.1", "13.2"]
+
+  - name: Coordinates and straight-line graphs
+    description: Plotting points, the equation y = mx + c, gradient and intercept.
+    prerequisites: ["Algebraic notation and substitution"]
+    objectives:
+      igcse-maths: ["15.1", "15.2", "15.3", "15.5", "15.7"]
+      iit-maths: [L6]
+
+  - name: Linear equations in two variables
+    description: A linear equation as a line, and solving a pair of them.
+    prerequisites: ["Linear equations", "Coordinates and straight-line graphs"]
+    objectives:
+      igcse-maths: ["13.6", "15.4"]
+      iit-maths: [L7]
+
+  - name: Distance and section formula
+    description: The length of a segment and the point dividing it in a given ratio.
+    prerequisites: ["Coordinates and straight-line graphs", "Pythagoras' theorem"]
+    objectives:
+      igcse-maths: ["15.6", "26.1"]
+      iit-maths: [L28]
+
+  # --- geometry ---
+  - name: Angle facts and parallel lines
+    description: Angles on a line, at a point, and the parallel-line angle relationships.
+    objectives:
+      igcse-maths: ["23.1", "23.2"]
+      iit-maths: [L9]
+
+  - name: Geometric reasoning from axioms
+    description: Building a geometric argument from stated facts, step by justified step.
+    prerequisites: ["Angle facts and parallel lines"]
+    note: >-
+      0580 does not teach Euclid's axioms as a topic. The transferable part — justifying each step of an
+      angle argument — is assessed inside the IGCSE angle work, so that is where reinforcement lands.
+    objectives:
+      igcse-maths: ["23.1", "23.3"]
+      iit-maths: [L8]
+
+  - name: Angles in triangles
+    description: The angle sum, exterior angles, and isosceles triangle properties.
+    prerequisites: ["Angle facts and parallel lines"]
+    objectives:
+      igcse-maths: ["23.3"]
+      iit-maths: [L10]
+
+  - name: Quadrilateral properties
+    description: The special quadrilaterals, their sides, angles, diagonals and symmetry.
+    prerequisites: ["Angles in triangles"]
+    objectives:
+      igcse-maths: ["23.4", "28.3"]
+      iit-maths: [L11]
+
+  - name: Similar shapes
+    description: Shapes of the same form at a different scale, and what that does to lengths and areas.
+    prerequisites: ["Angles in triangles"]
+    objectives:
+      igcse-maths: ["24.6", "24.7", "24.8"]
+
+  - name: Midpoint and intercept theorems
+    description: The segment joining two midpoints, and the theorems that follow from it.
+    prerequisites: ["Quadrilateral properties", "Similar shapes"]
+    objectives:
+      igcse-maths: ["24.6", "15.6"]
+      iit-maths: [L12]
+
+  - name: Congruent triangles
+    description: When two triangles are identical, and the tests that prove it.
+    prerequisites: ["Angles in triangles"]
+    objectives:
+      igcse-maths: ["24.4", "24.5"]
+      iit-maths: [L13]
+
+  - name: Inequalities in a triangle
+    description: Longer side opposite larger angle, and the triangle inequality.
+    prerequisites: ["Angles in triangles"]
+    objectives:
+      igcse-maths: ["23.3"]
+      iit-maths: [L14]
+
+  - name: Circle theorems
+    description: Angles in a circle, cyclic quadrilaterals, tangents and the alternate segment.
+    prerequisites: ["Angle facts and parallel lines"]
+    objectives:
+      igcse-maths: ["23.7", "23.8", "23.9", "23.10", "28.5"]
+      iit-maths: [L20]
+
+  - name: Constructions and scale drawing
+    description: Ruler-and-compass constructions, measuring angles, and drawing to scale.
+    prerequisites: ["Angle facts and parallel lines"]
+    objectives:
+      igcse-maths: ["24.1", "25.1", "25.2"]
+      iit-maths: [L21, L22]
+
+  - name: Pythagoras' theorem
+    description: The relationship between the three sides of a right-angled triangle.
+    prerequisites: ["Powers and roots"]
+    objectives:
+      igcse-maths: ["26.1"]
+
+  - name: Trigonometric ratios
+    description: Sine, cosine and tangent as ratios of sides, used to find sides and angles.
+    prerequisites: ["Pythagoras' theorem", "Similar shapes"]
+    objectives:
+      igcse-maths: ["26.2", "26.3", "26.4", "26.5", "26.6"]
+      iit-maths: [L27]
+
+  # --- mensuration ---
+  - name: Perimeter and area basics
+    description: Perimeter and area of rectangles, and working in consistent units.
+    objectives:
+      igcse-maths: ["10.1", "10.2", "27.1"]
+
+  - name: Area of a triangle
+    description: Half base times height, and choosing the right base.
+    prerequisites: ["Perimeter and area basics"]
+    objectives:
+      igcse-maths: ["27.2"]
+      iit-maths: [L16]
+
+  - name: Area of a parallelogram
+    description: Base times perpendicular height, and the shapes that reduce to it.
+    prerequisites: ["Perimeter and area basics"]
+    objectives:
+      igcse-maths: ["27.3", "27.4"]
+      iit-maths: [L15]
+
+  - name: Area of plane figures
+    description: Breaking a compound figure into parts whose areas are known.
+    prerequisites: ["Area of a triangle", "Area of a parallelogram"]
+    objectives:
+      igcse-maths: ["27.1", "27.2", "27.3", "27.4"]
+      iit-maths: [L29]
+
+  - name: Heron's formula
+    description: The area of a triangle from its three sides.
+    prerequisites: ["Area of a triangle", "Powers and roots"]
+    note: >-
+      0580 does not examine Heron's formula. Its foundation — triangle area and surd arithmetic — is IGCSE
+      content, and that is what reinforcement targets.
+    objectives:
+      igcse-maths: ["27.2", "5.1"]
+      iit-maths: [L17]
+
+  - name: Circle measures
+    description: Circumference and area of a circle, and of sectors and arcs.
+    prerequisites: ["Perimeter and area basics"]
+    objectives:
+      igcse-maths: ["27.5", "27.9", "27.10"]
+
+  - name: Surface area and volume of prisms
+    description: Cubes, cuboids and prisms — nets, surface area and volume.
+    prerequisites: ["Perimeter and area basics"]
+    objectives:
+      igcse-maths: ["24.3", "27.6", "27.7"]
+      iit-maths: [L18]
+
+  - name: Surface area and volume of round solids
+    description: Cylinders, cones, spheres and hemispheres.
+    prerequisites: ["Surface area and volume of prisms", "Circle measures"]
+    objectives:
+      igcse-maths: ["27.8", "27.11", "27.12", "27.13"]
+      iit-maths: [L19]
+
+  # --- data ---
+  - name: Averages and spread
+    description: Mode, median, mean and range, including from a frequency table.
+    objectives:
+      igcse-maths: ["32.1", "32.2", "32.3", "32.4", "32.5", "32.7", "32.8"]
+
+  - name: Statistical diagrams
+    description: Frequency tables, bar charts, pie charts and what each one is for.
+    prerequisites: ["Averages and spread"]
+    objectives:
+      igcse-maths: ["31.1", "31.3", "31.4"]
+      iit-maths: [L23]
+
+  - name: Probability
+    description: The probability scale, calculating probabilities, and the complement.
+    prerequisites: ["Fraction arithmetic"]
+    objectives:
+      igcse-maths: ["33.1", "33.2", "33.3", "33.4"]
+      iit-maths: [L24]

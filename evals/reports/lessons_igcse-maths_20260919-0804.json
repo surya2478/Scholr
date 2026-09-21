@@ -1,0 +1,22 @@
+{
+  "subject": "igcse-maths",
+  "prompt": "lesson_write/v1",
+  "guard": "lesson_guard_v2",
+  "model": "google/gemini-2.5-flash-lite",
+  "lessons": 10,
+  "ready": 9,
+  "not_enough_material": 0,
+  "failed": 1,
+  "errors": [
+    "invalid_output"
+  ],
+  "cost_usd": 0.015,
+  "kept_sections": 30,
+  "dropped_uncited": 0,
+  "dropped_copied": 0,
+  "dropped_unsupported_name": 0,
+  "kept_examples": 12,
+  "dropped_examples_unchecked": 0,
+  "dropped_examples_wrong": 6,
+  "dropped_terms": 0
+}

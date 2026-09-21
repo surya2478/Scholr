@@ -1,0 +1,43 @@
+# Source manifest — Cambridge IGCSE Physics 0625
+# Raw files live in subjects/ (gitignored). Private study use for one student; never redistributed.
+#
+# 0625 is at `stage: lessons` (19 Sep 2026, docs/STUDENT-APP.md D4): the coursebook is ingested from its text layer
+# (no OCR) as the retrieval corpus for topic lessons. There is still no question bank or marking for Physics.
+subject: igcse-physics
+curriculum: CAIE-IGCSE
+syllabus: "0625"
+
+sources:
+  - key: cambridge-igcse-physics-3e
+    title: "Physics for Cambridge IGCSE, Coursebook (3rd edition)"
+    publisher: Cambridge University Press
+    edition: "3rd edition, 2021 (Sang, Follows, Tarpey)"
+    owner: Cambridge University Press & Assessment
+    licence: >-
+      Copyrighted textbook; family's copy used for the student's private study only. Stored privately;
+      short excerpts with page references only; never redistributed.
+    acquired_via: Provided by parent (subjects/IGCSE/Physics), 16 Sep 2026; school course textbook
+    private: true
+    file: IGCSE/Physics/Physics.pdf
+    authority_tier: B
+    content_kind: explanation
+    notes: >-
+      527 pages with a text layer; 25 chapters. Contents read 16 Sep 2026 to check it matches the 0625 topic
+      structure, and again 19 Sep 2026 for the objective page ranges in content/curriculum/igcse-physics-0625.yaml.
+      Ingested from the text layer 19 Sep 2026; no OCR.
+
+  - key: 0625-syllabus-2026-2028
+    title: "Cambridge IGCSE Physics 0625 syllabus for 2026, 2027 and 2028"
+    publisher: Cambridge University Press & Assessment (UCLES)
+    owner: Cambridge University Press & Assessment
+    licence: >-
+      Copyright UCLES. Published syllabus, obtained for the student's private study. Stored privately;
+      excerpts shown only in short form with references; not redistributed.
+    acquired_via: Provided by parent (subjects/IGCSE/Physics), 16 Sep 2026
+    private: true
+    file: IGCSE/Physics/697209-2026-2028-syllabus-Physics.pdf
+    authority_tier: A
+    content_kind: syllabus
+    notes: >-
+      The authority for the 0625 curriculum file. Its subject-content section was parsed on 16 Sep 2026 to
+      build content/curriculum/igcse-physics-0625.yaml, which is now `verified`.

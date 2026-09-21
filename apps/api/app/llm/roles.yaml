@@ -1,0 +1,261 @@
+# Model assignment per role (ARCHITECTURE §19).
+# User rule (19 Sep 2026): every role — PDF extraction, batch jobs and marking — runs on google/gemini-2.5-flash-lite
+# with no fallback to another model. One exception, the user's decision of 21 Sep 2026: lesson_writer runs on
+# google/gemini-2.5-flash. tests/unit/test_ocr_roles.py enforces both. Screen any change with the role's eval.
+version: 1
+
+provider_preferences:
+  # Exclude providers that store or train on prompts (student is a minor).
+  data_collection: deny
+
+roles:
+  # Budget decision (user, 14 Sep 2026): conversational and classification roles run on the low-cost model,
+  # guarded by deterministic policy (help ladder, grounding states, safety rules, answer-leak checks).
+  # Screen changes with the role's eval: app.jobs.safety_eval (safety), tutoring pedagogy eval (pending).
+  tutor:
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.3
+    max_tokens: 1200
+    timeout_s: 60
+    retries: 1
+  evaluator_a:
+    # Not named by any subject config (Maths uses maths_marker, Sociology essay_marker_a/b). Flash-Lite by the
+    # user's rule (19 Sep 2026): every marking role runs on gemini-2.5-flash-lite, no fallback. Was claude-opus-5.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 3000
+    timeout_s: 120
+  maths_marker:
+    # Low-cost marker for structured_math (user budget decision, 14 Sep 2026). Guarded by the deterministic
+    # final-answer check: any tool/model disagreement goes to needs_review. Screen with app.jobs.marking_eval.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 3000
+    timeout_s: 60
+    retries: 1
+  essay_marker_a:
+    # Low-cost first marker for essay_levels (budget decision, 15 Sep 2026). Guarded by dual marking and by
+    # `calibrated: false` in the Sociology config, so nothing is final until calibrated against teacher marks (U3).
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 2000
+    timeout_s: 60
+    retries: 1
+  essay_marker_b:
+    # Second Sociology marker (dual marking, max_disagreement in the subject config). Was openai/gpt-4.1-nano, a
+    # different model family, so the two markers did not share one model's blind spots. User rule (19 Sep 2026):
+    # all markers on gemini-2.5-flash-lite. Same model at temperature 0 would largely repeat marker A and the
+    # disagreement check would rarely fire, so it samples at 0.4 instead: an independent reading of the same
+    # model, not a second model's view. Every Sociology mark still goes to parent review (calibrated: false, U3).
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.4
+    max_tokens: 2000
+    timeout_s: 60
+    retries: 1
+  evaluator_b:
+    # Not named by any subject config. Flash-Lite by the user's rule (19 Sep 2026). Was openai/gpt-5.5.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 3000
+    timeout_s: 120
+  vision_transcriber:
+    # The student confirms every transcription before marking (AC-E3), so a low-cost reader is acceptable.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 2000
+    timeout_s: 90
+    retries: 1
+  page_ocr:
+    # User rule (19 Sep 2026): PDF extraction and every batch job run on gemini-2.5-flash-lite only, with no
+    # fallback to another model. Was gemini-3.5-flash ($0.026/page, 14 Sep). No manifest source uses this default
+    # role today (both OCR'd books name page_ocr_math / page_ocr_text); screen with app.jobs.ocr_eval before the
+    # next book that does.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 8000
+    timeout_s: 180
+  page_ocr_math:
+    # Maths textbook scans on the low-cost model (user budget decision, 14 Sep 2026). Screened on 12 Collins pages:
+    #   JSON output, 150 DPI  -> LaTeX expressions matching reference 0.46, 51 JSON-escape defects
+    #   Markdown, 150 DPI     -> 0.62, no escape defects
+    #   Markdown, 220 DPI     -> 0.72, content F1 0.978 (chosen: prompt page_ocr_math_md)
+    #   Markdown, 300 DPI     -> 0.74 (no clear gain); two 200 DPI strips -> 0.73 but content drops to 0.94
+    # Known residual errors on dense notation: ÷ read as +, some root indices. No fallback to a pricier model.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 8000
+    timeout_s: 180
+  page_ocr_text:
+    # Prose-heavy scans. Screened 14 Sep 2026 on the Sociology coursebook: prose-word F1 0.988 (min 0.937) against
+    # gemini-3.5-flash transcriptions at $0.0005/page (evals/reports/ocr_igcse-sociology-textbook_*). Not for maths:
+    # on the Collins textbook it wrote maths as plain text/Unicode instead of LaTeX (maths F1 0.49).
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 8000
+    timeout_s: 180
+  classifier:
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 400
+    timeout_s: 20
+    retries: 1
+  safety_classifier:
+    # Advisory only: rules and the policy table decide; a classifier failure never downgrades a rule hit.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 300
+    timeout_s: 15
+    retries: 1
+  grounding_check:
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 800
+    timeout_s: 45
+    retries: 1
+  question_writer:
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.7
+    max_tokens: 2000
+    timeout_s: 60
+    retries: 1
+  lesson_writer:
+    # One stored lesson per objective (docs/STUDENT-APP.md), written by a batch job or on first open. User rule
+    # (19 Sep 2026): batch jobs run on gemini-2.5-flash-lite only, no fallback. The first 29 lessons were written
+    # on gemini-3.5-flash before this was applied. Guarded deterministically (app.modules.learn.lessons):
+    # citations, copying, named studies, SymPy-checked worked examples. Screen with app.jobs.lessons.
+    # 21 Sep 2026, the user's decision after the lesson_write/v4 pilot (docs/STUDENT-APP.md §15): gemini-2.5-flash,
+    # the one exception to the Flash-Lite rule. She found Flash-Lite lessons "only the basics"; on five pilot topics
+    # 2.5 Flash wrote ~40% more, kept more exam-level examples, and taught exam technique. ~$0.007 a lesson.
+    model: google/gemini-2.5-flash
+    fallbacks: []
+    temperature: 0.3
+    # Flash-Lite lessons need ~900-1,500 output tokens. Its failures are repetition loops that run to the cap,
+    # so a moderate cap fails fast and cheaply (as paper_extractor_lite). The 3.5-flash lessons needed ~4,000.
+    # Raised to 5,000 on 21 Sep 2026 for lesson_write/v4 (up to six sections and three worked examples).
+    max_tokens: 5000
+    timeout_s: 120
+    retries: 1
+  lesson_illustrator:
+    # Picks a diagram for a stored lesson from the subject's own vocabulary and supplies its numbers; it never
+    # draws (app.modules.learn.diagrams computes and checks the figure with SymPy and Pint, and drops anything
+    # that does not check out). Runs over lessons that are already written and hand-checked, so their text is
+    # never touched. Flash-Lite, like every batch job (user rule, 19 Sep 2026).
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.2
+    max_tokens: 900
+    timeout_s: 90
+    retries: 1
+  exam_walker:
+    # Solves one real past-paper question per topic step by step, following its official mark scheme (docs/
+    # STUDENT-APP.md AC-U16). Guarded deterministically (app.modules.learn.exam): the final answer must pass the
+    # same check that marks her answers, and every mark named must be one the scheme awards. Batch job, so
+    # Flash-Lite (user rule, 19 Sep 2026).
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.2
+    max_tokens: 1200
+    timeout_s: 90
+    retries: 1
+  lesson_voice:
+    # Reads lesson parts aloud (app.modules.learn.audio). Added 21 Sep 2026 in another session; put behind the
+    # gateway the same day at the user's request, keeping the model it was built with. A speech model, not an LLM,
+    # so it is outside the Flash-Lite rule's reach but listed in the test's exceptions. Priced from OpenRouter's
+    # generation record, 21 Sep 2026: $1.86e-6 for 3 characters (DeepInfra).
+    model: hexgrad/kokoro-82m
+    fallbacks: []
+    timeout_s: 60
+    retries: 1
+    usd_per_million_chars: 0.62
+  speech_to_text:
+    # Her spoken question to the Tutor, turned into text she checks and edits before sending (docs/STUDENT-APP.md
+    # §16). Replaced the browser's speech recognition on 21 Sep 2026, which sent her voice to Google/Microsoft
+    # outside the provider preferences above. Flash-Lite takes audio directly (user rule, 19 Sep 2026); measured
+    # $0.00005 for a 5-second clip. The recording is passed through and never stored.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 600
+    timeout_s: 30
+    retries: 1
+  essay_planner:
+    # Plans an extended answer, never writes one (AC-R5). Low-cost model (budget rule): the guard that
+    # matters is deterministic — app.modules.tutoring.planning rejects any plan containing prose long
+    # enough to paste as an answer, so a chatty model fails closed rather than doing her work for her.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.2
+    max_tokens: 1200
+    timeout_s: 45
+    retries: 1
+  examiner_report_extractor:
+    # Reads one examiner report page into short paraphrased points. Never quotes: the reports are UCLES
+    # copyright held for private study, so only our own wording with a reference is stored.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 3000
+    timeout_s: 120
+    retries: 1
+  summarizer:
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.2
+    max_tokens: 1200
+    timeout_s: 30
+    retries: 1
+  paper_extractor:
+    # User rule (19 Sep 2026): Flash-Lite only for PDF extraction, no fallback. Was claude-sonnet-5, which built
+    # the first Maths items on 14 Sep; Flash-Lite was already screened against those (paper_extractor_lite).
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 8000
+    timeout_s: 180
+    retries: 1
+  paper_extractor_lite_prose:
+    # Same low-cost model for papers whose mark schemes are long prose (Sociology): pages with several questions and
+    # their indicative content exceeded 4000 output tokens and failed validation when cut off (15 Sep 2026).
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 8000
+    timeout_s: 180
+    retries: 1
+  paper_extractor_lite:
+    # Low-cost extractor screened against Sonnet-extracted, verified items (app.jobs.question_bank --dry-run).
+    # Normal pages need ~1.5k output tokens. Failures seen were repetition loops (a run of dashes until cut off),
+    # not long pages: a small budget makes a loop fail fast, and extract_paper retries that page once at 0.4.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 4000
+    timeout_s: 180
+    retries: 1
+  tagger:
+    # Not called by any code today. Flash-Lite per the batch-job rule (19 Sep 2026).
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 2000
+    timeout_s: 60
+
+embeddings:
+  model: baai/bge-m3
+  dimensions: 1024
+  batch_size: 64
+  timeout_s: 60

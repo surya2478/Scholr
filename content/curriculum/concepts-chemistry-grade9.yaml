@@ -1,0 +1,71 @@
+# Shared concept map — IIT Foundation Chemistry (Grade 9) ↔ Cambridge IGCSE Chemistry 0620
+#
+# Same job as concepts-maths-grade9.yaml and concepts-physics-grade9.yaml. See docs/PHASE-3.md.
+#
+# 0620 is at `stage: planned` — Scholr can name a topic to revise but has no questions or marking for it yet,
+# so these suggestions point at the course book rather than at practice.
+#
+# The IIT course is only nine lessons, and they sit almost entirely inside 0620's Term 1 topics (2 Atoms,
+# elements and compounds; 12 Experimental techniques). Written 16 Sep 2026 from the two topic structures; a
+# teaching judgement, not an official mapping.
+
+subjects: [igcse-chemistry, iit-chemistry]
+
+concepts:
+  - name: States of matter
+    description: Solids, liquids and gases, the particle picture of each, and the changes between them.
+    objectives:
+      igcse-chemistry: ["1.1", "1.2"]
+      iit-chemistry: [L3]
+
+  - name: Gas pressure
+    description: Why a gas pushes on its container, and what temperature and volume do to that push.
+    prerequisites: ["States of matter"]
+    note: >-
+      0620 does not have a gas-pressure subtopic of its own — the particle explanation sits in 1.1 and the
+      quantitative work belongs to Physics 0625 (1.8 Pressure). Reinforcement targets the particle model.
+    objectives:
+      igcse-chemistry: ["1.1"]
+      iit-chemistry: [L4]
+
+  - name: Particles, atoms and the structure of matter
+    description: That matter is made of particles, and that those particles are atoms.
+    prerequisites: ["States of matter"]
+    objectives:
+      igcse-chemistry: ["2.1"]
+      iit-chemistry: [L1, L2]
+
+  - name: Atomic structure
+    description: Protons, neutrons and electrons; proton number, mass number and electron arrangement.
+    prerequisites: ["Particles, atoms and the structure of matter"]
+    objectives:
+      igcse-chemistry: ["2.2", "2.3"]
+      iit-chemistry: [L5]
+
+  - name: Chemical bonding
+    description: Why atoms join — ionic, covalent and metallic bonding, and the structures each produces.
+    prerequisites: ["Atomic structure"]
+    objectives:
+      igcse-chemistry: ["2.4", "2.5", "2.6", "2.7"]
+      iit-chemistry: [L7]
+
+  - name: The mole and amount of substance
+    description: Counting particles by mass — relative masses, the mole, and the Avogadro constant.
+    prerequisites: ["Atomic structure"]
+    objectives:
+      igcse-chemistry: ["3.1", "3.2", "3.3"]
+      iit-chemistry: [L6]
+
+  - name: Elements, compounds and mixtures
+    description: Telling the three apart, and what that means for how something behaves.
+    prerequisites: ["Particles, atoms and the structure of matter"]
+    objectives:
+      igcse-chemistry: ["2.1"]
+      iit-chemistry: [L8]
+
+  - name: Separation and purity
+    description: Deciding whether a substance is pure, and the techniques that separate a mixture.
+    prerequisites: ["Elements, compounds and mixtures"]
+    objectives:
+      igcse-chemistry: ["12.4", "12.3", "12.1"]
+      iit-chemistry: [L9]

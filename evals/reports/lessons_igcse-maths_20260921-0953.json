@@ -1,0 +1,27 @@
+{
+  "subject": "igcse-maths",
+  "prompt": "lesson_write/v4",
+  "guard": "lesson_guard_v7",
+  "model": "google/gemini-2.5-flash",
+  "lessons": 194,
+  "ready": 27,
+  "not_enough_material": 0,
+  "failed": 160,
+  "kept_old": 7,
+  "errors": [
+    "quota_exceeded"
+  ],
+  "cost_usd": 0.1655,
+  "kept_sections": 103,
+  "dropped_uncited": 0,
+  "dropped_copied": 3,
+  "dropped_unsupported_name": 0,
+  "kept_examples": 64,
+  "dropped_examples_unchecked": 2,
+  "dropped_examples_wrong": 10,
+  "dropped_terms": 0,
+  "dropped_garbled": 0,
+  "dropped_examples_unit": 0,
+  "dropped_examples_past_paper": 5,
+  "dropped_past_paper": 1
+}

@@ -1,0 +1,42 @@
+# Source manifest — Cambridge IGCSE Chemistry 0620
+# Raw files live in subjects/ (gitignored). Private study use for one student; never redistributed.
+#
+# The course book is not ingested — see igcse-physics-0625.yaml. It additionally has NO TEXT LAYER (it is a scan), so
+# every page would need vision OCR. Get a cost estimate and the parent's agreement before running it.
+subject: igcse-chemistry
+curriculum: CAIE-IGCSE
+syllabus: "0620"
+
+sources:
+  - key: cambridge-igcse-chemistry-cb
+    title: "Chemistry for Cambridge IGCSE, Coursebook"
+    publisher: Cambridge University Press
+    owner: Cambridge University Press & Assessment
+    licence: >-
+      Copyrighted textbook; family's copy used for the student's private study only. Stored privately;
+      short excerpts with page references only; never redistributed.
+    acquired_via: Provided by parent (subjects/IGCSE/Chemistry), 16 Sep 2026; school course textbook
+    private: true
+    file: IGCSE/Chemistry/603083167-Chemistry-for-Cambridge-Igcse-CourseBook.pdf
+    authority_tier: B
+    content_kind: explanation
+    notes: >-
+      479 pages, scanned: no text layer at all, so the contents page could not be read without vision OCR and
+      the curriculum structure was taken from the 0620 syllabus topic list instead. Screen OCR settings with
+      app.jobs.ocr_eval, and price the full run, before ingesting.
+
+  - key: 0620-syllabus-2026-2028
+    title: "Cambridge IGCSE Chemistry 0620 syllabus for 2026, 2027 and 2028"
+    publisher: Cambridge University Press & Assessment (UCLES)
+    owner: Cambridge University Press & Assessment
+    licence: >-
+      Copyright UCLES. Published syllabus, obtained for the student's private study. Stored privately;
+      excerpts shown only in short form with references; not redistributed.
+    acquired_via: Provided by parent (subjects/IGCSE/Chemistry), 16 Sep 2026
+    private: true
+    file: IGCSE/Chemistry/697205-2026-2028-syllabus-Chemistry.pdf
+    authority_tier: A
+    content_kind: syllabus
+    notes: >-
+      The authority for the 0620 curriculum file. Its subject-content section was parsed on 16 Sep 2026 to
+      build content/curriculum/igcse-chemistry-0620.yaml, which is now `verified`.

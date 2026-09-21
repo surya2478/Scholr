@@ -1,0 +1,38 @@
+# Copy to content/private/seed/household.yaml (gitignored) and fill in real values.
+# Run: cd apps/api && uv run python -m app.seed.household ../../content/private/seed/household.yaml
+
+tenant:
+  name: "Family"
+
+student:
+  display_name: "Student"
+  year_group: "Year 10"
+  timezone: "Asia/Dubai"
+  # Must match the auth provider subject; in dev mode any stable string works.
+  auth_subject: "dev|student"
+  email: null
+
+guardians:
+  - display_name: "Parent"
+    auth_subject: "dev|guardian"
+    email: null
+    # Phase 1: parents see everything (all scopes). Narrow later from Sharing & Permissions.
+    scopes: all
+
+enrollments:
+  - subject: igcse-maths
+    tier: extended
+    exam_session: "2028-06"
+  - subject: igcse-sociology
+    tier: null
+    exam_session: "2027-06"
+
+commitments:
+  - kind: iit_class
+    title: "IIT Foundation online class"
+    rrule: "FREQ=WEEKLY;BYDAY=MO,WE,FR"
+    start_time: "17:00"
+    duration_min: 120
+
+availability_minutes:  # Monday..Sunday
+  [120, 120, 120, 120, 90, 150, 60]

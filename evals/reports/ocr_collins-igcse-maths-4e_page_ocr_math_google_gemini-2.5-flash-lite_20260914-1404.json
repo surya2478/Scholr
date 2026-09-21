@@ -1,0 +1,184 @@
+{
+  "created_at": "2026-09-14T14:04:09+00:00",
+  "source": "collins-igcse-maths-4e",
+  "role": "page_ocr_math",
+  "prompt": "page_ocr_math",
+  "candidate_model": "google/gemini-2.5-flash-lite",
+  "reference_models": [
+    "google/gemini-3.5-flash"
+  ],
+  "seed": 7,
+  "summary": {
+    "pages": 12,
+    "mean_content_f1": 0.9751,
+    "min_content_f1": 0.9537,
+    "mean_word_f1": 0.8417,
+    "mean_math_f1": 0.6079,
+    "unicode_leaks": 1,
+    "math_segment_ratio": 1.425,
+    "verdict": "review"
+  },
+  "candidate_cost_per_page_usd": 0.00055,
+  "reference_cost_per_page_usd": 0.02745,
+  "candidate_mean_output_tokens": 756,
+  "remaining_pages": 602,
+  "projected_remaining_cost_usd": 0.33,
+  "lowest_pages": [
+    {
+      "page_number": 83,
+      "content_f1": 0.9537,
+      "word_f1": 0.9551,
+      "math_f1": 0.892,
+      "unicode_leaks": 0,
+      "reference_math_segments": 40,
+      "candidate_math_segments": 33
+    },
+    {
+      "page_number": 39,
+      "content_f1": 0.9539,
+      "word_f1": 0.7389,
+      "math_f1": 0.4165,
+      "unicode_leaks": 0,
+      "reference_math_segments": 11,
+      "candidate_math_segments": 10
+    },
+    {
+      "page_number": 19,
+      "content_f1": 0.9581,
+      "word_f1": 0.898,
+      "math_f1": 0.8037,
+      "unicode_leaks": 0,
+      "reference_math_segments": 10,
+      "candidate_math_segments": 28
+    },
+    {
+      "page_number": 25,
+      "content_f1": 0.9701,
+      "word_f1": 0.9915,
+      "math_f1": 0.7778,
+      "unicode_leaks": 0,
+      "reference_math_segments": 23,
+      "candidate_math_segments": 22
+    },
+    {
+      "page_number": 15,
+      "content_f1": 0.9751,
+      "word_f1": 0.8407,
+      "math_f1": 0.3448,
+      "unicode_leaks": 0,
+      "reference_math_segments": 5,
+      "candidate_math_segments": 58
+    }
+  ],
+  "pages": [
+    {
+      "page_number": 13,
+      "content_f1": 0.9778,
+      "word_f1": 0.975,
+      "math_f1": 0.7042,
+      "unicode_leaks": 0,
+      "reference_math_segments": 11,
+      "candidate_math_segments": 13
+    },
+    {
+      "page_number": 15,
+      "content_f1": 0.9751,
+      "word_f1": 0.8407,
+      "math_f1": 0.3448,
+      "unicode_leaks": 0,
+      "reference_math_segments": 5,
+      "candidate_math_segments": 58
+    },
+    {
+      "page_number": 19,
+      "content_f1": 0.9581,
+      "word_f1": 0.898,
+      "math_f1": 0.8037,
+      "unicode_leaks": 0,
+      "reference_math_segments": 10,
+      "candidate_math_segments": 28
+    },
+    {
+      "page_number": 25,
+      "content_f1": 0.9701,
+      "word_f1": 0.9915,
+      "math_f1": 0.7778,
+      "unicode_leaks": 0,
+      "reference_math_segments": 23,
+      "candidate_math_segments": 22
+    },
+    {
+      "page_number": 39,
+      "content_f1": 0.9539,
+      "word_f1": 0.7389,
+      "math_f1": 0.4165,
+      "unicode_leaks": 0,
+      "reference_math_segments": 11,
+      "candidate_math_segments": 10
+    },
+    {
+      "page_number": 83,
+      "content_f1": 0.9537,
+      "word_f1": 0.9551,
+      "math_f1": 0.892,
+      "unicode_leaks": 0,
+      "reference_math_segments": 40,
+      "candidate_math_segments": 33
+    },
+    {
+      "page_number": 94,
+      "content_f1": 0.9942,
+      "word_f1": 0.2788,
+      "math_f1": 0.4664,
+      "unicode_leaks": 0,
+      "reference_math_segments": 39,
+      "candidate_math_segments": 44
+    },
+    {
+      "page_number": 103,
+      "content_f1": 0.9792,
+      "word_f1": 0.8447,
+      "math_f1": 0.2783,
+      "unicode_leaks": 0,
+      "reference_math_segments": 21,
+      "candidate_math_segments": 35
+    },
+    {
+      "page_number": 132,
+      "content_f1": 0.9767,
+      "word_f1": 0.9658,
+      "math_f1": 0.4956,
+      "unicode_leaks": 1,
+      "reference_math_segments": 6,
+      "candidate_math_segments": 13
+    },
+    {
+      "page_number": 308,
+      "content_f1": 0.9903,
+      "word_f1": 0.9219,
+      "math_f1": 0.7945,
+      "unicode_leaks": 0,
+      "reference_math_segments": 17,
+      "candidate_math_segments": 42
+    },
+    {
+      "page_number": 403,
+      "content_f1": 0.9779,
+      "word_f1": 0.9593,
+      "math_f1": 0.8235,
+      "unicode_leaks": 0,
+      "reference_math_segments": 20,
+      "candidate_math_segments": 25
+    },
+    {
+      "page_number": 612,
+      "content_f1": 0.9941,
+      "word_f1": 0.731,
+      "math_f1": 0.4979,
+      "unicode_leaks": 0,
+      "reference_math_segments": 37,
+      "candidate_math_segments": 19
+    }
+  ],
+  "note": "Reference is another model's transcription, not ground truth. Spot-check lowest_pages by eye."
+}

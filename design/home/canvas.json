@@ -1,0 +1,38 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "Screens" },
+    { "id": "page-2", "name": "Earlier exploration" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1536, "h": 1024, "title": "Student Home", "page": "page-1" },
+    { "file": "ParentDashboard.dc.html", "x": 1656, "y": 0, "w": 1536, "h": 1024, "title": "Parent Dashboard · Overview", "page": "page-1" },
+    { "file": "Reference.dc.html", "x": 0, "y": 0, "w": 1536, "h": 1024, "title": "Reference replica (not chosen)", "page": "page-2" }
+  ],
+  "annotations": [
+    {
+      "id": "note-adjusted",
+      "page": "page-1",
+      "x": 0,
+      "y": -250,
+      "w": 760,
+      "text": "Student Home (chosen direction B, sample data)\n1. My Day: Streak → Solved Without Help; Focus → Mistakes Fixed\n2. Your Progress: Term 1 topics secure (18/26), IIT and India Explorer hours against weekly targets\n3. Subject Mastery: levels (Introduced → Developing → Competent → Mastered) with a Review due marker, not %\n4. Student menu: Parent section removed (separate parent login); added 'What my parent sees'\n5. AI Companion: study-support wording"
+    },
+    {
+      "id": "note-parent",
+      "page": "page-1",
+      "x": 1656,
+      "y": -250,
+      "w": 760,
+      "text": "Parent Dashboard · Overview (sample data)\nAnswers the parent questions from PRINCIPLES: Is learning improving? Becoming more independent? Studying consistently? Workload balanced? Strengths and gaps? How can I help?\n• Separate parent login; student switcher ready for more children later\n• Patterns, not surveillance: session history lives under Safety & Privacy, not on the overview\n• IIT test readiness shows 'Not tracked yet' until IIT integration (Phase 3)\n• Chart colours checked for colour-blind safety; charts carry labels and legends"
+    },
+    {
+      "id": "note-reference",
+      "page": "page-2",
+      "x": 0,
+      "y": -250,
+      "w": 640,
+      "text": "Reference replica (direction A, not chosen)\nEvery section, label and menu copied from the reference image. Only the name changed to Scholr."
+    }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}

@@ -1,0 +1,12 @@
+# Subject Expertise Engine config — Cambridge IGCSE Biology 0610.
+#
+# stage: planned — see igcse_physics_0625.yaml. Scholr knows the syllabus structure and can name a topic to
+# revise, but has no question bank, retrieval corpus or marking for Biology, so the teaching blocks are
+# absent rather than invented. Its only job today is to give an IIT Foundation biology class IGCSE ground to
+# point at (docs/PHASE-3.md).
+key: igcse_biology_0610
+path: IGCSE
+subject_code: igcse-biology
+syllabus: { code: "0610", tier: extended, exam_session: "2028-06" }
+subject_type: mixed
+stage: planned

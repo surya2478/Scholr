@@ -1,0 +1,43 @@
+# Copyrighted / private learning materials — never commit
+subjects/
+content/private/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+.next/
+out/
+
+# Tooling / OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Eval run outputs (reports are committed deliberately via evals/reports/*.md)
+evals/runs/
+
+# Home-machine secrets (infra/home.env.example is the committed template)
+infra/home.env
+
+# Build and test output
+*.tsbuildinfo
+test-results/
+playwright-report/
+
+# Generated audio (lesson read-aloud is cached under content/private)
+*.mp3
+*.wav

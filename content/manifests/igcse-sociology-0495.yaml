@@ -1,0 +1,308 @@
+# Source manifest — Cambridge IGCSE Sociology 0495
+# Raw files live in subjects/ (gitignored). Private study use for one student; never redistributed.
+subject: igcse-sociology
+curriculum: CAIE-IGCSE
+syllabus: "0495"
+
+defaults: &cambridge
+  publisher: Cambridge University Press & Assessment (UCLES)
+  owner: Cambridge University Press & Assessment
+  licence: >-
+    Copyright UCLES / Cambridge University Press & Assessment. Obtained for the student's private
+    study. Stored privately; excerpts shown only in short form with references; not redistributed.
+  acquired_via: Provided by parent (subjects/IGCSE/sociology)
+  private: true
+
+papacambridge: &papacambridge
+  publisher: Cambridge University Press & Assessment (UCLES)
+  owner: Cambridge University Press & Assessment
+  licence: >-
+    Copyright UCLES / Cambridge University Press & Assessment. Obtained for the student's private
+    study. Stored privately; excerpts shown only in short form with references; not redistributed.
+  acquired_via: "Downloaded from pastpapers.papacambridge.com at the parent's request (15 Sep 2026)"
+  private: true
+
+sources:
+  - key: 0495-mj24-qp11
+    <<: *cambridge
+    title: "0495/11 Paper 1 Question Paper, May/June 2024"
+    file: IGCSE/sociology/570132-june-2024-question-paper-11_Sociology.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ24
+    component: "11"
+    notes: >-
+      2h, 80 marks. Section A Theory and methods (compulsory, source-based, 45 marks);
+      then Section B Culture, identity and socialisation OR Section C Social inequality (35 marks).
+      Topic naming differs from the school's Term 1 planner — the planner follows a newer syllabus
+      structure (verify against the 0495 syllabus for the 2027 exam).
+  - key: 0495-mj24-ms11
+    <<: *cambridge
+    title: "0495/11 Paper 1 Mark Scheme, May/June 2024"
+    file: IGCSE/sociology/570130-june-2024-mark-scheme-paper-11-Sociology.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ24
+    component: "11"
+  - key: 0495-mj24-qp21
+    <<: *cambridge
+    title: "0495/21 Paper 2 Question Paper, May/June 2024"
+    file: IGCSE/sociology/570133-june-2024-question-paper-21-Sociology.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ24
+    component: "21"
+    notes: "1h45, 70 marks. Answer two of: Family, Education, Crime deviance and social control, Media (35 marks each)."
+  - key: 0495-mj24-ms21
+    <<: *cambridge
+    title: "0495/21 Paper 2 Mark Scheme, May/June 2024"
+    file: IGCSE/sociology/570131-june-2024-mark-scheme-paper-21-Sociology.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ24
+    component: "21"
+  - key: 0495-mj24-er
+    <<: *cambridge
+    title: "0495 Principal Examiner Report for Teachers, May/June 2024"
+    file: IGCSE/sociology/570129-june-2024-examiner-report-Sociology.pdf
+    authority_tier: A
+    content_kind: examiner_report
+    exam_series: MJ24
+
+  - key: igcse-sociology-textbook
+    title: "Sociology for Cambridge IGCSE™ and O Level Coursebook, Second edition (Blundell & Roberts)"
+    publisher: Cambridge University Press & Assessment
+    edition: "2nd (2023)"
+    owner: Cambridge University Press & Assessment
+    licence: >-
+      Copyrighted textbook; family's copy used for the student's private study only. Stored privately;
+      short excerpts with page references only; never redistributed.
+    acquired_via: Provided by parent (subjects/IGCSE/sociology); school course textbook
+    private: true
+    file: IGCSE/sociology/1010837919-IGCSE-Sociology-Textbook-New.pdf
+    authority_tier: B
+    content_kind: explanation
+    ocr_role: page_ocr_text  # prose-only scan; see roles.yaml and evals/reports/ocr_igcse-sociology-textbook_*
+    ocr_prompt: page_ocr_md  # plain Markdown: JSON output failed validation twice on pages 38 and 171
+    ocr_output: markdown
+    notes: Scanned PDF (308 pages, no text layer) — requires vision OCR.
+
+  # ---- Downloaded from PapaCambridge (15 Sep 2026) ----
+  - key: 0495-mj23-er
+    <<: *papacambridge
+    title: "0495 Principal Examiner Report for Teachers, May/June 2023"
+    file: IGCSE/sociology/papacambridge/0495_s23_er.pdf
+    authority_tier: A
+    content_kind: examiner_report
+    exam_series: MJ23
+  - key: 0495-mj23-ms11
+    <<: *papacambridge
+    title: "0495/11 Paper 1 Mark Scheme, May/June 2023"
+    file: IGCSE/sociology/papacambridge/0495_s23_ms_11.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ23
+    component: "11"
+  - key: 0495-mj23-ms12
+    <<: *papacambridge
+    title: "0495/12 Paper 1 Mark Scheme, May/June 2023"
+    file: IGCSE/sociology/papacambridge/0495_s23_ms_12.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ23
+    component: "12"
+  - key: 0495-mj23-ms21
+    <<: *papacambridge
+    title: "0495/21 Paper 2 Mark Scheme, May/June 2023"
+    file: IGCSE/sociology/papacambridge/0495_s23_ms_21.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ23
+    component: "21"
+  - key: 0495-mj23-ms22
+    <<: *papacambridge
+    title: "0495/22 Paper 2 Mark Scheme, May/June 2023"
+    file: IGCSE/sociology/papacambridge/0495_s23_ms_22.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ23
+    component: "22"
+  - key: 0495-mj23-qp11
+    <<: *papacambridge
+    title: "0495/11 Paper 1 Question Paper, May/June 2023"
+    file: IGCSE/sociology/papacambridge/0495_s23_qp_11.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ23
+    component: "11"
+    notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
+  - key: 0495-mj23-qp12
+    <<: *papacambridge
+    title: "0495/12 Paper 1 Question Paper, May/June 2023"
+    file: IGCSE/sociology/papacambridge/0495_s23_qp_12.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ23
+    component: "12"
+    notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
+  - key: 0495-mj23-qp21
+    <<: *papacambridge
+    title: "0495/21 Paper 2 Question Paper, May/June 2023"
+    file: IGCSE/sociology/papacambridge/0495_s23_qp_21.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ23
+    component: "21"
+    notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
+  - key: 0495-mj23-qp22
+    <<: *papacambridge
+    title: "0495/22 Paper 2 Question Paper, May/June 2023"
+    file: IGCSE/sociology/papacambridge/0495_s23_qp_22.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ23
+    component: "22"
+    notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
+  - key: 0495-mj25-er
+    <<: *papacambridge
+    title: "0495 Principal Examiner Report for Teachers, May/June 2025"
+    file: IGCSE/sociology/papacambridge/0495_s25_er.pdf
+    authority_tier: A
+    content_kind: examiner_report
+    exam_series: MJ25
+  - key: 0495-mj25-ms11
+    <<: *papacambridge
+    title: "0495/11 Paper 1 Mark Scheme, May/June 2025"
+    file: IGCSE/sociology/papacambridge/0495_s25_ms_11.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ25
+    component: "11"
+  - key: 0495-mj25-ms12
+    <<: *papacambridge
+    title: "0495/12 Paper 1 Mark Scheme, May/June 2025"
+    file: IGCSE/sociology/papacambridge/0495_s25_ms_12.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ25
+    component: "12"
+  - key: 0495-mj25-ms21
+    <<: *papacambridge
+    title: "0495/21 Paper 2 Mark Scheme, May/June 2025"
+    file: IGCSE/sociology/papacambridge/0495_s25_ms_21.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ25
+    component: "21"
+  - key: 0495-mj25-ms22
+    <<: *papacambridge
+    title: "0495/22 Paper 2 Mark Scheme, May/June 2025"
+    file: IGCSE/sociology/papacambridge/0495_s25_ms_22.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: MJ25
+    component: "22"
+  - key: 0495-mj25-qp11
+    <<: *papacambridge
+    title: "0495/11 Paper 1 Question Paper, May/June 2025"
+    file: IGCSE/sociology/papacambridge/0495_s25_qp_11.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ25
+    component: "11"
+    notes: "2025–2027 syllabus structure (80 marks per paper)."
+  - key: 0495-mj25-qp12
+    <<: *papacambridge
+    title: "0495/12 Paper 1 Question Paper, May/June 2025"
+    file: IGCSE/sociology/papacambridge/0495_s25_qp_12.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ25
+    component: "12"
+    notes: "2025–2027 syllabus structure (80 marks per paper)."
+  - key: 0495-mj25-qp21
+    <<: *papacambridge
+    title: "0495/21 Paper 2 Question Paper, May/June 2025"
+    file: IGCSE/sociology/papacambridge/0495_s25_qp_21.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ25
+    component: "21"
+    notes: "2025–2027 syllabus structure (80 marks per paper)."
+  - key: 0495-mj25-qp22
+    <<: *papacambridge
+    title: "0495/22 Paper 2 Question Paper, May/June 2025"
+    file: IGCSE/sociology/papacambridge/0495_s25_qp_22.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: MJ25
+    component: "22"
+    notes: "2025–2027 syllabus structure (80 marks per paper)."
+  - key: 0495-on24-ms11
+    <<: *papacambridge
+    title: "0495/11 Paper 1 Mark Scheme, October/November 2024"
+    file: IGCSE/sociology/papacambridge/0495_w24_ms_11.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: ON24
+    component: "11"
+  - key: 0495-on24-ms12
+    <<: *papacambridge
+    title: "0495/12 Paper 1 Mark Scheme, October/November 2024"
+    file: IGCSE/sociology/papacambridge/0495_w24_ms_12.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: ON24
+    component: "12"
+  - key: 0495-on24-ms21
+    <<: *papacambridge
+    title: "0495/21 Paper 2 Mark Scheme, October/November 2024"
+    file: IGCSE/sociology/papacambridge/0495_w24_ms_21.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: ON24
+    component: "21"
+  - key: 0495-on24-ms22
+    <<: *papacambridge
+    title: "0495/22 Paper 2 Mark Scheme, October/November 2024"
+    file: IGCSE/sociology/papacambridge/0495_w24_ms_22.pdf
+    authority_tier: A
+    content_kind: mark_scheme
+    exam_series: ON24
+    component: "22"
+  - key: 0495-on24-qp11
+    <<: *papacambridge
+    title: "0495/11 Paper 1 Question Paper, October/November 2024"
+    file: IGCSE/sociology/papacambridge/0495_w24_qp_11.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: ON24
+    component: "11"
+    notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
+  - key: 0495-on24-qp12
+    <<: *papacambridge
+    title: "0495/12 Paper 1 Question Paper, October/November 2024"
+    file: IGCSE/sociology/papacambridge/0495_w24_qp_12.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: ON24
+    component: "12"
+    notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
+  - key: 0495-on24-qp21
+    <<: *papacambridge
+    title: "0495/21 Paper 2 Question Paper, October/November 2024"
+    file: IGCSE/sociology/papacambridge/0495_w24_qp_21.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: ON24
+    component: "21"
+    notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
+  - key: 0495-on24-qp22
+    <<: *papacambridge
+    title: "0495/22 Paper 2 Question Paper, October/November 2024"
+    file: IGCSE/sociology/papacambridge/0495_w24_qp_22.pdf
+    authority_tier: A
+    content_kind: question
+    exam_series: ON24
+    component: "22"
+    notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."

@@ -1,0 +1,81 @@
+# Curriculum structure — Cambridge IGCSE Sociology 0495
+#
+# Provenance:
+# - Units and key questions: contents pages of "Sociology for Cambridge IGCSE and O Level Coursebook",
+#   2nd edition (Cambridge University Press, 2023). These match the school Term 1 planner wording exactly
+#   (Identity: self and society; Research methods; Education; Family).
+# - Assessment objectives AO1–AO3: school Term 1 planner.
+# - Verified 15 Sep 2026 against the official Cambridge IGCSE Sociology 0495 syllabus for 2025, 2026 and 2027
+#   (subjects/sociology, pages 8–9): the six topics and eighteen key questions match exactly, and the component
+#   structure below is taken from its assessment overview. Papers before June 2025 (e.g. May/June 2024) follow
+#   the previous syllabus (Media option, 45+35 mark Paper 1) and are practice only for this structure.
+# page: printed coursebook page where the section starts.
+
+curriculum: { code: CAIE-IGCSE, name: Cambridge IGCSE }
+path: { code: IGCSE, name: IGCSE }
+syllabus:
+  code: "0495"
+  title: Cambridge IGCSE Sociology
+  version: "for-2027-exam"
+  tiers: []
+  verification_status: verified
+  source_note: >-
+    Topics and key questions verified against the official 0495 syllabus for 2025–2027 (exam session 2027-06).
+subject: { code: igcse-sociology, name: Sociology, config_key: igcse_sociology_0495 }
+
+components:
+  - code: "P1"
+    name: "Paper 1 — Research Methods, Identity and Inequality"
+    duration_min: 120
+    marks: 80
+    structure_note: >-
+      Two structured questions: Question 1 Research methods (compulsory, includes data response), then either
+      Question 2 or Question 3. 50% of the qualification.
+  - code: "P2"
+    name: "Paper 2 — Family, Education and Crime"
+    duration_min: 105
+    marks: 80
+    structure_note: Two optional structured questions from a choice of three. 50% of the qualification.
+
+skills:
+  - { code: AO1, name: "Knowledge and understanding" }
+  - { code: AO2, name: "Interpretation and application" }
+  - { code: AO3, name: "Analysis and evaluation" }
+
+topics:
+  - code: U1
+    name: "Research methods"
+    objectives:
+      - { code: "1.1", statement: "How do sociologists approach the study of society?", page: 2 }
+      - { code: "1.2", statement: "What types of data and evidence do sociologists use?", page: 10 }
+      - { code: "1.3", statement: "How do sociologists investigate society?", page: 20 }
+  - code: U2
+    name: "Identity: self and society"
+    objectives:
+      - { code: "2.1", statement: "How do we learn our identity?", page: 44 }
+      - { code: "2.2", statement: "How does society control us?", page: 60 }
+      - { code: "2.3", statement: "What influences our social identity?", page: 71 }
+  - code: U3
+    name: "Social stratification and inequality"
+    objectives:
+      - { code: "3.1", statement: "What is social stratification?", page: 91 }
+      - { code: "3.2", statement: "What attempts have been made to reduce social inequalities?", page: 113 }
+      - { code: "3.3", statement: "How has globalisation affected inequalities between societies?", page: 123 }
+  - code: U4
+    name: "Family"
+    objectives:
+      - { code: "4.1", statement: "What are the different types of families?", page: 137 }
+      - { code: "4.2", statement: "What is the role of the family for the individual and society?", page: 148 }
+      - { code: "4.3", statement: "How is family life changing?", page: 158 }
+  - code: U5
+    name: "Education"
+    objectives:
+      - { code: "5.1", statement: "What is education and schooling?", page: 176 }
+      - { code: "5.2", statement: "What are the roles and functions of education?", page: 189 }
+      - { code: "5.3", statement: "What factors help to explain differences in educational achievement and experience?", page: 198 }
+  - code: U6
+    name: "Crime, deviance and social control"
+    objectives:
+      - { code: "6.1", statement: "What are crime, deviance and social control?", page: 219 }
+      - { code: "6.2", statement: "What are the patterns of and explanations for crime and deviance?", page: 234 }
+      - { code: "6.3", statement: "How is crime dealt with in different societies?", page: 255 }

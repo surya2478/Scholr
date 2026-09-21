@@ -1,0 +1,415 @@
+{
+  "dataset": "retrieval_v1",
+  "k": 8,
+  "cases": 40,
+  "recall_at_k": 0.9714285714285714,
+  "state_agreement": 1.0,
+  "state_exact": 0.625,
+  "targets": {
+    "recall_at_k": 0.85,
+    "state_agreement": 0.8
+  },
+  "verdict": "pass",
+  "results": [
+    {
+      "id": "m01",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6636
+    },
+    {
+      "id": "m02",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6824
+    },
+    {
+      "id": "m03",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7309
+    },
+    {
+      "id": "m04",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.67
+    },
+    {
+      "id": "m05",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7346
+    },
+    {
+      "id": "m06",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7111
+    },
+    {
+      "id": "m07",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6611
+    },
+    {
+      "id": "m08",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "MEDIUM",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6539
+    },
+    {
+      "id": "m09",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6901
+    },
+    {
+      "id": "m10",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6755
+    },
+    {
+      "id": "m11",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "MEDIUM",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6129
+    },
+    {
+      "id": "m12",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "MEDIUM",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6438
+    },
+    {
+      "id": "m13",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "MEDIUM",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6324
+    },
+    {
+      "id": "m14",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7018
+    },
+    {
+      "id": "m15",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6463
+    },
+    {
+      "id": "m16",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": false,
+      "top_similarity": 0.6472
+    },
+    {
+      "id": "m17",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7106
+    },
+    {
+      "id": "m18",
+      "subject": "igcse-maths",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6748
+    },
+    {
+      "id": "m19",
+      "subject": "igcse-maths",
+      "expected_state": "NONE",
+      "state": "LOW",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": null,
+      "top_similarity": 0.4845
+    },
+    {
+      "id": "m20",
+      "subject": "igcse-maths",
+      "expected_state": "NONE",
+      "state": "LOW",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": null,
+      "top_similarity": 0.4445
+    },
+    {
+      "id": "s01",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "MEDIUM",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6505
+    },
+    {
+      "id": "s02",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6986
+    },
+    {
+      "id": "s03",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7324
+    },
+    {
+      "id": "s04",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7528
+    },
+    {
+      "id": "s05",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7242
+    },
+    {
+      "id": "s06",
+      "subject": "igcse-sociology",
+      "expected_state": "MEDIUM",
+      "state": "HIGH",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6908
+    },
+    {
+      "id": "s07",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "MEDIUM",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6118
+    },
+    {
+      "id": "s08",
+      "subject": "igcse-sociology",
+      "expected_state": "MEDIUM",
+      "state": "MEDIUM",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.5952
+    },
+    {
+      "id": "s09",
+      "subject": "igcse-sociology",
+      "expected_state": "MEDIUM",
+      "state": "HIGH",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6574
+    },
+    {
+      "id": "s10",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.743
+    },
+    {
+      "id": "s11",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7197
+    },
+    {
+      "id": "s12",
+      "subject": "igcse-sociology",
+      "expected_state": "MEDIUM",
+      "state": "HIGH",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7055
+    },
+    {
+      "id": "s13",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7181
+    },
+    {
+      "id": "s14",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6347
+    },
+    {
+      "id": "s15",
+      "subject": "igcse-sociology",
+      "expected_state": "HIGH",
+      "state": "HIGH",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7661
+    },
+    {
+      "id": "s16",
+      "subject": "igcse-sociology",
+      "expected_state": "MEDIUM",
+      "state": "HIGH",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.7184
+    },
+    {
+      "id": "s17",
+      "subject": "igcse-sociology",
+      "expected_state": "MEDIUM",
+      "state": "HIGH",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": true,
+      "top_similarity": 0.6847
+    },
+    {
+      "id": "s18",
+      "subject": "igcse-sociology",
+      "expected_state": "NONE",
+      "state": "LOW",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": null,
+      "top_similarity": 0.4611
+    },
+    {
+      "id": "s19",
+      "subject": "igcse-sociology",
+      "expected_state": "NONE",
+      "state": "NONE",
+      "state_exact": true,
+      "state_ok": true,
+      "recall_hit": null,
+      "top_similarity": 0.3785
+    },
+    {
+      "id": "s20",
+      "subject": "igcse-sociology",
+      "expected_state": "NONE",
+      "state": "LOW",
+      "state_exact": false,
+      "state_ok": true,
+      "recall_hit": null,
+      "top_similarity": 0.4214
+    }
+  ]
+}

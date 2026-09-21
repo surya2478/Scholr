@@ -1,0 +1,306 @@
+{
+  "subject": "igcse-maths",
+  "prompt": "exam_walkthrough/v2",
+  "model": "google/gemini-2.5-flash-lite",
+  "tried": 57,
+  "kept": 28,
+  "rejected": {
+    "garbled": 1,
+    "too_many_marks": 11,
+    "mark_not_in_scheme": 7,
+    "llm_invalid_output": 2,
+    "answer_incorrect": 3,
+    "step_count": 1,
+    "arithmetic": 2,
+    "step_too_long": 1,
+    "answer_not_checked": 1
+  },
+  "cost_usd": 0.0247,
+  "per_topic": {
+    "1.3": [
+      "0580/41/MJ25/Q10(a)",
+      true,
+      ""
+    ],
+    "1.4": [
+      "0580/22/MJ23/Q2",
+      false,
+      "garbled"
+    ],
+    "1.6": [
+      "0580/22/MJ25/Q8",
+      true,
+      ""
+    ],
+    "2.3": [
+      "0580/21/MJ24/Q15",
+      false,
+      "too_many_marks"
+    ],
+    "2.5": [
+      "0580/41/MJ24/Q1(a)(iii)",
+      false,
+      "mark_not_in_scheme"
+    ],
+    "2.6": [
+      null,
+      false,
+      "llm_invalid_output"
+    ],
+    "2.7": [
+      "0580/42/ON24/Q1(b)",
+      false,
+      "too_many_marks"
+    ],
+    "2.8": [
+      "0580/42/MJ25/Q17(c)",
+      false,
+      "too_many_marks"
+    ],
+    "2.9": [
+      "0580/21/MJ24/Q10",
+      true,
+      ""
+    ],
+    "2.10": [
+      "0580/41/MJ25/Q9",
+      true,
+      ""
+    ],
+    "3.1": [
+      "0580/41/MJ25/Q2",
+      true,
+      ""
+    ],
+    "5.1": [
+      "0580/41/MJ25/Q2",
+      true,
+      ""
+    ],
+    "5.3": [
+      "0580/22/MJ25/Q17(a)",
+      true,
+      ""
+    ],
+    "5.4": [
+      "0580/21/MJ24/Q9",
+      true,
+      ""
+    ],
+    "7.1": [
+      "0580/21/ON24/Q4",
+      false,
+      "mark_not_in_scheme"
+    ],
+    "7.3": [
+      "0580/42/ON24/Q5(b)",
+      true,
+      ""
+    ],
+    "7.4": [
+      "0580/42/ON24/Q7(a)(vi)",
+      false,
+      "answer_incorrect"
+    ],
+    "7.5": [
+      "0580/22/ON24/Q12",
+      false,
+      "step_count"
+    ],
+    "8.3": [
+      "0580/11/MJ24/Q14",
+      true,
+      ""
+    ],
+    "8.4": [
+      "0580/41/MJ24/Q1(b)",
+      false,
+      "mark_not_in_scheme"
+    ],
+    "8.5": [
+      "0580/41/MJ25/Q22",
+      false,
+      "too_many_marks"
+    ],
+    "10.1": [
+      "0580/41/MJ25/Q9",
+      true,
+      ""
+    ],
+    "10.2": [
+      "0580/42/ON24/Q7(a)(vi)",
+      false,
+      "answer_incorrect"
+    ],
+    "10.3": [
+      "0580/42/ON24/Q5(b)",
+      false,
+      "arithmetic"
+    ],
+    "10.4": [
+      "0580/41/MJ23/Q1(b)(i)",
+      true,
+      ""
+    ],
+    "10.5": [
+      "0580/41/MJ25/Q2",
+      true,
+      ""
+    ],
+    "11.2": [
+      "0580/42/ON24/Q1(b)",
+      false,
+      "too_many_marks"
+    ],
+    "11.3": [
+      "0580/42/MJ25/Q19(d)",
+      true,
+      ""
+    ],
+    "12.2": [
+      "0580/41/MJ23/Q10(a)(iii)",
+      true,
+      ""
+    ],
+    "13.1": [
+      null,
+      false,
+      "llm_invalid_output"
+    ],
+    "13.3": [
+      "0580/21/MJ25/Q18(d)",
+      false,
+      "mark_not_in_scheme"
+    ],
+    "16.2": [
+      "0580/41/MJ24/Q8(b)(ii)",
+      true,
+      ""
+    ],
+    "17.2": [
+      "0580/41/ON24/Q4(b)",
+      false,
+      "mark_not_in_scheme"
+    ],
+    "17.4": [
+      "0580/21/MJ24/Q3(b)",
+      false,
+      "too_many_marks"
+    ],
+    "19.1": [
+      "0580/22/MJ23/Q19",
+      false,
+      "mark_not_in_scheme"
+    ],
+    "20.3": [
+      "0580/41/ON24/Q7(d)",
+      true,
+      ""
+    ],
+    "22.1": [
+      "0580/21/MJ23/Q21(a)",
+      true,
+      ""
+    ],
+    "22.3": [
+      "0580/41/MJ24/Q8(b)(ii)",
+      true,
+      ""
+    ],
+    "15.3": [
+      "0580/22/MJ23/Q15(b)",
+      true,
+      ""
+    ],
+    "15.4": [
+      "0580/41/MJ25/Q14(c)",
+      false,
+      "step_too_long"
+    ],
+    "15.6": [
+      "0580/41/MJ23/Q6(b)(ii)",
+      true,
+      ""
+    ],
+    "23.5": [
+      "0580/42/MJ25/Q15",
+      true,
+      ""
+    ],
+    "24.2": [
+      "0580/41/MJ24/Q6(c)",
+      false,
+      "answer_incorrect"
+    ],
+    "24.8": [
+      "0580/21/ON24/Q14",
+      false,
+      "too_many_marks"
+    ],
+    "27.1": [
+      "0580/42/ON24/Q7(b)",
+      false,
+      "mark_not_in_scheme"
+    ],
+    "27.12": [
+      "0580/41/MJ24/Q7(b)(ii)",
+      false,
+      "too_many_marks"
+    ],
+    "27.13": [
+      "0580/42/MJ25/Q6",
+      false,
+      "arithmetic"
+    ],
+    "26.1": [
+      "0580/41/MJ24/Q7(b)(ii)",
+      false,
+      "too_many_marks"
+    ],
+    "26.4": [
+      "0580/21/MJ23/Q19(b)",
+      true,
+      ""
+    ],
+    "26.6": [
+      "0580/41/MJ24/Q6(d)(ii)",
+      false,
+      "answer_not_checked"
+    ],
+    "26.11": [
+      "0580/21/ON24/Q21",
+      true,
+      ""
+    ],
+    "29.3": [
+      "0580/21/MJ25/Q8(b)",
+      true,
+      ""
+    ],
+    "33.2": [
+      "0580/42/ON24/Q8(b)(ii)",
+      false,
+      "too_many_marks"
+    ],
+    "33.6": [
+      "0580/21/MJ24/Q22",
+      false,
+      "too_many_marks"
+    ],
+    "33.7": [
+      "0580/42/MJ25/Q16(b)",
+      true,
+      ""
+    ],
+    "31.7": [
+      "0580/41/ON24/Q3(a)",
+      true,
+      ""
+    ],
+    "32.3": [
+      "0580/41/ON24/Q3(a)",
+      true,
+      ""
+    ]
+  }
+}

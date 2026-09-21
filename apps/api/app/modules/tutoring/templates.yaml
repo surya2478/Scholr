@@ -1,0 +1,20 @@
+# Fixed tutor replies used when policy decides without an LLM (ARCHITECTURE §10, §9.5). Reviewed by the parent.
+# Changing this file => bump `version`.
+version: tutor_templates_v1
+replies:
+  ask_for_attempt: >-
+    Have a go first — write down what the question is asking and try the first step. Even a partial attempt helps
+    me give you exactly the right hint.
+  no_help_in_test: >-
+    This is a test, so I can't help with the questions right now. Do your best — we'll go through it together
+    afterwards.
+  not_enough_material: >-
+    I don't have enough from your course materials to answer that reliably, and I don't want to guess. Please check
+    your textbook or ask your teacher, then tell me what you found and we can work through it.
+  reply_withheld: >-
+    Let's take this one step at a time. What is the question asking you to find, and what information have you
+    already been given?
+  no_items: >-
+    There are no practice questions ready for this topic yet. Try another topic, or ask me to explain an idea.
+  tutor_unavailable: >-
+    I'm having trouble right now — your work is saved. Please try again in a moment.
