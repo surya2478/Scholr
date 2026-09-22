@@ -30,6 +30,9 @@ class SourceIn(BaseModel):
     exam_series: str | None = None
     component: str | None = None
     notes: str | None = None
+    # Question numbers whose section has no unit in the current syllabus (old papers' Media option): their items
+    # are saved with no objectives, whatever the extractor tagged, so they never stand for a current topic.
+    untagged_questions: list[str] = Field(default_factory=list)
     # LLM role used to OCR scanned pages (app/llm/roles.yaml); chosen per source from app.jobs.ocr_eval results.
     ocr_role: str = "page_ocr"
     ocr_prompt: str = "page_ocr"  # prompt name in app/llm/prompts/

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -39,6 +40,7 @@ from app.modules.assessment.mark_scheme import MarkSchemeTable, looks_tabular, p
 from app.modules.assessment.models import QuestionItem
 from app.modules.assessment.past_papers import (
     EXTRACTOR_ROLE,
+    ExtractedItem,
     PaperCheck,
     PaperInput,
     ReferenceItem,
@@ -73,6 +75,20 @@ SUBJECT_NOTES = {
 def paper_notes(subject_code: str, source: SourceIn) -> str:
     """Subject notes plus this paper's own manifest notes (series structure, calculator rules)."""
     return " ".join(x for x in (SUBJECT_NOTES[subject_code], source.title, source.notes or "") if x)
+
+
+def without_off_syllabus_tags[T](
+    merged: list[tuple[ExtractedItem, T]], untagged: list[str]
+) -> list[tuple[ExtractedItem, T]]:
+    """Drop the extractor's objective codes on questions the manifest marks as off the current syllabus.
+
+    The prompt already says Media has no unit, but the model tagged old Media questions onto Research methods and
+    Identity (22 Sep 2026), so the rule is applied here, in code. "4(e)" belongs to question 4."""
+    off = set(untagged)
+    return [
+        (item.model_copy(update={"objective_codes": []}) if re.match(r"\d*", item.ref)[0] in off else item, pages)
+        for item, pages in merged
+    ]
 
 
 # Papers where every question is compulsory, so marks must add up to the printed total.
@@ -167,7 +183,7 @@ def run_job(job: PaperJob, *, role: str = EXTRACTOR_ROLE, model: str | None = No
     gateway = build_gateway()
     ctx = CallContext(request_id=f"qbank:{job.qp.key}", tenant_id=tenant_id)
     extraction = extract_paper(gateway, ctx, paper, role=role, models=[model] if model else None, table=table)
-    merged = merge_pages(extraction.pages)
+    merged = without_off_syllabus_tags(merge_pages(extraction.pages), job.qp.untagged_questions)
     items = [m[0] for m in merged]
     if table is not None:
         check = check_paper_against_table(

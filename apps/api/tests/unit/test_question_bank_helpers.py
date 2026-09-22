@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.jobs.question_bank import SUBJECT_NOTES, paper_notes
+from app.jobs.question_bank import SUBJECT_NOTES, paper_notes, without_off_syllabus_tags
 from app.modules.assessment.past_papers import ExtractedItem, _without_nul
 from app.modules.knowledge.manifest import SourceIn
 
@@ -47,3 +47,22 @@ def test_nul_characters_are_removed_from_item_text() -> None:
     clean = _without_nul(item)
     assert "\x00" not in clean.stem and "\x00" not in clean.mark_scheme
     assert clean.stem.endswith("[Density = mass  volume]") and clean.marks == 3
+
+
+def test_questions_off_the_current_syllabus_keep_no_objectives() -> None:
+    """Old papers' Media option (Q4) has no current unit: whatever the extractor tagged is dropped (22 Sep 2026)."""
+
+    def item(ref: str) -> ExtractedItem:
+        return ExtractedItem(
+            ref=ref, stem="s", marks=2, answer_type="extended_response", answer="a", mark_scheme="m",
+            objective_codes=["1.2", "2.1"],
+        )  # fmt: skip
+
+    merged = [(item("3(e)"), [4]), (item("4(e)"), [5]), (item("14"), [6])]
+    kept = without_off_syllabus_tags(merged, ["4"])
+    assert [(i.ref, i.objective_codes, pages) for i, pages in kept] == [
+        ("3(e)", ["1.2", "2.1"], [4]),
+        ("4(e)", [], [5]),
+        ("14", ["1.2", "2.1"], [6]),  # question 14 is not question 4
+    ]
+    assert without_off_syllabus_tags(merged, []) == merged

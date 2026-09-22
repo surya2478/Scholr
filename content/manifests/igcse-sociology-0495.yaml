@@ -52,6 +52,7 @@ sources:
     content_kind: question
     exam_series: MJ24
     component: "21"
+    untagged_questions: ["4"]  # the old Media option: no current unit
     notes: "1h45, 70 marks. Answer two of: Family, Education, Crime deviance and social control, Media (35 marks each)."
   - key: 0495-mj24-ms21
     <<: *cambridge
@@ -153,6 +154,7 @@ sources:
     content_kind: question
     exam_series: MJ23
     component: "21"
+    untagged_questions: ["4"]  # the old Media option: no current unit
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
   - key: 0495-mj23-qp22
     <<: *papacambridge
@@ -162,6 +164,7 @@ sources:
     content_kind: question
     exam_series: MJ23
     component: "22"
+    untagged_questions: ["4"]  # the old Media option: no current unit
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
   - key: 0495-mj25-er
     <<: *papacambridge
@@ -296,6 +299,7 @@ sources:
     content_kind: question
     exam_series: ON24
     component: "21"
+    untagged_questions: ["4"]  # the old Media option: no current unit
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
   - key: 0495-on24-qp22
     <<: *papacambridge
@@ -305,4 +309,5 @@ sources:
     content_kind: question
     exam_series: ON24
     component: "22"
+    untagged_questions: ["4"]  # the old Media option: no current unit
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
