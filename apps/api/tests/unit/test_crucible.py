@@ -1,33 +1,66 @@
-"""Unit tests for the Sociology 0495 Dialectical Crucible Engine."""
+"""The Crucible's guard (learn/crucible.py): perspectives must be cited, may name only who the excerpts name, and
+may not copy the book; it ends with questions, never an answer."""
 
 from __future__ import annotations
 
-from app.modules.curriculum.crucible import get_crucible_topic, list_crucible_topics
+from app.modules.learn import crucible, lessons
+
+BOOK = [
+    lessons.Excerpt(
+        "c1", "Sociology Coursebook", 40, "Parsons argued that the family performs two irreducible functions."
+    ),
+    lessons.Excerpt(
+        "c2", "Sociology Coursebook", 42, "Marxists see the family as serving capitalism as a unit of consumption."
+    ),
+]
 
 
-def test_list_and_filter_crucible_topics() -> None:
-    all_topics = list_crucible_topics()
-    assert len(all_topics) >= 2
+def draft(**overrides: object) -> crucible.CrucibleDraft:
+    base = {
+        "perspectives": [
+            {"perspective": "Functionalist", "sociologist": "Parsons", "argument": "The family keeps two key jobs.",
+             "key_concept": "irreducible functions", "sources": [1]},
+            {"perspective": "Marxist", "sociologist": "", "argument": "The family props up the economic system.",
+             "key_concept": "consumption", "sources": [2]},
+        ],
+        "questions_to_weigh": ["Which view fits today's family diversity better?", "The family is necessary."],
+    }  # fmt: skip
+    return crucible.CrucibleDraft.model_validate({**base, **overrides})
 
-    edu_topics = list_crucible_topics("Education")
-    assert len(edu_topics) == 1
-    assert edu_topics[0].syllabus_unit == "Education"
-    assert "social mobility" in edu_topics[0].essay_question
 
-    fam_topics = list_crucible_topics("Family")
-    assert len(fam_topics) == 1
-    assert fam_topics[0].syllabus_unit == "Family"
+def test_cited_perspectives_are_kept_and_only_questions_survive() -> None:
+    content, report = crucible.guard(draft(), BOOK)
+    assert content is not None and [p["perspective"] for p in content["perspectives"]] == ["Functionalist", "Marxist"]
+    assert content["perspectives"][0]["sources"] == [{"title": "Sociology Coursebook", "page": 40}]
+    assert content["questions"] == ["Which view fits today's family diversity better?"]  # a statement is dropped
+    assert report["dropped_questions"] == 1
 
 
-def test_crucible_topic_avatars_and_descriptors() -> None:
-    topic = get_crucible_topic("crucible-edu-01")
-    assert topic is not None
-    assert len(topic.avatars) == 3
+def test_a_name_the_book_does_not_give_or_no_citation_drops_the_perspective() -> None:
+    invented = draft(
+        perspectives=[
+            {"perspective": "Functionalist", "sociologist": "Parsons", "argument": "Two jobs.", "sources": [1]},
+            {"perspective": "Feminist", "sociologist": "Oakley", "argument": "Housework is unpaid.", "sources": [2]},
+            {"perspective": "Marxist", "argument": "It serves capital.", "sources": []},
+        ]
+    )
+    content, report = crucible.guard(invented, BOOK)
+    assert content is None  # only one perspective survives: no debate rather than a one-sided one
+    assert (report["dropped_named"], report["dropped_uncited"]) == (1, 1)
 
-    perspectives = {a.perspective for a in topic.avatars}
-    assert "Functionalist" in perspectives
-    assert "Marxist" in perspectives
-    assert "Feminist" in perspectives
 
-    assert "Level 4" in topic.ao3_level_4_descriptor
-    assert len(topic.synthesis_guidelines) >= 3
+def test_a_copied_example_goes_but_the_perspective_stays_and_school_names_are_not_people() -> None:
+    copied = "Marxists see the family as serving capitalism as a unit of consumption."
+    content, report = crucible.guard(
+        draft(
+            perspectives=[
+                {"perspective": "Functionalist", "sociologist": "Parsons", "argument": "The family keeps two key jobs.",
+                 "sources": [1]},
+                {"perspective": "Marxist", "argument": "Like the New Right, it treats the family as central, but as a "
+                 "prop for the economy.", "evidence": copied, "sources": [2]},
+            ]
+        ),
+        BOOK,
+    )  # fmt: skip
+    assert content is not None and content["perspectives"][1]["evidence"] == ""
+    assert report["evidence_dropped"] == 1 and report["dropped_named"] == 0  # "New Right" is a school, not a person

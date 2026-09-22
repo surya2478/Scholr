@@ -216,6 +216,17 @@ roles:
     max_tokens: 500
     timeout_s: 30
     retries: 1
+  crucible_writer:
+    # Perspectives on a real Sociology essay question, cited from her coursebook (learn/crucible.py). Replaced a
+    # hand-written set with unsourced claims (review, 22 Sep 2026). Guarded like lessons (citations, named
+    # sociologists, copying) and approved by a person. Flash-Lite; the job runs it on the Batch API.
+    model: google/gemini-2.5-flash-lite
+    batch_model: google/gemini-2.5-flash-lite:batch
+    fallbacks: []
+    temperature: 0.2
+    max_tokens: 1500
+    timeout_s: 60
+    retries: 1
   essay_planner:
     # Plans an extended answer, never writes one (AC-R5). Low-cost model (budget rule): the guard that
     # matters is deterministic — app.modules.tutoring.planning rejects any plan containing prose long

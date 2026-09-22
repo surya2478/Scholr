@@ -1,39 +1,57 @@
-"""Cognitive Mutation & Bug-Hunting Challenge Engine.
+"""Bug Hunter: find the wrong step in a candidate's working, as an examiner would (review of 22 Sep 2026).
 
-Inspired by Kurt VanLehn's Cognitive Bug Theory and software code reviews.
-Students act as the 'Chief Examiner' inspecting synthetic flawed solutions,
-pinpointing the derailed step, categorizing the misconception, and deciding
-whether Cambridge method marks (M) or accuracy marks (A) should be awarded.
+Every challenge is built from a checked source — a person-approved walkthrough (AC-U16): a real past-paper question
+whose steps passed the mark-scheme checks. Code, not a model, introduces ONE slip: it changes the result of one
+calculation step. SymPy confirms that step is now false and every other step still holds (``exam.arithmetic_holds``),
+so there is exactly one bug to find. (Carrying the wrong value forward made later steps false too, 22 Sep 2026.)
+
+What the method-mark answer is follows from the mark the official scheme gives that step: an M mark is for the
+method, so an arithmetic slip keeps it; an A or B mark is for the correct value, so it is lost. That is the
+convention printed at the front of every Cambridge mark scheme, not a claim about this question. What the examiners
+wrote about the real question comes from their report, attributed (AC-R6).
+
+The challenge sent to the page never says which step is wrong; only the verdict does.
 """
 
 from __future__ import annotations
 
-from typing import Any
+import hashlib
+import re
+from dataclasses import dataclass
+from uuid import UUID
 
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from app.core.errors import not_found
+from app.modules.assessment import service as assessment
+from app.modules.assessment.schemas import ExaminerInsightsOut
+from app.modules.learn import exam
+from app.modules.learn import service as learn
+
+BUG_TYPE = "calculation"
+_MATH = re.compile(r"\$([^$]+)\$")
+_RESULT = re.compile(r"(=\s*)(-?\d+(?:\.\d+)?)")
+_MARK = re.compile(r"^(SC|[MAB])\d$")
 
 
-class SolutionStep(BaseModel):
+class ChallengeStep(BaseModel):
     step_number: int
     text: str
-    is_bug: bool
-    explanation: str
 
 
 class BugChallenge(BaseModel):
-    id: str
+    """What the page shows: a candidate's working, with no hint of which step is wrong."""
+
+    id: str  # the objective id of the walkthrough it was built from
     title: str
-    subject_category: str
     topic_name: str
+    label: str  # "June 2025 · Paper 21 · Q18(d)"
+    question_context: str | None
     question_stem: str
     marks_available: int
-    student_alias: str
-    student_steps: list[SolutionStep]
-    bug_type: str
-    examiner_rationale: str
-    marks_to_award: dict[str, Any]
+    student_steps: list[ChallengeStep]
+    final_answer: str
 
 
 class BugVerificationIn(BaseModel):
@@ -45,249 +63,130 @@ class BugVerificationIn(BaseModel):
 class BugVerificationOut(BaseModel):
     correct_step: bool
     correct_type: bool
-    correct_mark: bool = False  # her decision on the method mark matched the scheme
+    correct_mark: bool = False  # her decision on the step's mark matched the mark scheme's convention
     success: bool
     score: int  # 0 to 100
+    bug_step: int
+    bug_explanation: str
+    correct_text: str  # the step as it should read
     examiner_report: str
     official_mark: str
+    examiner: ExaminerInsightsOut | None = None  # what the report said about the real question, attributed
 
 
-# Curated catalog of real Cambridge & IIT Foundation cognitive traps
-CHALLENGES: list[BugChallenge] = [
-    BugChallenge(
-        id="bug-math-01",
-        title="The Illegal Cancellation Fallacy",
-        subject_category="math_sciences",
-        topic_name="Algebraic Fractions (0580)",
-        question_stem="Simplify the expression: $\\frac{4x + 12}{4x}$",
-        marks_available=2,
-        student_alias="Candidate A",
-        student_steps=[
-            SolutionStep(
-                step_number=1,
-                text="Given: $\\frac{4x + 12}{4x}$",
-                is_bug=False,
-                explanation="Initial statement is copied correctly.",
-            ),
-            SolutionStep(
-                step_number=2,
-                text="Cancel $4x$ in the numerator with $4x$ in the denominator: $= 12$",
-                is_bug=True,
-                explanation=(
-                    "Fatal algebraic bug: terms added together cannot be cancelled individually! "
-                    "You must factorise the entire numerator first: $4(x + 3)$."
-                ),
-            ),
-            SolutionStep(
-                step_number=3,
-                text="Final Answer: $12$",
-                is_bug=False,
-                explanation="Propagated from the faulty step 2.",
-            ),
-        ],
-        bug_type="conceptual",
-        examiner_rationale=(
-            "Cambridge mark schemes strictly penalise cancelling terms across addition or subtraction. "
-            "Correct step: $\\frac{4(x + 3)}{4x} = \\frac{x + 3}{x}$ or $1 + \\frac{3}{x}$."
-        ),
-        marks_to_award={"M1": False, "A1": False, "official": "0 / 2 Marks (B0)"},
-    ),
-    BugChallenge(
-        id="bug-math-02",
-        title="The Negative Bracket Distribution Trap",
-        subject_category="math_sciences",
-        topic_name="Linear Equations & Expansion (0580)",
-        question_stem="Expand and simplify: $5 - 2(3x - 4)$",
-        marks_available=2,
-        student_alias="Candidate B",
-        student_steps=[
-            SolutionStep(
-                step_number=1,
-                text="Given: $5 - 2(3x - 4)$",
-                is_bug=False,
-                explanation="Initial expression.",
-            ),
-            SolutionStep(
-                step_number=2,
-                text="Expand brackets: $= 5 - 6x - 8$",
-                is_bug=True,
-                explanation=(
-                    "Sign error: $-2 \\times (-4) = +8$, not $-8$. A negative times a negative produces a positive."
-                ),
-            ),
-            SolutionStep(
-                step_number=3,
-                text="Simplify: $= -3 - 6x$",
-                is_bug=False,
-                explanation="Arithmetic following faulty step 2.",
-            ),
-        ],
-        bug_type="calculation",
-        examiner_rationale=(
-            "Distributing negative factors across brackets is the single most frequent mark loss in Paper 2. "
-            "Correct expansion: $5 - 6x + 8 = 13 - 6x$."
-        ),
-        marks_to_award={"M1": True, "A1": False, "official": "1 / 2 Marks (M1 for $-6x$, A0 for incorrect constant)"},
-    ),
-    BugChallenge(
-        id="bug-math-03",
-        title="The Root Eraser (Dividing by Variable)",
-        subject_category="math_sciences",
-        topic_name="Quadratic Equations (0580 & IIT)",
-        question_stem="Solve the equation for $x$: $x^2 = 7x$",
-        marks_available=2,
-        student_alias="Candidate C",
-        student_steps=[
-            SolutionStep(
-                step_number=1,
-                text="Given: $x^2 = 7x$",
-                is_bug=False,
-                explanation="Initial equation.",
-            ),
-            SolutionStep(
-                step_number=2,
-                text="Divide both sides by $x$: $\\frac{x^2}{x} = \\frac{7x}{x}$",
-                is_bug=True,
-                explanation=(
-                    "Dividing by a variable that could be zero erases a valid root ($x = 0$)! "
-                    "You must factorise: $x^2 - 7x = 0 \\implies x(x - 7) = 0$."
-                ),
-            ),
-            SolutionStep(
-                step_number=3,
-                text="Result: $x = 7$",
-                is_bug=False,
-                explanation="Only one of the two solutions found.",
-            ),
-        ],
-        bug_type="conceptual",
-        examiner_rationale=(
-            "Quadratic equations have up to two roots. Dividing through by $x$ loses the root $x = 0$, "
-            "costing the accuracy mark A1 in both Cambridge and JEE Foundation."
-        ),
-        marks_to_award={"M1": True, "A1": False, "official": "1 / 2 Marks (B1 for 7, B0 for missing 0)"},
-    ),
-    BugChallenge(
-        id="bug-phys-01",
-        title="The Apex Acceleration Fallacy",
-        subject_category="physical_sciences",
-        topic_name="Kinematics & Gravity (0625 & IIT)",
-        question_stem=(
-            "A ball is thrown vertically upward. State the velocity and acceleration at the very highest point."
-        ),
-        marks_available=2,
-        student_alias="Candidate D",
-        student_steps=[
-            SolutionStep(
-                step_number=1,
-                text=(
-                    "At the highest point, the ball momentarily stops moving, so vertical velocity $v = 0\\text{ m/s}$."
-                ),
-                is_bug=False,
-                explanation="Correct: instantaneous vertical velocity is zero at the zenith.",
-            ),
-            SolutionStep(
-                step_number=2,
-                text="Because the ball is stopped, there is no motion, therefore acceleration $a = 0\\text{ m/s}^2$.",
-                is_bug=True,
-                explanation=(
-                    "Gravity never turns off! Earth's gravitational field continues exerting a downward force $mg$, "
-                    "so acceleration remains $9.8\\text{ m/s}^2$ downward."
-                ),
-            ),
-        ],
-        bug_type="conceptual",
-        examiner_rationale=(
-            "Conflating zero instantaneous velocity with zero acceleration is an elite physics misconception. "
-            "If acceleration were zero at the top, the ball would float in mid-air forever!"
-        ),
-        marks_to_award={"M1": True, "A1": False, "official": "1 / 2 Marks (1 mark for $v=0$, 0 for acceleration)"},
-    ),
-    BugChallenge(
-        id="bug-soc-01",
-        title="Validity vs Reliability Conflation",
-        subject_category="social_sciences",
-        topic_name="Research Methods (0495)",
-        question_stem="Explain one advantage of using closed-question questionnaires in sociological research.",
-        marks_available=2,
-        student_alias="Candidate E",
-        student_steps=[
-            SolutionStep(
-                step_number=1,
-                text="Closed questions provide standardised answers with pre-coded choices.",
-                is_bug=False,
-                explanation="Accurate description of closed questionnaires.",
-            ),
-            SolutionStep(
-                step_number=2,
-                text=(
-                    "This makes the research highly valid because respondents give deep, "
-                    "truthful accounts of their subjective meanings."
-                ),
-                is_bug=True,
-                explanation=(
-                    "Closed questionnaires produce high reliability (replicability), NOT high validity. "
-                    "Pre-coded options limit depth and may lack genuine validity."
-                ),
-            ),
-        ],
-        bug_type="vocabulary",
-        examiner_rationale=(
-            "Confusing validity (truthfulness, depth) with reliability (repeatability, consistency) "
-            "is the #1 conceptual error cited in Cambridge Principal Examiner reports for 0495 Paper 1."
-        ),
-        marks_to_award={
-            "M1": True,
-            "A1": False,
-            "official": "1 / 2 Marks (1 mark for closed questions feature, 0 for incorrect validity claim)",
-        },
-    ),
-]
+@dataclass(frozen=True)
+class _Built:
+    challenge: BugChallenge
+    bug_step: int
+    old_value: str
+    new_value: str
+    correct_text: str
+    step_mark: str
+    item_id: UUID
 
 
-def list_challenges(subject: str | None = None) -> list[BugChallenge]:
-    """Return bug hunting cases, optionally filtered by subject category."""
-    if not subject:
-        return CHALLENGES
-    return [c for c in CHALLENGES if c.subject_category.lower() == subject.lower()]
+def _wrong_value(value: str) -> str:
+    """A plausible slip: the last digit moved by one ("18" -> "19", "2.5" -> "2.6", "-8" -> "-7")."""
+    head, last = value[:-1], int(value[-1])
+    return f"{head}{(last + 1) % 10}" if last != 9 else f"{head}8"
 
 
-def get_challenge(challenge_id: str) -> BugChallenge | None:
-    """Retrieve a single bug challenge by ID."""
-    for c in CHALLENGES:
-        if c.id == challenge_id:
-            return c
+def _mutate_step(text: str) -> tuple[str, str, str] | None:
+    """(new text, old value, new value) with the first numeric result of the step's maths changed, or None."""
+    for segment in _MATH.finditer(text):
+        found = _RESULT.search(segment.group(1))
+        if not found:
+            continue
+        old = found.group(2)
+        new = _wrong_value(old)
+        body = segment.group(1)
+        changed = body[: found.start(2)] + new + body[found.end(2) :]
+        new_text = text[: segment.start(1)] + changed + text[segment.end(1) :]
+        if not exam.arithmetic_holds([new_text]):  # SymPy agrees the step is now wrong
+            return new_text, old, new
     return None
 
 
-def verify_challenge(challenge_id: str, submission: BugVerificationIn) -> BugVerificationOut:
-    """Mark her Chief Examiner decision: the faulty step (50), the kind of error (25), and whether the method mark
-    stands (25). Until 22 Sep 2026 the method-mark decision was asked for and never checked."""
-    challenge = get_challenge(challenge_id)
-    if not challenge:
+def build(w: learn.ApprovedWalkthrough) -> _Built | None:
+    """One challenge per walkthrough: the slip goes in the first calculation step that carries a mark of its own,
+    chosen the same way every time (so a challenge can be checked again from its id)."""
+    candidates = [i for i, step in enumerate(w.steps) if _MARK.match(step.get("mark", "") or "")]
+    start = int(hashlib.sha256(str(w.objective_id).encode()).hexdigest(), 16) % max(1, len(candidates))
+    for index in candidates[start:] + candidates[:start]:
+        mutated = _mutate_step(w.steps[index]["text"])
+        if mutated is None:
+            continue
+        new_text, old, new = mutated
+        steps = [
+            ChallengeStep(step_number=i + 1, text=new_text if i == index else step["text"])
+            for i, step in enumerate(w.steps)
+        ]
+        if not all(exam.arithmetic_holds([s.text]) for s in steps if s.step_number != index + 1):
+            continue  # another step already fails the check: the bug would not be the only one
+        return _Built(
+            challenge=BugChallenge(
+                id=str(w.objective_id),
+                title=f"{w.code} {w.statement}",
+                topic_name=w.statement,
+                label=w.label,
+                question_context=w.context,
+                question_stem=w.stem,
+                marks_available=w.marks,
+                student_steps=steps,
+                # The answer line follows the slip, as a candidate's would; it is not a step, so no second bug.
+                final_answer=re.sub(rf"(?<![\d.]){re.escape(old)}(?![\d.])", new, w.final_answer),
+            ),
+            bug_step=index + 1,
+            old_value=old,
+            new_value=new,
+            correct_text=w.steps[index]["text"],
+            step_mark=w.steps[index]["mark"],
+            item_id=w.item_id,
+        )
+    return None
+
+
+def list_challenges(s: Session, *, subject_id: UUID | None = None) -> list[BugChallenge]:
+    return [b.challenge for w in learn.approved_walkthroughs(s, subject_id) if (b := build(w)) is not None]
+
+
+def verify_challenge(s: Session, challenge_id: str, submission: BugVerificationIn) -> BugVerificationOut:
+    """Mark her examiner's decision: the faulty step (50), the kind of error (25), and whether the step's mark
+    stands (25). She succeeds only if she found the step and got the mark decision right."""
+    try:
+        objective_id = UUID(challenge_id)
+    except ValueError:
+        raise not_found("challenge") from None
+    built = next(
+        (b for w in learn.approved_walkthroughs(s) if w.objective_id == objective_id and (b := build(w)) is not None),
+        None,
+    )
+    if built is None:
         raise not_found("challenge")
 
-    actual_bug_step = next(s for s in challenge.student_steps if s.is_bug)
-    correct_step = submission.selected_step == actual_bug_step.step_number
-    correct_type = submission.selected_bug_type.lower() == challenge.bug_type.lower()
-    method_mark_due = bool(challenge.marks_to_award.get("M1", False))
-    correct_mark = submission.award_method_mark == method_mark_due
-
+    method_mark = built.step_mark.startswith("M")
+    correct_step = submission.selected_step == built.bug_step
+    correct_type = submission.selected_bug_type.lower() == BUG_TYPE
+    correct_mark = submission.award_method_mark == method_mark
     score = (50 if correct_step else 0) + (25 if correct_type else 0) + (25 if correct_mark else 0)
-    success = correct_step and correct_mark
 
-    decision = "should" if method_mark_due else "should not"
-    report = (
-        f"Step {actual_bug_step.step_number} was the fatal breakdown: {actual_bug_step.explanation} "
-        f"The method mark {decision} be awarded. {challenge.examiner_rationale}"
+    keeps = (
+        f"In the mark scheme this step earns {built.step_mark}. An M mark is for the method, so a correct method "
+        "with an arithmetic slip keeps it; the accuracy marks that need the right value are lost."
+        if method_mark
+        else f"In the mark scheme this step earns {built.step_mark}. That mark is for the correct value, so the slip "
+        "loses it — and a later mark that needs this value goes too, unless the scheme allows follow-through."
     )
-
     return BugVerificationOut(
         correct_step=correct_step,
         correct_type=correct_type,
         correct_mark=correct_mark,
-        success=success,
+        success=correct_step and correct_mark,
         score=score,
-        examiner_report=report,
-        official_mark=challenge.marks_to_award.get("official", "Marked"),
+        bug_step=built.bug_step,
+        bug_explanation=f"Step {built.bug_step} gives {built.new_value} where the working gives {built.old_value}.",
+        correct_text=built.correct_text,
+        examiner_report=keeps,
+        official_mark=f"This step: {built.step_mark} {'kept' if method_mark else 'lost'}",
+        examiner=assessment.examiner_insights(s, built.item_id),
     )

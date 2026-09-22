@@ -28,12 +28,14 @@ from app.modules.events import service as events
 from app.modules.external_training import service as external_training
 from app.modules.identity import service as identity
 from app.modules.knowledge import service as knowledge
-from app.modules.learn import diagrams, exam, labels, lessons, pacing, viva
+from app.modules.learn import crucible, diagrams, exam, labels, lessons, pacing, viva
 from app.modules.learn.models import Lesson
 from app.modules.learn.schemas import (
     ChapterOut,
     ClassLogOut,
     ConnectionOut,
+    CrucibleOut,
+    CruciblePerspectiveOut,
     DiagramOut,
     ExamLevelOut,
     ExternalLessonOut,
@@ -81,6 +83,9 @@ WALK_ROLE = "exam_walker"
 WALK_PROMPT = "exam_walkthrough"
 VIVA_ROLE = "viva_judge"
 VIVA_PROMPT = "viva_judge"
+CRUCIBLE_ROLE = "crucible_writer"
+CRUCIBLE_PROMPT = "crucible_write"
+CRUCIBLE_MIN_MARKS = 10
 MAX_DIAGRAMS = 2
 EXCERPTS = 8
 CHECK_YOURSELF = 3
@@ -349,6 +354,7 @@ def topic_view(s: Session, objective_id: UUID, *, student_id: UUID | None, now: 
         _add_steps(s, out, row=row, student_id=student_id, objective_id=objective_id)
         return out
     out.tutor_available = True
+    out.crucible = _crucible(s, row, items) if config.pedagogy.debates else None
     out.exam_level = _exam_level(s, row, items, solves=config.pedagogy.worked_example_check == "sympy")
     worked_id = out.exam_level.worked.item_id if out.exam_level and out.exam_level.worked else None
     # The worked exam question is solved on the page, so it is not also offered to her as one to try.
@@ -367,6 +373,35 @@ def topic_view(s: Session, objective_id: UUID, *, student_id: UUID | None, now: 
         ]
     _add_steps(s, out, row=row, student_id=student_id, objective_id=objective_id)
     return out
+
+
+def _crucible(s: Session, row: Lesson | None, items: Sequence[assessment.ItemBrief]) -> CrucibleOut | None:
+    stored = ((row.content or {}) if row else {}).get("crucible")
+    if not stored or not stored.get("approved"):
+        return None
+    brief = next((i for i in items if str(i.id) == stored.get("item_id")), None)
+    if brief is None:
+        return None  # the question left the bank
+    item = assessment.servable_item(s, brief.id)
+    return CrucibleOut(
+        question=_item_card(brief),
+        stem=item.stem,
+        perspectives=[
+            CruciblePerspectiveOut(
+                perspective=p["perspective"],
+                sociologist=p.get("sociologist", ""),
+                argument=p["argument"],
+                key_concept=p.get("key_concept", ""),
+                evidence=p.get("evidence", ""),
+                sources=[
+                    SourceRefOut(title=title, page=page)
+                    for title, page in dict.fromkeys((x["title"], x.get("page")) for x in p.get("sources", []))
+                ],
+            )
+            for p in stored["perspectives"]
+        ],
+        questions=list(stored.get("questions", [])),
+    )
 
 
 def _exam_level(
@@ -872,7 +907,7 @@ def record_lesson(
     if row is None:
         row = Lesson(tenant_id=prepared.tenant_id, subject_id=prepared.subject_id, objective_id=prepared.objective_id)
         s.add(row)
-    kept = {"exam": row.content["exam"]} if row.content and row.content.get("exam") else {}
+    kept = {k: row.content[k] for k in ("exam", "crucible") if row.content and row.content.get(k)}
     row.status = written.status
     row.retrieval_state = prepared.retrieval_state
     # The worked exam question does not depend on the lesson text, so a rewrite keeps it.
@@ -1250,3 +1285,159 @@ def judge_viva_step(
         hint=judged.hint,
         **reveal,
     )
+
+
+@dataclass(frozen=True)
+class ApprovedWalkthrough:
+    """A person-approved solved exam question (AC-U16), for features that build on one: the viva, Bug Hunter."""
+
+    objective_id: UUID
+    code: str
+    statement: str
+    subject_id: UUID
+    item_id: UUID
+    source_ref: str | None
+    label: str
+    context: str | None
+    stem: str
+    marks: int
+    steps: tuple[dict, ...]
+    final_answer: str
+
+
+def approved_walkthroughs(s: Session, subject_id: UUID | None = None) -> list[ApprovedWalkthrough]:
+    query = select(Lesson)
+    if subject_id is not None:
+        query = query.where(Lesson.subject_id == subject_id)
+    out = []
+    for row in s.scalars(query).all():
+        walk = (row.content or {}).get("exam")
+        if not walk or not walk.get("approved") or not walk.get("steps"):
+            continue
+        detail = curriculum.objective_detail(s, row.objective_id)
+        try:
+            item = assessment.servable_item(s, UUID(walk["item_id"]))
+        except ApiError:
+            continue  # the question left the bank since it was solved
+        if detail is None:
+            continue
+        out.append(
+            ApprovedWalkthrough(
+                objective_id=row.objective_id,
+                code=detail.code,
+                statement=detail.statement,
+                subject_id=row.subject_id,
+                item_id=item.id,
+                source_ref=item.source_ref,
+                label=labels.item_label(item.source_ref, "past_paper"),
+                context=item.context,
+                stem=item.stem,
+                marks=item.marks,
+                steps=tuple(walk["steps"]),
+                final_answer=walk.get("final_answer", ""),
+            )
+        )
+    return sorted(out, key=lambda w: [int(p) if p.isdigit() else p for p in w.code.split(".")])
+
+
+# ---------------------------------------------------------------------------
+# The Crucible (learn/crucible.py): perspectives on a real essay question, from her coursebook
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class PreparedCrucible:
+    objective_id: UUID
+    item_id: UUID
+    excerpts: list[lessons.Excerpt]
+    variables: dict[str, str]
+
+
+def prepare_crucible(s: Session, gateway: LLMGateway, ctx: CallContext, objective_id: UUID) -> PreparedCrucible | None:
+    """The topic's highest-mark essay question and the coursebook excerpts on it, or None: the subject has no
+    debates in its config, there is no essay question on the topic, or the book does not cover it well enough."""
+    detail = curriculum.objective_detail(s, objective_id)
+    if detail is None:
+        raise not_found("objective")
+    config = subjects.config_for(detail.subject_code)
+    if not isinstance(config, subjects.ExplainedSubjectConfig) or not config.pedagogy.debates:
+        return None
+    essays = [i for i in assessment.items_for_objective(s, objective_id) if i.marks >= CRUCIBLE_MIN_MARKS]
+    if not essays:
+        return None
+    brief = max(essays, key=lambda i: (i.marks, i.source_ref or ""))
+    item = assessment.servable_item(s, brief.id)
+    result = knowledge.search(
+        s, gateway, ctx, query=item.stem, subject_id=detail.subject_id, objective_ids=[objective_id], k=10
+    )
+    if result.state not in lessons.GROUNDED_STATES:
+        return None  # not enough in her book to stand behind: no debate rather than an ungrounded one
+    excerpts = [
+        lessons.Excerpt(str(c.id), c.source_title, c.printed_page if (c.printed_page or 0) >= 1 else None, c.content)
+        for c in result.chunks
+        if c.content_kind != "question"
+    ]
+    return PreparedCrucible(
+        objective_id=objective_id,
+        item_id=item.id,
+        excerpts=excerpts,
+        variables={"marks": str(item.marks), "question": item.stem, "excerpts": _format_excerpts(excerpts)},
+    )
+
+
+def finish_crucible(prepared: PreparedCrucible, result: LLMResult[crucible.CrucibleDraft]) -> tuple[dict | None, dict]:
+    content, report = crucible.guard(result.value, prepared.excerpts)
+    if content is not None:
+        content = {
+            **content,
+            "item_id": str(prepared.item_id),
+            "approved": False,  # a person reads it first
+            "prompt_version": result.prompt_version,
+            "model": result.model,
+        }
+    return content, report
+
+
+def record_crucible(s: Session, objective_id: UUID, content: dict, *, now: datetime) -> bool:
+    row = s.scalar(select(Lesson).where(Lesson.objective_id == objective_id))
+    if row is None:
+        return False
+    row.content = {**(row.content or {}), "crucible": {**content, "written_at": now.isoformat()}}
+    s.flush()
+    audit.record(
+        s,
+        tenant_id=row.tenant_id,
+        actor_user_id=None,
+        actor_role="system",
+        action="learn.crucible_written",
+        entity_type="lesson",
+        entity_id=row.id,
+        meta={"item_id": content.get("item_id"), "model": content.get("model")},
+    )
+    return True
+
+
+def decide_crucible(s: Session, objective_id: UUID, *, approved: bool) -> bool:
+    """A person's decision on a stored debate: approve it (she sees it) or reject it (it is deleted)."""
+    row = s.scalar(select(Lesson).where(Lesson.objective_id == objective_id))
+    stored = (row.content or {}).get("crucible") if row else None
+    if row is None or not stored:
+        return False
+    content = dict(row.content)
+    if approved:
+        content["crucible"] = {**stored, "approved": True}
+    else:
+        content.pop("crucible")
+    row.content = content
+    s.flush()
+    audit.record(
+        s,
+        tenant_id=row.tenant_id,
+        actor_user_id=None,
+        actor_role="system",
+        action="learn.crucible_approved" if approved else "learn.crucible_rejected",
+        entity_type="lesson",
+        entity_id=row.id,
+        meta={"item_id": stored.get("item_id")},
+    )
+    return True

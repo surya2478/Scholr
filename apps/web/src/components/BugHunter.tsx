@@ -1,53 +1,52 @@
 "use client";
 
 import { useState } from "react";
+import { ExaminerInsightsView } from "@/components/ExaminerInsights";
 import { MathText } from "@/components/MathText";
 import { Button, Card, Chip, Empty, ErrorNote } from "@/components/ui";
 import { api, type BugChallenge, type BugVerificationOut } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 
-const BUG_CATEGORIES = [
-  { value: "conceptual", label: "Conceptual Misunderstanding" },
-  { value: "calculation", label: "Calculation / Sign Error" },
-  { value: "vocabulary", label: "Vocabulary / Terminology Conflation" },
-  { value: "accuracy", label: "Premature Rounding / Accuracy Loss" },
+// Bug Hunter: a candidate's working on a real past-paper question, with one slip in it. She finds the step, names the
+// kind of error, and decides whether that step's mark would still be awarded. Every challenge is built from a solved
+// question a parent approved, with the slip checked by SymPy (mistakes/challenges.py) — nothing here is invented.
+
+const BUG_TYPES = [
+  { value: "calculation", label: "Calculation slip" },
+  { value: "conceptual", label: "Wrong method or idea" },
+  { value: "misreading", label: "Misread the question" },
+  { value: "accuracy", label: "Rounded too early" },
 ];
 
 export function BugHunter() {
-  const [selectedSubject, setSelectedSubject] = useState<string>("");
-  const challenges = useApi<BugChallenge[]>(
-    `/mistakes/challenges${selectedSubject ? `?subject=${selectedSubject}` : ""}`
-  );
-  const [activeChallengeId, setActiveChallengeId] = useState<string | null>(null);
-  const [selectedStep, setSelectedStep] = useState<number | null>(null);
-  const [selectedBugType, setSelectedBugType] = useState<string>("conceptual");
-  const [awardMethodMark, setAwardMethodMark] = useState<boolean>(true);
+  const challenges = useApi<BugChallenge[]>("/mistakes/challenges");
+  const [active, setActive] = useState<BugChallenge | null>(null);
+  const [step, setStep] = useState<number | null>(null);
+  const [bugType, setBugType] = useState("calculation");
+  const [keepsMark, setKeepsMark] = useState<boolean | null>(null);
   const [verdict, setVerdict] = useState<BugVerificationOut | null>(null);
-  const [busy, setBusy] = useState<boolean>(false);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
-  const activeChallenge =
-    challenges.data?.find((c) => c.id === activeChallengeId) ??
-    challenges.data?.[0] ??
-    null;
+  function open(c: BugChallenge) {
+    setActive(c);
+    setStep(null);
+    setKeepsMark(null);
+    setVerdict(null);
+    setError(null);
+  }
 
-  async function submitVerdict() {
-    if (!activeChallenge || selectedStep === null) return;
+  async function submit() {
+    if (!active || step === null || keepsMark === null) return;
     setBusy(true);
     setError(null);
     try {
-      const result = await api<BugVerificationOut>(
-        `/mistakes/challenges/${activeChallenge.id}/verify`,
-        {
+      setVerdict(
+        await api<BugVerificationOut>(`/mistakes/challenges/${active.id}/verify`, {
           method: "POST",
-          json: {
-            selected_step: selectedStep,
-            selected_bug_type: selectedBugType,
-            award_method_mark: awardMethodMark,
-          },
-        }
+          json: { selected_step: step, selected_bug_type: bugType, award_method_mark: keepsMark },
+        })
       );
-      setVerdict(result);
     } catch (err) {
       setError(err);
     } finally {
@@ -55,230 +54,132 @@ export function BugHunter() {
     }
   }
 
-  function nextCase(id: string) {
-    setActiveChallengeId(id);
-    setSelectedStep(null);
-    setVerdict(null);
-    setError(null);
-  }
-
   return (
-    <div className="space-y-6">
-      {/* Banner */}
-      <div className="rounded-3xl border-2 border-orange-200 bg-gradient-to-br from-amber-50 via-[#FFF9F2] to-orange-50 p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center sm:text-left">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-fun font-bold border border-orange-200">
-              <span>🕵️‍♀️</span> Chief Examiner Review
-            </span>
-            <h2 className="text-xl md:text-2xl font-fun font-bold text-slate-900">
-              The Cognitive Bug Hunter
-            </h2>
-            <p className="text-xs md:text-sm text-slate-600 font-medium max-w-xl">
-              Inspect synthetic student solutions with real Cambridge and IIT exam traps. Spotting subtle bugs in others&apos; reasoning builds an immune system against making them yourself!
-            </p>
-          </div>
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-2xl text-white shadow-md select-none">
-            🔬
-          </div>
-        </div>
+    <Card
+      title="🔬 Bug Hunter"
+      subtitle="A candidate's working on a real exam question has one slip in it. Find it, and decide what it costs."
+      tone="amber"
+    >
+      {error ? <ErrorNote error={error} /> : null}
+      {challenges.error ? <ErrorNote error={challenges.error} /> : null}
 
-        {/* Subject Filter Pills */}
-        <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-orange-200/70">
-          {[
-            { value: "", label: "All Subjects" },
-            { value: "math_sciences", label: "📐 Mathematics (0580)" },
-            { value: "physical_sciences", label: "⚡ Physics (0625)" },
-            { value: "social_sciences", label: "📚 Sociology (0495)" },
-          ].map((s) => (
+      {!active && (
+        <div className="flex flex-col gap-2">
+          {challenges.data?.length === 0 && (
+            <Empty>No challenges yet — they are built from solved exam questions once a parent approves them.</Empty>
+          )}
+          {challenges.data?.map((c) => (
             <button
-              key={s.value}
-              onClick={() => {
-                setSelectedSubject(s.value);
-                setVerdict(null);
-                setSelectedStep(null);
-              }}
-              className={`rounded-xl px-3 py-1 text-xs font-fun font-bold transition-all cursor-pointer ${
-                selectedSubject === s.value
-                  ? "bg-orange-500 text-white shadow-2xs"
-                  : "bg-white text-slate-600 hover:bg-orange-100 border border-orange-200"
-              }`}
+              key={c.id}
+              onClick={() => open(c)}
+              className="flex flex-col items-start rounded-2xl border border-amber-200 bg-white px-3.5 py-2.5 text-left hover:bg-amber-50"
             >
-              {s.label}
+              <span className="text-sm font-semibold text-slate-900">{c.title}</span>
+              <span className="text-[11px] text-slate-500">
+                {c.label} · {c.marks_available} marks · {c.student_steps.length} steps
+              </span>
             </button>
           ))}
         </div>
-      </div>
+      )}
 
-      {challenges.error ? <ErrorNote error={challenges.error} /> : null}
+      {active && (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Chip tone="neutral">
+              {active.label} · {active.marks_available} marks
+            </Chip>
+            <button onClick={() => setActive(null)} className="text-[11px] font-semibold text-amber-800 hover:underline">
+              Choose another
+            </button>
+          </div>
+          {active.question_context && <MathText text={active.question_context} className="text-sm text-slate-700" />}
+          <MathText text={active.question_stem} className="text-sm font-medium text-slate-900" />
 
-      {/* Main Challenge Arena */}
-      {activeChallenge ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Challenge Selector & Question Stem (4 cols) */}
-          <div className="lg:col-span-5 space-y-4">
-            <Card
-              title="Case Dossier"
-              subtitle={`Showing cases for ${selectedSubject || "All Curricula"}`}
-            >
-              <div className="space-y-2">
-                {challenges.data?.map((c) => (
+          <p className="text-xs font-bold text-slate-600">The candidate&apos;s working — tap the step with the slip:</p>
+          <ol className="flex flex-col gap-1.5">
+            {active.student_steps.map((s) => (
+              <li key={s.step_number}>
+                <button
+                  onClick={() => !verdict && setStep(s.step_number)}
+                  className={`flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-sm ${
+                    verdict && s.step_number === verdict.bug_step
+                      ? "border-rose-300 bg-rose-50"
+                      : step === s.step_number
+                        ? "border-amber-400 bg-amber-50"
+                        : "border-slate-200 bg-white hover:bg-slate-50"
+                  }`}
+                >
+                  <span className="font-bold text-slate-500">{s.step_number}.</span>
+                  <MathText text={s.text} className="flex-1" />
+                </button>
+              </li>
+            ))}
+          </ol>
+          <p className="text-sm text-slate-800">
+            Answer given: <MathText text={active.final_answer} />
+          </p>
+
+          {!verdict && (
+            <div className="flex flex-col gap-2 rounded-2xl border border-amber-200 bg-amber-50/50 p-3">
+              <label className="text-xs font-bold text-slate-700">
+                What kind of error is it?{" "}
+                <select
+                  value={bugType}
+                  onChange={(e) => setBugType(e.target.value)}
+                  className="ml-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs"
+                >
+                  {BUG_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-700">
+                Does that step still earn its mark?
+                {[
+                  { value: true, label: "Yes, it keeps it" },
+                  { value: false, label: "No, it's lost" },
+                ].map((o) => (
                   <button
-                    key={c.id}
-                    onClick={() => nextCase(c.id)}
-                    className={`w-full text-left p-3 rounded-2xl border transition-all cursor-pointer ${
-                      activeChallenge.id === c.id
-                        ? "border-orange-400 bg-orange-50/80 shadow-2xs"
-                        : "border-slate-200 bg-white hover:border-orange-300 hover:bg-amber-50/30"
+                    key={String(o.value)}
+                    onClick={() => setKeepsMark(o.value)}
+                    className={`rounded-lg border px-2.5 py-1 ${
+                      keepsMark === o.value ? "border-amber-500 bg-white" : "border-slate-200 bg-white/60"
                     }`}
                   >
-                    <div className="flex items-center justify-between text-xs font-fun font-bold">
-                      <span className="text-slate-900">{c.title}</span>
-                      <Chip tone="neutral">{c.subject_category}</Chip>
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-1">
-                      {c.topic_name} · {c.marks_available} Marks
-                    </div>
+                    {o.label}
                   </button>
                 ))}
               </div>
-            </Card>
+              <Button
+                onClick={() => void submit()}
+                disabled={busy || step === null || keepsMark === null}
+                className="h-8 self-start px-3 text-xs"
+              >
+                {busy ? "Checking…" : "Give my verdict"}
+              </Button>
+            </div>
+          )}
 
-            <Card title="Exam Question Stem" subtitle="Official Cambridge Question">
-              <div className="p-3.5 rounded-2xl bg-white border border-slate-200 text-sm font-medium text-slate-900 leading-relaxed">
-                <MathText text={activeChallenge.question_stem} />
-              </div>
-            </Card>
-          </div>
-
-          {/* Right Column: Student Solution & Inspector (7 cols) */}
-          <div className="lg:col-span-7 space-y-4">
-            <Card
-              title={`Examining ${activeChallenge.student_alias}'s Solution`}
-              subtitle="Click on the exact line where the reasoning broke down!"
-              tone="amber"
-            >
-              <div className="space-y-3">
-                <p className="text-xs text-slate-600 font-medium">
-                  Review each step below. Which step contains the fatal algebraic, physical, or sociological flaw?
-                </p>
-
-                <div className="space-y-2">
-                  {activeChallenge.student_steps.map((step) => (
-                    <button
-                      key={step.step_number}
-                      type="button"
-                      onClick={() => {
-                        setSelectedStep(step.step_number);
-                        setVerdict(null);
-                      }}
-                      className={`w-full text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
-                        selectedStep === step.step_number
-                          ? "border-orange-500 bg-orange-50/90 shadow-sm ring-2 ring-orange-400/30"
-                          : "border-slate-200 bg-white hover:border-orange-300 hover:bg-orange-50/30"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between text-xs font-fun font-bold text-slate-500 mb-1">
-                        <span>Step {step.step_number}</span>
-                        {selectedStep === step.step_number && (
-                          <span className="text-orange-700 font-bold bg-orange-100 px-2 py-0.5 rounded-full text-[10px]">
-                            FLAGGED AS BUG 🎯
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm font-medium text-slate-800 leading-relaxed">
-                        <MathText text={step.text} />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Bug Diagnosis Controls */}
-                <div className="pt-3 border-t border-amber-200/70 space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-fun font-bold text-slate-800">
-                      Misconception Classification:
-                    </label>
-                    <select
-                      value={selectedBugType}
-                      onChange={(e) => setSelectedBugType(e.target.value)}
-                      className="w-full h-10 rounded-xl border border-amber-300 bg-white px-3 text-xs font-semibold text-slate-800 outline-none focus:border-orange-400"
-                    >
-                      {BUG_CATEGORIES.map((cat) => (
-                        <option key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="awardM"
-                      checked={awardMethodMark}
-                      onChange={(e) => setAwardMethodMark(e.target.checked)}
-                      className="h-4 w-4 rounded text-orange-600 focus:ring-orange-400"
-                    />
-                    <label htmlFor="awardM" className="text-xs font-medium text-slate-700">
-                      Award partial method mark ($M1$) for attempted formula/working
-                    </label>
-                  </div>
-
-                  <Button
-                    disabled={selectedStep === null || busy}
-                    onClick={submitVerdict}
-                    className="w-full"
-                  >
-                    {busy ? "Reviewing with Cambridge mark scheme…" : "Submit Chief Examiner Verdict ⚖️"}
-                  </Button>
-                </div>
-
-                {error ? <ErrorNote error={error} /> : null}
-
-                {/* Verdict Display */}
-                {verdict && (
-                  <div
-                    className={`p-4 rounded-2xl border-2 space-y-2.5 animate-fadeIn ${
-                      verdict.success
-                        ? "border-emerald-300 bg-emerald-50 text-emerald-950"
-                        : "border-rose-300 bg-rose-50 text-rose-950"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{verdict.success ? "🏆" : "🤔"}</span>
-                        <div className="font-fun font-bold text-sm">
-                          {verdict.success ? "Outstanding Diagnosis!" : "Close, but re-read the steps!"}
-                        </div>
-                      </div>
-                      <span className="text-xs font-fun font-extrabold px-2.5 py-0.5 rounded-full bg-white/80 border border-slate-300">
-                        Score: {verdict.score}/100
-                      </span>
-                    </div>
-
-                    <p className="text-[11px] font-semibold">
-                      {verdict.correct_step ? "✓" : "✗"} faulty step · {verdict.correct_type ? "✓" : "✗"} kind of error ·{" "}
-                      {verdict.correct_mark ? "✓" : "✗"} method mark decision
-                    </p>
-                    <p className="text-xs leading-relaxed font-medium">
-                      {verdict.examiner_report}
-                    </p>
-
-                    <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-semibold">
-                      {/* Written for this exercise, not taken from a Cambridge mark scheme (review, 22 Sep 2026). */}
-                      <span>How this would be marked:</span>
-                      <span className="font-fun font-bold">{verdict.official_mark}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </Card>
-          </div>
+          {verdict && (
+            <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-sm">
+              <p className="text-[11px] font-semibold">
+                {verdict.correct_step ? "✓" : "✗"} the step · {verdict.correct_type ? "✓" : "✗"} kind of error ·{" "}
+                {verdict.correct_mark ? "✓" : "✗"} the mark
+              </p>
+              <p className="text-slate-800">{verdict.bug_explanation}</p>
+              <p className="text-slate-700">
+                It should read: <MathText text={verdict.correct_text} />
+              </p>
+              <p className="text-slate-700">{verdict.examiner_report}</p>
+              <p className="text-xs font-semibold text-slate-500">{verdict.official_mark}</p>
+              {verdict.examiner && <ExaminerInsightsView data={verdict.examiner} />}
+            </div>
+          )}
         </div>
-      ) : (
-        <Empty>No bug challenges loaded for this subject yet.</Empty>
       )}
-    </div>
+    </Card>
   );
 }

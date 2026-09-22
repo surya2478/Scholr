@@ -113,6 +113,7 @@ python -m uv run python -m app.jobs.illustrate --subject igcse-maths [--limit N]
 python -m uv run python -m app.jobs.illustrate --subject igcse-maths --review | --approve <codes> | --reject <codes>   # a person decides what she sees
 python -m uv run python -m app.jobs.walkthroughs --subject igcse-maths [--only 15.4,1.6] [--redo] [--run]   # a real past-paper question solved per topic (AC-U16); without --run prints the estimate only
 python -m uv run python -m app.jobs.walkthroughs --subject igcse-maths --review | --approve <codes> | --reject <codes>   # a person decides what she sees
+python -m uv run python -m app.jobs.crucible --subject igcse-sociology [--only 4.1] [--redo] [--run] | --review | --approve <codes> | --reject <codes>   # Crucible debates from her coursebook (docs/STUDENT-APP.md §20)
 python -m uv run python -m app.jobs.lessons --subject igcse-maths --pilot 1.1,15.4 --prompt-version v4 [--model M] --run   # write beside the stored lessons for comparison; saves nothing (output in evals/runs/)
 python -m uv run python -m app.jobs.templates generate --subject igcse-maths [--per-template 5] [--dry-run]   # SymPy-verified template items (no LLM)
 python -m uv run python -m app.jobs.notify once|loop [--every 30]   # deliver guardian safety notifications (run `loop` beside the API)

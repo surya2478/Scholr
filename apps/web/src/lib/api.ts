@@ -505,6 +505,7 @@ export type Topic = {
   check_yourself: ItemCard[];
   exam_questions: ItemCard[];
   exam_level: ExamLevel | null;
+  crucible: Crucible | null;
   mistakes: { description: string; occurrences: number; status: string }[];
   connections: {
     objective_id: string;
@@ -617,54 +618,48 @@ export type Sitting = {
 };
 
 // ---- cognitive mutation & bug-hunting (Innovation 3) ---------------------------------------------------------
-export type SolutionStep = {
-  step_number: number;
-  text: string;
-  is_bug: boolean;
-  explanation: string;
-};
+// Bug Hunter (mistakes/challenges.py): a candidate's working on a real past-paper question, built from an approved
+// walkthrough with one SymPy-checked slip. The page is never told which step is wrong; the verdict says.
 export type BugChallenge = {
   id: string;
   title: string;
-  subject_category: string;
   topic_name: string;
+  label: string;
+  question_context: string | null;
   question_stem: string;
   marks_available: number;
-  student_alias: string;
-  student_steps: SolutionStep[];
-  bug_type: string;
-  examiner_rationale: string;
-  marks_to_award: Record<string, unknown>;
+  student_steps: { step_number: number; text: string }[];
+  final_answer: string;
 };
 export type BugVerificationOut = {
   correct_step: boolean;
   correct_type: boolean;
-  correct_mark: boolean; // her method-mark decision matched the scheme
+  correct_mark: boolean; // her decision on the step's mark matched the scheme's convention
   success: boolean;
   score: number;
+  bug_step: number;
+  bug_explanation: string;
+  correct_text: string;
   examiner_report: string;
   official_mark: string;
+  examiner: ExaminerInsights | null;
 };
 
-// ---- dialectical crucible for sociology 0495 (Innovation 7) --------------------------------------------------
-export type SociologistAvatar = {
-  name: string;
-  perspective: string;
-  core_thesis: string;
-  key_concept: string;
-  empirical_evidence: string;
+// The Crucible (learn/crucible.py): perspectives on a real essay question, cited from her coursebook, approved by a
+// person. Part of the topic page (Topic.crucible); she writes her own answer to the question the normal way.
+export type Crucible = {
+  question: ItemCard;
+  stem: string;
+  perspectives: {
+    perspective: string;
+    sociologist: string;
+    argument: string;
+    key_concept: string;
+    evidence: string;
+    sources: SourceRef[];
+  }[];
+  questions: string[];
 };
-export type CrucibleTopic = {
-  id: string;
-  syllabus_unit: string;
-  essay_question: string;
-  marks_available: number;
-  avatars: SociologistAvatar[];
-  synthesis_guidelines: string[];
-  ao3_level_4_descriptor: string;
-};
-
-
 
 // The viva (docs/STUDENT-APP.md §19): defend each step of an approved solved exam question.
 export type VivaTopic = {

@@ -215,6 +215,25 @@ class ExamLevelOut(BaseModel):
     examiner: ExaminerInsightsOut | None = None
 
 
+class CruciblePerspectiveOut(BaseModel):
+    perspective: str
+    sociologist: str
+    argument: str
+    key_concept: str
+    evidence: str
+    sources: list[SourceRefOut]
+
+
+class CrucibleOut(BaseModel):
+    """Perspectives on a real essay question, cited from her coursebook and approved by a person (learn/crucible.py).
+    She writes and submits her own answer to the question the normal way."""
+
+    question: ItemCardOut
+    stem: str
+    perspectives: list[CruciblePerspectiveOut]
+    questions: list[str]  # to weigh before writing; never answered here
+
+
 class TopicOut(BaseModel):
     objective: ObjectiveCardOut
     subject: SubjectCardOut
@@ -225,6 +244,7 @@ class TopicOut(BaseModel):
     check_yourself: list[ItemCardOut] = Field(default_factory=list)
     exam_questions: list[ItemCardOut] = Field(default_factory=list)
     exam_level: ExamLevelOut | None = None
+    crucible: CrucibleOut | None = None
     mistakes: list[MistakeCardOut] = Field(default_factory=list)
     connections: list[ConnectionOut] = Field(default_factory=list)
     external: ExternalLessonOut | None = None

@@ -11,6 +11,7 @@ retrieval:
 pedagogy:
   help_ladder: essay
   socratic_prompts: [evidence, counterargument, application_to_example]
+  debates: true   # the Crucible: perspectives on a real essay question, cited from her coursebook
 question_types: [define, identify, describe, explain, discuss, to_what_extent]
 question_sources: [past_paper, textbook, school, generated_format_checked]
 evaluation:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from app.modules.learn.viva import GENERIC_HINT, TOO_SHORT_HINT, VivaJudgement, guard, step_results
 
-STEP = "Multiply the common prime factors: $2 \times 3 \times 3 = 18$."
+STEP = r"Multiply the common prime factors: $2 \times 3 \times 3 = 18$."
 LATER = ["So the HCF is $18$."]
 
 

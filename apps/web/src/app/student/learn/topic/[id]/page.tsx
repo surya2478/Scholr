@@ -310,9 +310,8 @@ export default function TopicPage() {
 
           <DualLensView subject={data.subject} objective={data.objective} connections={data.connections} />
 
-          {data.subject.name.toLowerCase().includes("sociology") && (
-            <DialecticalCrucible unitName={data.path[0]} />
-          )}
+          {/* Present when the subject's config has debates and a parent approved one (no subject-name check). */}
+          {data.crucible && <DialecticalCrucible crucible={data.crucible} />}
 
           {data.connections.length > 0 && !data.connections.some((c) => c.subject_name.toLowerCase().includes("iit")) && (
             <Card title="🔗 Connections" subtitle="The same idea in your other subjects" tone="purple">

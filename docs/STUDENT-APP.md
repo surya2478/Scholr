@@ -595,3 +595,29 @@ service. It was hidden, then rebuilt at the user's request:
 - On 13.3 (solve $x^2 - 2x - 48 = 0$ by factorising) the live judge accepted the right pairing, and turned down
   the quadratic formula, a completing-the-square start and "banana banana banana", each with a question as a hint.
 
+## 20. Status — 22 Sep 2026: Bug Hunter and the Crucible from checked sources
+
+Both were first written in another session with hand-made content: challenges and debates in Python, "official"
+marks and examiner claims with no source, sociologists and studies no guard had seen, a Crucible that "marked" her
+paragraph by counting keywords, and a Bug Hunter that sent the answer to the page with the question.
+
+**Bug Hunter** (`mistakes/challenges.py`, no model). Each challenge is an approved walkthrough (AC-U16) — a real
+past-paper question checked against its mark scheme and read by a person — with ONE slip put in by code: the result
+of one step that earns a mark of its own moves by one in its last digit. SymPy confirms that step is now false and
+every other step still holds, so there is exactly one bug; the answer line follows the slip. Whether the step keeps
+its mark follows from the scheme's own code for it — an M mark is for method, so a slip keeps it; A and B marks
+need the right value, so it goes — the convention printed in every Cambridge mark scheme. After her verdict she sees
+the step as it should read and what the examiners wrote about the real question, attributed. The page is never sent
+which step is wrong. 15 challenges from the 48 approved walkthroughs (the rest have no calculation step with a mark
+of its own). Maths only, for now, since only Maths has walkthroughs.
+
+**The Crucible** (`learn/crucible.py`, role `crucible_writer`, Flash-Lite on the Batch API, `app.jobs.crucible`).
+For each topic of a subject whose config has `pedagogy.debates` (Sociology), the highest-mark essay question in the
+bank is paired with her coursebook's excerpts on it. Two to four perspectives must each cite excerpts, may name a
+sociologist or study only if a cited excerpt does, and may not copy the book (a copied example is dropped, a copied
+argument drops the perspective); it ends with questions to weigh, never an answer (AC-R5). A person approves it;
+she writes her answer to the question itself in "Exam questions", marked the normal way. Topics whose book coverage
+is too thin get no debate. The subject-name check on the page is gone; the page shows the Crucible when the topic
+has an approved one. Prompt v1 copied the book in most drafts (2 of 13 kept); v2 asks harder for her own words and
+the job retries a failed debate once.
+
