@@ -44,10 +44,11 @@ def test_only_a_taught_subject_declares_teaching_behaviour() -> None:
     somewhere else entirely. Describing how either would be marked would describe behaviour that does not
     exist (docs/PHASE-3.md §1).
     """
+    assert _at_stage("external"), "no subject is at stage 'external'"
+    # No subject is `planned` since 22 Sep 2026 (Chemistry and Biology moved to `lessons`); the rule still holds
+    # for any subject that is.
     for stage in ("planned", "external"):
-        configs = _at_stage(stage)
-        assert configs, f"no subject is at stage '{stage}'"
-        for config in configs:
+        for config in _at_stage(stage):
             assert config.taught_here is False, config.key
             for field in ("retrieval", "pedagogy", "evaluation", "mistake_categories", "answer_input"):
                 assert not hasattr(config, field), f"{config.key} must not carry {field}"

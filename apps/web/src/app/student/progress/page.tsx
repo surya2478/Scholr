@@ -1,12 +1,15 @@
 "use client";
 
+import { CalibrationMatrix } from "@/components/CalibrationMatrix";
+import { IndependenceMeter } from "@/components/IndependenceMeter";
 import { SubjectLevels } from "@/components/SubjectLevels";
 import { Card, Chip, Empty, ErrorNote, LevelBar, Stat } from "@/components/ui";
-import type { Mastery, ProgressSummary } from "@/lib/api";
+import type { Mastery, Metacognition, ProgressSummary } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 
 export default function Progress() {
   const summary = useApi<ProgressSummary>("/progress/summary");
+  const metacognition = useApi<Metacognition>("/progress/metacognition");
   const mastery = useApi<Mastery[]>("/mastery");
   const skills = useApi<{ subject_id: string; skill_code: string; skill_name: string; score: number; evidence_count: number }[]>(
     "/skills",
@@ -47,6 +50,12 @@ export default function Progress() {
           </div>
         )}
       </Card>
+
+      {/* Metacognitive Calibration Matrix (Confidence vs Performance) */}
+      <CalibrationMatrix data={metacognition.data} />
+
+      {/* Socratic Independence Index (Anti-Dependency) */}
+      <IndependenceMeter data={metacognition.data?.independence} />
 
       {/* Topics by Level */}
       <Card title="Topics by Mastery Level" subtitle="Based on evaluated answers and SymPy proofs">

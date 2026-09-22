@@ -161,3 +161,44 @@ class TrendsOut(BaseModel):
     days: list[TrendDayOut]  # the current week, Monday to Sunday
     subjects: list[TrendSubjectOut]  # study minutes over the weeks shown
     planned_minutes_per_day: int  # the family's own availability, for comparison
+
+
+class MetacognitionItem(BaseModel):
+    attempt_id: UUID
+    subject_id: UUID
+    question_stem: str
+    pre_confidence: int
+    confidence_label: str
+    marks_awarded: float
+    marks_available: float
+    percentage: int
+    quadrant: Literal["true_mastery", "dangerous_blindspot", "hesitant_mastery", "known_gap"]
+    mistakes: list[str]
+    submitted_at: datetime
+
+
+class QuadrantCount(BaseModel):
+    count: int
+    percentage: float
+
+
+class IndependenceStats(BaseModel):
+    independence_index: float  # 0.0 to 100.0%
+    tier: str  # Silent Master, Self-Reliant, Guided Explorer, Supported Apprentice
+    unassisted_count: int  # help level 0
+    nudged_count: int  # help level 1
+    assisted_count: int  # help level >= 2
+    total: int
+    advice: str
+
+
+class MetacognitionOut(BaseModel):
+    student_id: UUID
+    total_evaluated_with_confidence: int
+    brier_calibration_score: float  # 0.0 to 100.0% calibration
+    calibration_rating: str
+    quadrants: dict[str, QuadrantCount]
+    blindspots: list[MetacognitionItem]
+    recent_items: list[MetacognitionItem]
+    advice: str
+    independence: IndependenceStats

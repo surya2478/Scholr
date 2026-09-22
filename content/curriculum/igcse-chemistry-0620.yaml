@@ -25,6 +25,9 @@ syllabus:
     Verified 16 Sep 2026 against the official 0620 syllabus for 2026-2028: 12 topics and
     49 subtopics, with the Extended assessment overview (Papers 2, 4 and 6). Term 1 coverage
     from the school's Year 10 Term 1 planner.
+# `pages`: printed pages of the coursebook (Chemistry for Cambridge IGCSE, Coursebook) where each objective starts,
+# from its contents pages and, where two objectives share a section, the section's own headings in the OCR text
+# (22 Sep 2026). A chunk belongs to the objective whose start page last precedes it (knowledge.chunking).
 subject: { code: igcse-chemistry, name: Chemistry, config_key: igcse_chemistry_0620 }
 
 # Extended route. All three sciences share this structure in the 2026-2028 syllabuses.
@@ -58,85 +61,85 @@ topics:
   - code: "1"
     name: "States of matter"
     objectives:
-      - { code: "1.1", statement: "Solids, liquids and gases" }
-      - { code: "1.2", statement: "Diffusion" }
+      - { code: "1.1", statement: "Solids, liquids and gases", pages: [3] }
+      - { code: "1.2", statement: "Diffusion", pages: [14] }
   - code: "2"
     name: "Atoms, elements and compounds"
     objectives:
-      - { code: "2.1", statement: "Elements, compounds and mixtures" }   # Term 1
-      - { code: "2.2", statement: "Atomic structure and the Periodic Table" }   # Term 1
-      - { code: "2.3", statement: "Isotopes" }   # Term 1
-      - { code: "2.4", statement: "Ions and ionic bonds" }   # Term 1
-      - { code: "2.5", statement: "Simple molecules and covalent bonds" }   # Term 1
-      - { code: "2.6", statement: "Giant covalent structures" }   # Term 1
-      - { code: "2.7", statement: "Metallic bonding" }   # Term 1
+      - { code: "2.1", statement: "Elements, compounds and mixtures", pages: [28] }   # Term 1
+      - { code: "2.2", statement: "Atomic structure and the Periodic Table", pages: [30, 38] }   # Term 1
+      - { code: "2.3", statement: "Isotopes", pages: [34] }   # Term 1
+      - { code: "2.4", statement: "Ions and ionic bonds", pages: [57] }   # Term 1
+      - { code: "2.5", statement: "Simple molecules and covalent bonds", pages: [49] }   # Term 1
+      - { code: "2.6", statement: "Giant covalent structures", pages: [62] }   # Term 1
+      - { code: "2.7", statement: "Metallic bonding", pages: [65] }   # Term 1
   - code: "3"
     name: "Stoichiometry"
     objectives:
-      - { code: "3.1", statement: "Formulae" }
-      - { code: "3.2", statement: "Relative masses of atoms and molecules" }
-      - { code: "3.3", statement: "The mole and the Avogadro constant" }
+      - { code: "3.1", statement: "Formulae", pages: [75] }
+      - { code: "3.2", statement: "Relative masses of atoms and molecules", pages: [87] }
+      - { code: "3.3", statement: "The mole and the Avogadro constant", pages: [101] }
   - code: "4"
     name: "Electrochemistry"
     objectives:
-      - { code: "4.1", statement: "Electrolysis" }
-      - { code: "4.2", statement: "Hydrogen–oxygen fuel cells" }
+      - { code: "4.1", statement: "Electrolysis", pages: [124] }
+      - { code: "4.2", statement: "Hydrogen–oxygen fuel cells", pages: [139] }
   - code: "5"
     name: "Chemical energetics"
     objectives:
-      - { code: "5.1", statement: "Exothermic and endothermic reactions" }
+      - { code: "5.1", statement: "Exothermic and endothermic reactions", pages: [151] }
   - code: "6"
     name: "Chemical reactions"
     objectives:
-      - { code: "6.1", statement: "Physical and chemical changes" }
-      - { code: "6.2", statement: "Rate of reaction" }
-      - { code: "6.3", statement: "Reversible reactions and equilibrium" }
-      - { code: "6.4", statement: "Redox" }
+      - { code: "6.1", statement: "Physical and chemical changes", pages: [148] }
+      - { code: "6.2", statement: "Rate of reaction", pages: [163] }
+      - { code: "6.3", statement: "Reversible reactions and equilibrium", pages: [183] }
+      - { code: "6.4", statement: "Redox", pages: [203] }
   - code: "7"
     name: "Acids, bases and salts"
     objectives:
-      - { code: "7.1", statement: "The characteristic properties of acids and bases" }   # Term 1
-      - { code: "7.2", statement: "Oxides" }   # Term 1
-      - { code: "7.3", statement: "Preparation of salts" }   # Term 1
+      - { code: "7.1", statement: "The characteristic properties of acids and bases", pages: [219, 230] }   # Term 1
+      - { code: "7.2", statement: "Oxides", pages: [226] }   # Term 1
+      - { code: "7.3", statement: "Preparation of salts", pages: [242] }   # Term 1
   - code: "8"
     name: "The Periodic Table"
     objectives:
-      - { code: "8.1", statement: "Arrangement of elements" }   # Term 1
-      - { code: "8.2", statement: "Group I properties" }   # Term 1
-      - { code: "8.3", statement: "Group VII properties" }   # Term 1
-      - { code: "8.4", statement: "Transition elements" }   # Term 1
-      - { code: "8.5", statement: "Noble gases" }   # Term 1
+      - { code: "8.1", statement: "Arrangement of elements", pages: [259, 270] }   # Term 1
+      - { code: "8.2", statement: "Group I properties", pages: [265] }   # Term 1
+      - { code: "8.3", statement: "Group VII properties", pages: [266] }   # Term 1
+      - { code: "8.4", statement: "Transition elements", pages: [269] }   # Term 1
+      - { code: "8.5", statement: "Noble gases", pages: [267] }   # Term 1
   - code: "9"
     name: "Metals"
     objectives:
-      - { code: "9.1", statement: "Properties of metals" }
-      - { code: "9.2", statement: "Uses of metals" }
-      - { code: "9.3", statement: "Alloys and their properties" }
-      - { code: "9.4", statement: "Reactivity series" }
-      - { code: "9.5", statement: "Corrosion of metals" }
-      - { code: "9.6", statement: "Extraction of metals" }
+      - { code: "9.1", statement: "Properties of metals", pages: [277] }
+      - { code: "9.2", statement: "Uses of metals", pages: [284] }
+      - { code: "9.3", statement: "Alloys and their properties", pages: [286] }
+      - { code: "9.4", statement: "Reactivity series", pages: [295] }
+      - { code: "9.5", statement: "Corrosion of metals", pages: [317] }
+      - { code: "9.6", statement: "Extraction of metals", pages: [309] }
   - code: "10"
     name: "Chemistry of the environment"
     objectives:
-      - { code: "10.1", statement: "Water" }
-      - { code: "10.2", statement: "Fertilisers" }
-      - { code: "10.3", statement: "Air quality and climate" }
+      - { code: "10.1", statement: "Water", pages: [334] }
+      - { code: "10.2", statement: "Fertilisers", pages: [197] }
+      - { code: "10.3", statement: "Air quality and climate", pages: [325] }
   - code: "11"
     name: "Organic chemistry"
     objectives:
-      - { code: "11.1", statement: "Formulae, functional groups and terminology" }
-      - { code: "11.2", statement: "Naming organic compounds" }
-      - { code: "11.3", statement: "Fuels" }
-      - { code: "11.4", statement: "Alkanes" }
-      - { code: "11.5", statement: "Alkenes" }
-      - { code: "11.6", statement: "Alcohols" }
-      - { code: "11.7", statement: "Carboxylic acids" }
-      - { code: "11.8", statement: "Polymers" }
+      - { code: "11.1", statement: "Formulae, functional groups and terminology", pages: [344, 353] }
+      - { code: "11.2", statement: "Naming organic compounds", pages: [349] }
+      - { code: "11.3", statement: "Fuels", pages: [380] }
+      - { code: "11.4", statement: "Alkanes", pages: [362] }
+      - { code: "11.5", statement: "Alkenes", pages: [364] }
+      - { code: "11.6", statement: "Alcohols", pages: [371] }
+      - { code: "11.7", statement: "Carboxylic acids", pages: [373] }
+      - { code: "11.8", statement: "Polymers", pages: [387] }
   - code: "12"
     name: "Experimental techniques and chemical analysis"
     objectives:
-      - { code: "12.1", statement: "Experimental design" }   # Term 1
-      - { code: "12.2", statement: "Acid–base titrations" }   # Term 1
-      - { code: "12.3", statement: "Chromatography" }   # Term 1
-      - { code: "12.4", statement: "Separation and purification" }   # Term 1
-      - { code: "12.5", statement: "Identification of ions and gases" }   # Term 1
+      - { code: "12.1", statement: "Experimental design", pages: [404] }   # Term 1
+      - { code: "12.2", statement: "Acid–base titrations", pages: [440] }   # Term 1
+      - { code: "12.3", statement: "Chromatography", pages: [417] }   # Term 1
+      - { code: "12.4", statement: "Separation and purification", pages: [410] }   # Term 1
+      - { code: "12.5", statement: "Identification of ions and gases", pages: [426] }   # Term 1

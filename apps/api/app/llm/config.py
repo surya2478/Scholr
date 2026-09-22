@@ -22,6 +22,11 @@ class RoleConfig(BaseModel):
     # Speech models are charged by the character and the provider reports the cost only later, so a voice
     # role states its published price and each call is recorded at that rate.
     usd_per_million_chars: float | None = None
+    # The `:batch` variant a batch job uses for this role (OpenRouter Batch API). Live calls use `model`.
+    batch_model: str | None = None
+    # OpenRouter's `reasoning` object, for models that always reason (GLM 5.3 Flash cannot turn it off): low effort,
+    # and excluded from the reply, so the JSON is not preceded by pages of thinking that run out the token cap.
+    reasoning: dict[str, Any] | None = None
 
     @property
     def models(self) -> list[str]:

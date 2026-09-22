@@ -32,13 +32,15 @@ from sqlalchemy import select
 import app.models_registry  # noqa: F401
 from app.core.config import API_ROOT
 from app.core.db import session_scope
+from app.jobs import batching
 from app.jobs.lessons import spent
 from app.llm.config import load_roles
 from app.llm.factory import build_gateway
-from app.llm.gateway import CallContext, LLMError
+from app.llm.gateway import BatchItem, CallContext, LLMError
 from app.llm.prompts import default_registry
 from app.modules.curriculum import service as curriculum
 from app.modules.curriculum.models import Subject
+from app.modules.learn import lessons
 from app.modules.learn import service as learn
 from app.modules.learn.models import Lesson
 
@@ -81,6 +83,50 @@ def illustrate_one(lesson_id: UUID, subject_code: str) -> dict:
         **{k: v for k, v in illustrated.checks.items() if k != "cost_usd"},
         "cost_usd": spent(request_id),
     }
+
+
+def illustrate_batch(pending: list[UUID], subject_code: str, *, resume: str | None = None) -> list[dict]:
+    """Offer diagrams through the Batch API on the role's `:batch` model (user rule, 21 Sep 2026). The prompt, the
+    subject's curated vocabulary and the checks are exactly those of the live path."""
+    gateway = build_gateway()
+    now = datetime.now(UTC)
+    asks: dict[str, tuple[dict, set[str]]] = {}
+    results: list[dict] = []
+    tenant_id = None
+    with session_scope(user_id=None, role="system") as s:
+        for lesson_id in pending:
+            row = s.get(Lesson, lesson_id)
+            if row is None:
+                continue
+            tenant_id = row.tenant_id
+            ask = learn.illustrate_lesson(s, None, None, row, subject_code=subject_code)
+            if "variables" in ask.checks:
+                asks[str(lesson_id)] = (ask.checks["variables"], set(ask.checks["allowed"]))
+            else:
+                results.append({"status": "no_diagram", **ask.checks})
+    if not asks or tenant_id is None:
+        return results
+    got, failed, cost = batching.run(
+        gateway,
+        learn.ILLUSTRATE_ROLE,
+        learn.ILLUSTRATE_PROMPT,
+        [BatchItem(cid, variables) for cid, (variables, _) in asks.items()],
+        lessons.DiagramDrafts,
+        tenant_id,
+        tag=f"illustrate-{subject_code}",
+        resume=resume,
+    )
+    for cid, (_, allowed) in asks.items():
+        if cid not in got:
+            results.append({"status": "failed", "error": failed.get(cid, "missing")})
+            continue
+        with session_scope(user_id=None, role="system") as s:
+            row = s.get(Lesson, UUID(cid))
+            illustrated = learn.finish_illustration(row, got[cid], allowed=allowed)
+            learn.record_diagrams(s, row, illustrated, actor=None, now=now)
+        kept = illustrated.checks.get("kept", 0)
+        results.append({"status": "illustrated" if kept else "no_diagram", **illustrated.checks})
+    return results
 
 
 def review(subject_code: str) -> None:
@@ -141,6 +187,8 @@ def main(argv: list[str]) -> None:
     parser.add_argument("--redo", action="store_true", help="go over lessons that already carry a diagram")
     parser.add_argument("--run", action="store_true", help="make the calls; without it, print the estimate only")
     parser.add_argument("--concurrency", type=int, default=3)
+    parser.add_argument("--live", action="store_true", help="call the live model per lesson instead of the Batch API")
+    parser.add_argument("--resume", metavar="BATCH_ID", help="collect a batch submitted by an interrupted run")
     parser.add_argument("--review", action="store_true", help="list candidate diagrams and what they draw")
     parser.add_argument("--approve", nargs="+", metavar="CODE", help="objective codes whose diagrams she may see")
     parser.add_argument("--reject", nargs="+", metavar="CODE", help="objective codes whose candidates to delete")
@@ -158,17 +206,21 @@ def main(argv: list[str]) -> None:
 
     _, pending = todo(args.subject, redo=args.redo, limit=args.limit)
     role = load_roles().role(learn.ILLUSTRATE_ROLE)
+    model = role.model if args.live else (role.batch_model or role.model)
     prompt = default_registry().get(learn.ILLUSTRATE_PROMPT)
     print(
         f"{args.subject}: {len(pending)} lessons to illustrate, estimate "
-        f"${len(pending) * COST_PER_LESSON_USD:.2f} (model {role.model}, prompt {prompt.name}/{prompt.version})",
+        f"${len(pending) * COST_PER_LESSON_USD:.2f} (model {model}, prompt {prompt.name}/{prompt.version})",
         flush=True,
     )
     if not args.run or not pending:
         return
 
-    with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
-        results = list(pool.map(lambda lesson_id: illustrate_one(lesson_id, args.subject), pending))
+    if args.live:
+        with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
+            results = list(pool.map(lambda lesson_id: illustrate_one(lesson_id, args.subject), pending))
+    else:
+        results = illustrate_batch(pending, args.subject, resume=args.resume)
 
     kinds: dict[str, int] = {}
     with session_scope(user_id=None, role="system") as s:
@@ -178,7 +230,7 @@ def main(argv: list[str]) -> None:
     report = {
         "subject": args.subject,
         "prompt": f"{prompt.name}/{prompt.version}",
-        "model": role.model,
+        "model": model,
         "lessons": len(results),
         "with_diagram": sum(1 for r in results if r["status"] == "illustrated"),
         "no_diagram": sum(1 for r in results if r["status"] == "no_diagram"),

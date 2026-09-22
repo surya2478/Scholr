@@ -113,6 +113,43 @@ export type ProgressSummary = {
   focus: { kind: "mistake" | "retention"; objective_code: string | null; label: string }[];
   recent_wins: { objective_code: string; objective_statement: string; level_name: string }[];
 };
+export type MetacognitionItem = {
+  attempt_id: string;
+  subject_id: string;
+  question_stem: string;
+  pre_confidence: number;
+  confidence_label: string;
+  marks_awarded: number;
+  marks_available: number;
+  percentage: number;
+  quadrant: "true_mastery" | "dangerous_blindspot" | "hesitant_mastery" | "known_gap";
+  mistakes: string[];
+  submitted_at: string;
+};
+export type Metacognition = {
+  student_id: string;
+  total_evaluated_with_confidence: number;
+  brier_calibration_score: number;
+  calibration_rating: string;
+  quadrants: {
+    true_mastery: { count: number; percentage: number };
+    dangerous_blindspot: { count: number; percentage: number };
+    hesitant_mastery: { count: number; percentage: number };
+    known_gap: { count: number; percentage: number };
+  };
+  blindspots: MetacognitionItem[];
+  recent_items: MetacognitionItem[];
+  advice: string;
+  independence: {
+    independence_index: number;
+    tier: string;
+    unassisted_count: number;
+    nudged_count: number;
+    assisted_count: number;
+    total: number;
+    advice: string;
+  };
+};
 export type GuardianOverview = {
   student_id: string;
   student_name: string;
@@ -202,6 +239,19 @@ export type Mistake = {
   occurrences: number;
   status: "open" | "improving" | "resolved";
   last_seen: string;
+  resolution?: string | null;
+};
+export type AutopsyEntry = {
+  evaluation_id: string;
+  attempt_id: string;
+  subject_id: string;
+  objective_code: string | null;
+  stem: string;
+  category: string;
+  takeaway: string;
+  marks_awarded: number;
+  marks_available: number;
+  recorded_at: string;
 };
 export type Memory = { id: string; kind: string; statement: string; evidence_count: number; updated_at: string };
 
@@ -225,7 +275,12 @@ export type Evaluation = {
   provisional: boolean;
   marks_awarded: number;
   marks_available: number;
-  feedback: { summary: string; what_went_well: string | null; next_step: string };
+  feedback: {
+    summary: string;
+    what_went_well: string | null;
+    next_step: string;
+    autopsy?: { category: string; takeaway: string; recorded_at: string } | null;
+  };
   final_answer_check: { status: string; detail: string } | null;
   mistakes: { label: string; severity: string; description: string }[];
 };
@@ -560,3 +615,52 @@ export type Sitting = {
   over_time: boolean;
   status: string;
 };
+
+// ---- cognitive mutation & bug-hunting (Innovation 3) ---------------------------------------------------------
+export type SolutionStep = {
+  step_number: number;
+  text: string;
+  is_bug: boolean;
+  explanation: string;
+};
+export type BugChallenge = {
+  id: string;
+  title: string;
+  subject_category: string;
+  topic_name: string;
+  question_stem: string;
+  marks_available: number;
+  student_alias: string;
+  student_steps: SolutionStep[];
+  bug_type: string;
+  examiner_rationale: string;
+  marks_to_award: Record<string, unknown>;
+};
+export type BugVerificationOut = {
+  correct_step: boolean;
+  correct_type: boolean;
+  success: boolean;
+  score: number;
+  examiner_report: string;
+  official_mark: string;
+};
+
+// ---- dialectical crucible for sociology 0495 (Innovation 7) --------------------------------------------------
+export type SociologistAvatar = {
+  name: string;
+  perspective: string;
+  core_thesis: string;
+  key_concept: string;
+  empirical_evidence: string;
+};
+export type CrucibleTopic = {
+  id: string;
+  syllabus_unit: string;
+  essay_question: string;
+  marks_available: number;
+  avatars: SociologistAvatar[];
+  synthesis_guidelines: string[];
+  ao3_level_4_descriptor: string;
+};
+
+

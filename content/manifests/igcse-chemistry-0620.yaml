@@ -20,6 +20,13 @@ sources:
     file: IGCSE/Chemistry/603083167-Chemistry-for-Cambridge-Igcse-CourseBook.pdf
     authority_tier: B
     content_kind: explanation
+    # Scan settings (22 Sep 2026): those screened on the Collins Maths book (evals/reports/ocr_collins-*), which
+    # keep equations, subscripts and units as LaTeX. Flash-Lite, live: the Batch API takes no inline page images.
+    ocr_role: page_ocr_math
+    ocr_prompt: page_ocr_math_md
+    ocr_output: markdown
+    ocr_dpi: 220
+    ocr_postprocess: [unicode_math_to_latex]
     notes: >-
       479 pages, scanned: no text layer at all, so the contents page could not be read without vision OCR and
       the curriculum structure was taken from the 0620 syllabus topic list instead. Screen OCR settings with

@@ -34,7 +34,7 @@ and reinforces the IGCSE ground beneath them. It never teaches the IIT syllabus.
 | Backend | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2, Alembic, `uv` |
 | Database | PostgreSQL 16 + pgvector + full-text search, row-level security |
 | Jobs | Postgres-backed scheduler (no Redis/Celery in Phase 1) |
-| LLM | OpenRouter behind internal `LLMGateway` (role-based model config) |
+| LLM | OpenRouter behind internal `LLMGateway` (role-based model config). Only Gemini 2.5 Flash-Lite and GLM 5.3 Flash, live or `:batch` (docs/STUDENT-APP.md §17) |
 | Deterministic tools | SymPy (maths), Pint (units, from Physics slice) |
 | Tests | pytest, testcontainers (Postgres), Playwright (critical UI flows), `evals/` |
 
@@ -66,7 +66,7 @@ docs/
 - Arithmetic, algebra, units, scoring, dates, mastery → deterministic code. Never trust an LLM for these.
 - **`learning_event` is append-only.** Mastery, mistakes, and learning memory are projections derived from events. Features emit events; they do not write projections directly.
 - **Subject behaviour lives in `subject_configs/*.yaml`.** No `if subject == "maths"` in engine code — add a config field instead.
-- A subject config declares a **`stage`**, and that is the only switch engine code may branch on: `taught` (full engine), `lessons` (a retrieval corpus and grounded topic lessons; no questions, marking or Tutor yet — added 19 Sep 2026 for Physics), `planned` (syllabus known; no questions, corpus or marking yet — may be named as revision, never set or marked) or `external` (learnt elsewhere; only recorded). A `taught` subject carries retrieval, pedagogy and evaluation blocks; a `lessons` subject carries retrieval and pedagogy only; for the others they are absent, not invented. You cannot teach to a syllabus nobody has verified.
+- A subject config declares a **`stage`**, and that is the only switch engine code may branch on: `taught` (full engine), `lessons` (a retrieval corpus and grounded topic lessons, and the Tutor for doubts; no questions or marking yet — added 19 Sep 2026 for Physics, Chemistry and Biology from 22 Sep), `planned` (syllabus known; no questions, corpus or marking yet — may be named as revision, never set or marked) or `external` (learnt elsewhere; only recorded). A `taught` subject carries retrieval, pedagogy and evaluation blocks; a `lessons` subject carries retrieval and pedagogy only; for the others they are absent, not invented. You cannot teach to a syllabus nobody has verified.
 - Every table with student data carries `student_id` (and `tenant_id`) and has an RLS policy.
 - **No mock intelligence.** Fixtures only in `tests/fixtures/` and `evals/`, clearly named.
 - Never commit copyrighted source material. Never show long verbatim textbook passages to the user.
@@ -85,7 +85,7 @@ python -m uv sync                                          # install dependencie
 python -m uv run alembic upgrade head                      # migrate dev DB (owner role)
 python -m uv run python -m app.seed.curriculum ../../content/curriculum/igcse-maths-0580.yaml ../../content/curriculum/igcse-sociology-0495.yaml
 python -m uv run python -m app.seed.curriculum ../../content/curriculum/iit-maths-grade9.yaml ../../content/curriculum/iit-physics-grade9.yaml ../../content/curriculum/iit-chemistry-grade9.yaml ../../content/curriculum/iit-biology-grade9.yaml   # external IIT Foundation courses (Phase 3)
-python -m uv run python -m app.seed.curriculum ../../content/curriculum/igcse-physics-0625.yaml ../../content/curriculum/igcse-chemistry-0620.yaml ../../content/curriculum/igcse-biology-0610.yaml   # planned subjects: syllabus known, nothing taught yet
+python -m uv run python -m app.seed.curriculum ../../content/curriculum/igcse-physics-0625.yaml ../../content/curriculum/igcse-chemistry-0620.yaml ../../content/curriculum/igcse-biology-0610.yaml   # science subjects: stage `lessons` (grounded lessons + Tutor, nothing marked yet)
 python -m uv run python -m app.seed.concepts ../../content/curriculum/concepts-*.yaml   # concept maps: four IIT<->IGCSE pairs plus the cross-subject one
 python -m uv run python -m app.seed.household ../../content/private/seed/household.yaml
 python -m uv run python -m app.jobs.ingest register        # register manifest sources, extract text-layer PDFs
@@ -108,7 +108,7 @@ python -m uv run python -m app.jobs.retrieval_eval [--run]   # AC-K2 recall@8 + 
 python -m uv run python -m app.jobs.tutor_eval [--run]       # AC-K3/K4 tutor checks (Flash-Lite); without --run prints the estimate only
 python -m uv run python -m app.jobs.ao_tag --subject igcse-sociology [--write]   # tag the bank with assessment objectives from the subject config (no LLM)
 python -m uv run python -m app.jobs.examiner_insights [--subject igcse-maths] [--only <er-key>] [--run] [--force]   # examiner reports -> attributed per-question points (AC-R6); without --run prints the estimate only
-python -m uv run python -m app.jobs.lessons --subject igcse-maths [--limit N] [--stale] [--run] [--recheck]   # topic lessons (docs/STUDENT-APP.md); without --run prints the estimate only; --recheck applies a stricter guard with no calls
+python -m uv run python -m app.jobs.lessons --subject igcse-maths [--limit N] [--stale] [--run] [--recheck] [--live] [--resume BATCH_ID]   # topic lessons (docs/STUDENT-APP.md); Batch API unless --live; without --run prints the estimate only; --recheck applies a stricter guard with no calls
 python -m uv run python -m app.jobs.illustrate --subject igcse-maths [--limit N] [--redo] [--run]   # offer diagrams for written lessons (AC-U14); without --run prints the estimate only
 python -m uv run python -m app.jobs.illustrate --subject igcse-maths --review | --approve <codes> | --reject <codes>   # a person decides what she sees
 python -m uv run python -m app.jobs.walkthroughs --subject igcse-maths [--only 15.4,1.6] [--redo] [--run]   # a real past-paper question solved per topic (AC-U16); without --run prints the estimate only

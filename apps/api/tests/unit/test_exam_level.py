@@ -185,3 +185,16 @@ def test_a_lesson_may_not_borrow_a_past_papers_curve_or_equation() -> None:
     assert lessons.reuses_past_paper_maths(borrowed, past)
     assert not lessons.reuses_past_paper_maths("For $y = x^3 - 2x^2 + 1$, solve $x^3 - 2x^2 - x + 3 = 0$.", past)
     assert not lessons.reuses_past_paper_maths("Solve $2x = 4$.", past)  # a straight line is nobody's question
+
+
+def test_maths_written_outside_dollar_signs_is_wrapped_so_it_renders() -> None:
+    """18 lessons printed "H_2O" and "12x^3" as typed (22 Sep 2026): chemistry upright, algebra and powers as maths."""
+    assert lessons.wrap_bare_maths("36 g of H_2O and Ca(OH)_2 in 1 dm^3") == (
+        "36 g of $\mathrm{H_2O}$ and $\mathrm{Ca(OH)_2}$ in 1 $\mathrm{dm^3}$"
+    )
+    assert lessons.wrap_bare_maths("Simplify 12x^3; 6.02 x 10^23 particles") == (
+        "Simplify $12x^3$; 6.02 x $10^{23}$ particles"
+    )
+    assert (
+        lessons.wrap_bare_maths("already $x^2$, in 2024, costs 3 dollars") == "already $x^2$, in 2024, costs 3 dollars"
+    )

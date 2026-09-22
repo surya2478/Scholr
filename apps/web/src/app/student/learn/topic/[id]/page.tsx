@@ -10,6 +10,9 @@ import { FormulaDrawer } from "@/components/learn/FormulaDrawer";
 import { LessonAudioPlayer } from "@/components/learn/LessonAudioPlayer";
 import { Sources } from "@/components/learn/Sources";
 import { MasteryBadge } from "@/components/learn/Streams";
+import { DualLensView } from "@/components/learn/DualLensView";
+import { DialecticalCrucible } from "@/components/learn/DialecticalCrucible";
+import { InventingToLearn } from "@/components/learn/InventingToLearn";
 import { ExamLevel } from "@/components/learn/ExamLevel";
 import { TopicSteps } from "@/components/learn/TopicSteps";
 import { TryQuestion } from "@/components/learn/TryQuestion";
@@ -305,41 +308,13 @@ export default function TopicPage() {
             </section>
           )}
 
-          {data.connections.some((c) => c.subject_name.toLowerCase().includes("iit")) && (
-            <div className="rounded-2xl border-2 border-indigo-300 bg-gradient-to-r from-indigo-50 via-purple-50/50 to-white p-4 shadow-xs">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-lg">⚡</span>
-                <h3 className="font-fun font-bold text-indigo-950">IIT Foundation Bridge</h3>
-                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-800">
-                  Cross-Curriculum
-                </span>
-              </div>
-              <p className="text-xs text-slate-700 leading-relaxed mb-3">
-                You are studying this topic in your external IIT coaching! Remember: in Cambridge Extended exams, examiners require <strong>explicit method steps ($M$ marks)</strong>. In IIT, use algebraic shortcuts and speed.
-              </p>
-              <div className="space-y-2">
-                {data.connections
-                  .filter((c) => c.subject_name.toLowerCase().includes("iit"))
-                  .map((c) => (
-                    <Link
-                      key={c.objective_id}
-                      href={`/student/learn/topic/${c.objective_id}`}
-                      className="flex items-center justify-between rounded-xl bg-white p-2.5 border border-indigo-100 hover:border-indigo-300 transition shadow-2xs"
-                    >
-                      <div>
-                        <div className="text-xs font-bold text-indigo-900">
-                          {c.subject_name}: {c.objective_code} {c.statement}
-                        </div>
-                        <div className="text-[11px] text-slate-500">Shared idea: {c.concept}</div>
-                      </div>
-                      <span className="text-xs font-fun font-bold text-indigo-600">Open IIT Topic →</span>
-                    </Link>
-                  ))}
-              </div>
-            </div>
+          <DualLensView subject={data.subject} objective={data.objective} connections={data.connections} />
+
+          {data.subject.name.toLowerCase().includes("sociology") && (
+            <DialecticalCrucible unitName={data.path[0]} />
           )}
 
-          {data.connections.length > 0 && (
+          {data.connections.length > 0 && !data.connections.some((c) => c.subject_name.toLowerCase().includes("iit")) && (
             <Card title="🔗 Connections" subtitle="The same idea in your other subjects" tone="purple">
               <ul className="flex flex-col gap-2">
                 {data.connections.map((c) => (
@@ -358,6 +333,8 @@ export default function TopicPage() {
               </ul>
             </Card>
           )}
+
+          <InventingToLearn />
 
           <FormulaDrawer lesson={lesson} />
         </>

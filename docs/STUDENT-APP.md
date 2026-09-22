@@ -512,3 +512,65 @@ The browser's speech recognition is gone from the code. The same review moved le
 Kokoro 82M) behind the gateway with a recorded per-character cost, and stopped the API accepting a sign-in token
 in the URL.
 
+## 17. Decision — 21 Sep 2026: two models only, batch where possible
+
+The user's rule, replacing the Flash-Lite-only rule of 19 Sep: **only Gemini 2.5 Flash-Lite and GLM 5.3 Flash**, no
+other LLM, no fallbacks. GLM 5.3 Flash takes the place of Gemini 2.5 Flash, for lesson writing and the solved exam
+questions; Flash-Lite does everything else. The two non-LLM models stay, by the user's decision: Kokoro 82M
+(read-aloud) and bge-m3 (the embeddings that let lessons and the Tutor search her books).
+
+**Batch and live.** The user asked for the `:batch` variants. OpenRouter serves those only through its Batch API:
+requests are submitted together, results come back within 24 hours, with no streaming and no inline images or
+audio. So each role names a live `model` and, where it has a batch job, a `batch_model`:
+
+| | live (`model`) | batch (`batch_model`) |
+|---|---|---|
+| lesson_writer, exam_walker | `z-ai/glm-5.3-flash` | `z-ai/glm-5.3-flash:batch` |
+| lesson_illustrator, summarizer, examiner_report_extractor | `google/gemini-2.5-flash-lite` | `google/gemini-2.5-flash-lite:batch` |
+| every other role (Tutor, marking, OCR, voice, safety…) | `google/gemini-2.5-flash-lite` | — |
+
+`tests/unit/test_ocr_roles.py` enforces the table. The lessons, walkthroughs and illustrate jobs submit through the
+gateway's `batch_submit` / `batch_collect` (`app/jobs/batching.py`; `--live` for one-off calls, `--resume` to collect
+a batch an interrupted run left behind). Each reply is checked against its schema and recorded in `llm_call` with
+its own cost; an unreadable reply is queued once more, then reported as failed — never sent to another model.
+A lesson written the first time she opens a topic is live, on GLM 5.3 Flash.
+
+**What the first runs showed.**
+- GLM 5.3 Flash always reasons and cannot switch it off. Unchecked, it wrote ~13k characters of thinking and hit
+  the token cap before any JSON (27 of the first 28 batch walkthroughs). Both GLM roles now send
+  `reasoning: {effort: low, exclude: true}`; with it, a live pilot wrote 3 of 4 lessons at about the depth of the
+  2.5 Flash ones (1.6, 11.1, 1.1; 15.4 still failed its schema twice).
+- A batch took ~11 minutes for 28 requests ($0.0105).
+- **Data policy.** The Batch API accepts only `provider.only`, so the per-request `provider_preferences`
+  (`data_collection: deny`) cannot be sent with a batch; the OpenRouter account's own privacy setting applies.
+  That setting must disallow providers that store or train on prompts. Batches carry lesson material and past-paper
+  text, never her answers or messages — every student-facing call is live and sends the preference.
+- Stored lessons stay as written by 2.5 Flash; GLM writes new ones and any rewrite from here on.
+
+## 18. Status — 22 Sep 2026: Chemistry and Biology lessons (step 6)
+
+At the user's request ("complete Physics, Chemistry and Biology lessons topic wise"). Physics already had all 24.
+Chemistry and Biology moved from `planned` to `lessons` — grounded lessons and the Tutor for doubts; nothing set or
+marked (Chemistry marking needs the equation balancer and mole checks first; docs/ROADMAP.md).
+
+- **OCR.** Both coursebooks are scans with no text layer: 957 pages on `page_ocr_math` / `page_ocr_math_md` at
+  220 DPI (the Collins settings), live Flash-Lite (the Batch API takes no inline images), ~$0.55. The "2001 edition"
+  Biology book is in fact the current Cambridge IGCSE Biology Coursebook; its manifest is corrected.
+- **Printed pages.** Markdown OCR does not report page numbers, so `label_text_layer_pages` now labels any
+  unlabelled page (offsets: Chemistry 12, Biology 10) and runs after every OCR.
+- **Objectives to pages.** Each curriculum file gained `pages:` from the book's contents pages and, where two
+  objectives share a section, the section's headings in the OCR text. Biology 15.1 (Drugs) has no section in the
+  book, so it has no pages.
+- **Tagging across a span.** Chunks follow headings, so a long section with none (Chemistry 13.2, pp. 261–266) made
+  chunks that all carried its first page, and Group I and Group VII got nothing. A chunk now belongs to every
+  objective that starts inside its pages (`chunking.sections_for_span`).
+- **Retrieval.** When a search is scoped to objectives, their own chunks are also ranked by vector distance, so the
+  pages a topic is taught on are measured rather than found by keyword only (Biology 1.1 and 4.1 went from LOW to
+  HIGH/MEDIUM). Thresholds unchanged; the retrieval eval is unchanged (recall@8 0.97, state agreement 1.0, pass).
+- **Lessons** on the GLM 5.3 Flash batch (§17), $0.083 for 106: **Chemistry 48 of 49, Biology 60 of 61.** Not
+  written, honestly: Chemistry 3.1 (Formulae — its pages match at ~0.50, below the bar) and Biology 15.1 (Drugs — not
+  in the book). The guard dropped 65 sections that copied the book and 27 Chemistry examples whose answer SymPy or
+  Pint could not confirm.
+- **Rendering.** Guard v8 wraps maths written outside `$…$` ("H_2O", "12x^3", "10^23") so it renders — chemistry and
+  units upright — applied to 21 stored lessons.
+

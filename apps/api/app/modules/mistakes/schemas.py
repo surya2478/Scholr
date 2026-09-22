@@ -19,3 +19,4 @@ class MistakeOut(BaseModel):
     status: str
     first_seen: datetime
     last_seen: datetime
+    resolution: str | None = None

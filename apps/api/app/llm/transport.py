@@ -24,6 +24,7 @@ class ChatRequest:
     timeout_s: float
     response_format: dict[str, Any] | None = None
     provider: dict[str, Any] | None = None
+    reasoning: dict[str, Any] | None = None  # OpenRouter's reasoning control, for models that always reason
 
 
 @dataclass(frozen=True)
@@ -50,6 +51,15 @@ class SpeechResponse:
     audio: bytes
     provider: str | None
     generation_id: str | None  # OpenRouter prices a speech call afterwards, under this id
+
+
+class BatchTransport(Protocol):
+    """OpenRouter's Batch API: `:batch` model variants are reachable only through it (up to 24 h, no streaming,
+    no inline images or audio). Kept apart from ChatTransport so test fakes need not implement it."""
+
+    def submit_batch(self, model: str, requests: list[dict[str, Any]], timeout_s: float) -> dict[str, Any]: ...
+
+    def get_batch(self, batch_id: str, timeout_s: float) -> dict[str, Any]: ...
 
 
 class ChatTransport(Protocol):
@@ -97,7 +107,7 @@ class OpenRouterTransport:
         if resp.status_code >= 400:
             raise TransportError(f"http_{resp.status_code}", resp.text[:300], retryable=False)
         data: dict[str, Any] = resp.json()
-        if "error" in data:
+        if data.get("error"):  # a batch object always carries "error": null
             err = data["error"] or {}
             code = int(err.get("code") or 500) if str(err.get("code", "")).isdigit() else 500
             if code == 402:
@@ -119,6 +129,8 @@ class OpenRouterTransport:
             body["response_format"] = request.response_format
         if request.provider:
             body["provider"] = request.provider
+        if request.reasoning:
+            body["reasoning"] = request.reasoning
         data = self._post("/chat/completions", body, request.timeout_s)
         choices = data.get("choices") or []
         if not choices:
@@ -134,6 +146,23 @@ class OpenRouterTransport:
             cost_usd=usage.get("cost"),
             finish_reason=choice.get("finish_reason"),
         )
+
+    def submit_batch(self, model: str, requests: list[dict[str, Any]], timeout_s: float = 120.0) -> dict[str, Any]:
+        # `endpoint` and `model` must come before `requests`: the API stream-parses the body.
+        body = {"endpoint": "/v1/chat/completions", "model": model, "requests": requests}
+        return self._post("/batches", body, timeout_s)
+
+    def get_batch(self, batch_id: str, timeout_s: float = 120.0) -> dict[str, Any]:
+        try:
+            resp = self._client.get(f"{self._base_url}/batches/{batch_id}", headers=self._headers, timeout=timeout_s)
+        except httpx.TimeoutException as exc:
+            raise TransportError("timeout", "batch status timed out", retryable=True) from exc
+        except httpx.TransportError as exc:
+            raise TransportError("network", "network error reading batch", retryable=True) from exc
+        if resp.status_code >= 400:
+            raise TransportError(f"http_{resp.status_code}", resp.text[:300], retryable=resp.status_code >= 500)
+        data: dict[str, Any] = resp.json()
+        return data
 
     def embed(self, model: str, inputs: list[str], timeout_s: float) -> EmbeddingResponse:
         data = self._post("/embeddings", {"model": model, "input": inputs}, timeout_s)

@@ -30,7 +30,7 @@ from app.tools.math_sympy import MathParseError, NumericSpec, check_numeric, equ
 
 # v3: repair LaTeX damaged by JSON; v4: list answers value by value; v5: drop parts still garbled;
 # v6: units checked with Pint where the subject's answers carry units (not repeated if the answer already names it)
-GUARD_VERSION = "lesson_guard_v7"
+GUARD_VERSION = "lesson_guard_v8"
 COPY_RUN = 12
 # A worked example may not reuse a past-paper question: she is meant to try those herself (lesson v4).
 PAST_PAPER_RUN = 8
@@ -622,6 +622,31 @@ _CITATION_MARKER = re.compile(r"\s*\[\d+(?:\s*,\s*\d+)*\]")
 _MATH_OR_TEXT = re.compile(r"(\$[^$]*\$)")
 
 
+# A token that is maths but was written outside $...$: "12x^3", "H_2O", "C_2H_5OH", "dm^3" — shown to her as typed.
+_BARE_MATH = re.compile(r"(?<![\w\$])[A-Za-z0-9()]*[A-Za-z)][_^]\{?-?\d+\}?(?:[A-Za-z0-9()]|[_^]\{?-?\d+\}?)*")
+_BARE_POWER = re.compile(r"(?<![\w\$^])(\d+)\^\{?(-?\d+)\}?")  # "10^23", "10^-3"
+_UPRIGHT = re.compile(
+    r"^(?:[A-Z][a-z]?(?:_\{?\d+\}?)?|\((?:[A-Z][a-z]?(?:_\{?\d+\}?)?)+\)(?:_\{?\d+\}?)?|\d)+$|^[cdkm]?m\^\{?\d\}?$"
+)
+_MATHRM = "\\mathrm"
+
+
+def wrap_bare_maths(text: str) -> str:
+    r"""Put maths written outside $...$ into it, so it renders: chemical formulas and units upright
+    ("$\mathrm{H_2O}$", "$\mathrm{Ca(OH)_2}$", "$\mathrm{dm^3}$"), algebra and powers as maths ("$12x^3$",
+    "$10^{23}$"). Found in 18 lessons on 22 Sep 2026."""
+
+    def wrap(m: re.Match[str]) -> str:
+        token = m.group(0)
+        return f"${_MATHRM}{{{token}}}$" if _UPRIGHT.match(token) else f"${token}$"
+
+    def power(m: re.Match[str]) -> str:
+        return f"${m.group(1)}^{{{m.group(2)}}}$"
+
+    parts = _MATH_OR_TEXT.split(text)
+    return "".join(p if p.startswith("$") else _BARE_POWER.sub(power, _BARE_MATH.sub(wrap, p)) for p in parts)
+
+
 def strip_markers(text: str) -> str:
     """Remove excerpt numbers the model wrote into the prose ("... on the x-axis. [1, 3]"); they belong in
     `sources`. Maths between dollar signs is left alone: "[1, 3]" there is an interval."""
@@ -635,7 +660,7 @@ def repair_draft(draft: LessonDraft) -> LessonDraft:
     the backslashes unescaped."""
 
     def fix(text: str) -> str:
-        return strip_markers(repair_json_escapes(text))
+        return wrap_bare_maths(strip_markers(repair_json_escapes(text)))
 
     return LessonDraft(
         summary=fix(draft.summary),
@@ -647,8 +672,9 @@ def repair_draft(draft: LessonDraft) -> LessonDraft:
                     "problem": fix(e.problem),
                     "steps": [fix(x) for x in e.steps],
                     "final_answer": fix(e.final_answer),
-                    "answer_expression": fix(e.answer_expression),
-                    "unit": fix(e.unit),
+                    # Machine-read fields: JSON repair only. Wrapping them in $...$ broke units ("kg/$m³").
+                    "answer_expression": repair_json_escapes(e.answer_expression),
+                    "unit": repair_json_escapes(e.unit),
                 }
             )
             for e in draft.worked_examples
@@ -661,7 +687,7 @@ def repair_content(content: dict) -> tuple[dict, bool]:
     """The same repair for a lesson already stored. Returns the content and whether anything changed."""
 
     def fix(text: str) -> str:
-        return strip_markers(repair_json_escapes(text))
+        return wrap_bare_maths(strip_markers(repair_json_escapes(text)))
 
     repaired = {
         **content,

@@ -1,10 +1,22 @@
 # Subject Expertise Engine config — Cambridge IGCSE Chemistry 0620.
 #
-# stage: planned — see igcse_physics_0625.yaml. Chemistry additionally needs the deterministic equation
-# balancer and mole-calculation checks before it can mark anything.
+# stage: lessons (the user's request of 22 Sep 2026 to complete the science lessons topic by topic; docs/STUDENT-APP.md
+# step 6: "Chemistry and Biology after their books are OCR'd"). Scholr writes grounded topic lessons from her
+# coursebook, OCR'd on 22 Sep 2026 (content/manifests/igcse-chemistry-0620.yaml), and the Tutor answers doubts on
+# them (D4 amended). It sets and marks nothing yet: marking Chemistry needs the deterministic equation balancer and
+# mole-calculation checks first (docs/ROADMAP.md). It still names the IGCSE ground under an IIT chemistry class.
 key: igcse_chemistry_0620
 path: IGCSE
 subject_code: igcse-chemistry
 syllabus: { code: "0620", tier: extended, exam_session: "2028-06" }
 subject_type: mixed
-stage: planned
+stage: lessons
+retrieval:
+  allowed_authority_tiers: [A, B, C]   # the coursebook and syllabus; student notes never ground a lesson
+  grounding_critical_intents: [syllabus_scope, notation, exam_technique]
+pedagogy:
+  worked_example_style: step_by_step
+  # Mole, mass, volume and concentration calculations are checked like Physics: SymPy for the number, Pint for the
+  # unit (mol, g, dm^3, mol/dm^3). A descriptive topic may keep no example rather than an unchecked one.
+  worked_example_check: sympy
+  answer_units: true

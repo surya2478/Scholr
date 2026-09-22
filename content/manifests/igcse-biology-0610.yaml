@@ -22,11 +22,19 @@ sources:
     file: IGCSE/Biology/747041263-9th-IGCSE-Biology-TextBook-PDF.pdf
     authority_tier: B
     content_kind: explanation
+    # Scan settings (22 Sep 2026): those screened on the Collins Maths book (evals/reports/ocr_collins-*), which
+    # keep equations, subscripts and units as LaTeX. Flash-Lite, live: the Batch API takes no inline page images.
+    ocr_role: page_ocr_math
+    ocr_prompt: page_ocr_math_md
+    ocr_output: markdown
+    ocr_dpi: 220
+    ocr_postprocess: [unicode_math_to_latex]
     notes: >-
       478 pages, 217 MB, scanned: no text layer, so neither the title page nor the contents could be read
-      without vision OCR. Publisher and edition given by the parent from the physical copy (U19, 16 Sep 2026);
-      being a 2001 edition it predates the 2026-2028 syllabus, so treat it as explanation only and never as
-      the authority on what is examinable. Screen OCR settings with app.jobs.ocr_eval, and price the full
+      without vision OCR. Publisher and edition were first given as a 2001 edition (U19, 16 Sep 2026), but the
+      OCR of 22 Sep 2026 shows the current "Cambridge IGCSE Biology Coursebook" (its companion workbook is the
+      4th edition, Mary Jones & Geoff Jones), whose chapters follow the 0610 syllabus closely. Still explanation
+      only: the syllabus remains the authority on what is examinable. Screen OCR settings with app.jobs.ocr_eval, and price the full
       run, before ingesting.
 
   - key: 0610-syllabus-2026-2028

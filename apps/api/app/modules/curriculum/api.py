@@ -6,7 +6,7 @@ from fastapi import APIRouter
 
 from app.core.deps import DbDep, PrincipalDep
 from app.core.errors import not_found
-from app.modules.curriculum import service
+from app.modules.curriculum import crucible, service
 from app.modules.curriculum.schemas import (
     ObjectiveDetailOut,
     RelatedObjectiveOut,
@@ -67,3 +67,9 @@ def get_related_objectives(objective_id: UUID, principal: PrincipalDep, s: DbDep
             )
         )
     return out
+
+
+@router.get("/curriculum/crucible", response_model=list[crucible.CrucibleTopic])
+def list_crucible_debates(syllabus_unit: str | None = None) -> list[crucible.CrucibleTopic]:
+    """Retrieve multi-perspective roundtable debates for Sociology 0495."""
+    return crucible.list_crucible_topics(syllabus_unit=syllabus_unit)

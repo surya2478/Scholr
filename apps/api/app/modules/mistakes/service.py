@@ -219,6 +219,7 @@ def list_mistakes(
             status=r.status,
             first_seen=r.first_seen,
             last_seen=r.last_seen,
+            resolution=r.resolution,
         )
         for r in rows
     ]

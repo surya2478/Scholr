@@ -22,6 +22,8 @@ from app.modules.evaluation import essay_levels, structured_math
 from app.modules.evaluation.models import Evaluation
 from app.modules.evaluation.schemas import (
     AnswerCheckOut,
+    AutopsyEntryOut,
+    AutopsyIn,
     AwardOut,
     EvaluationOut,
     FeedbackOut,
@@ -72,6 +74,35 @@ def marks_for_attempts(s: Session, attempt_ids: Sequence[UUID]) -> dict[UUID, as
     return {r.attempt_id: assessment.ItemMark(r.id, r.status, r.marks_awarded) for r in rows}  # later rows win
 
 
+@dataclass(frozen=True)
+class EvaluationSummary:
+    evaluation_id: UUID
+    status: str
+    marks_awarded: float
+    marks_available: float
+    mistake_descriptions: tuple[str, ...]
+
+
+def evaluation_summaries_for_attempts(s: Session, attempt_ids: Sequence[UUID]) -> dict[UUID, EvaluationSummary]:
+    """attempt_id -> summary with marks and diagnosed mistakes (latest evaluation wins)."""
+    if not attempt_ids:
+        return {}
+    rows = s.scalars(
+        select(Evaluation).where(Evaluation.attempt_id.in_(list(attempt_ids))).order_by(Evaluation.created_at)
+    ).all()
+    out: dict[UUID, EvaluationSummary] = {}
+    for r in rows:
+        mistakes = tuple(m.get("description", "") for m in (r.diagnosed_mistakes or []) if m.get("description"))
+        out[r.attempt_id] = EvaluationSummary(
+            evaluation_id=r.id,
+            status=r.status,
+            marks_awarded=r.marks_awarded,
+            marks_available=r.marks_available,
+            mistake_descriptions=mistakes,
+        )
+    return out
+
+
 def latest_id_for_attempt(s: Session, attempt_id: UUID) -> UUID | None:
     row = latest_row(s, attempt_id)
     return row.id if row else None
@@ -91,6 +122,7 @@ def to_out(row: Evaluation) -> EvaluationOut:
             summary=feedback.get("summary", ""),
             what_went_well=feedback.get("what_went_well"),
             next_step=feedback.get("next_step") or structured_math.DEFAULT_NEXT_STEP,
+            autopsy=feedback.get("autopsy"),
         ),
         final_answer_check=AnswerCheckOut(status=check["status"], detail=check["detail"]) if check else None,
         awards=[AwardOut(**a) for a in (row.criterion_scores or {}).get("awards", [])],
@@ -372,3 +404,68 @@ def override(
         },
     )
     return to_out(row)
+
+
+def record_autopsy(
+    s: Session, principal: Principal, evaluation_id: UUID, body: AutopsyIn, *, now: datetime
+) -> EvaluationOut:
+    require_role(principal, "student", "guardian", "admin")
+    row = s.get(Evaluation, evaluation_id)
+    if row is None:
+        raise not_found("evaluation")
+    require_student_access(principal, row.student_id, "assessments")
+    autopsy_data = {
+        "category": body.category,
+        "takeaway": body.takeaway,
+        "recorded_at": now.isoformat(),
+    }
+    row.feedback = {**(row.feedback or {}), "autopsy": autopsy_data}
+    s.flush()
+    return to_out(row)
+
+
+def list_autopsies(
+    s: Session, principal: Principal, *, student_id: UUID, subject_id: UUID | None = None
+) -> list[AutopsyEntryOut]:
+    require_student_access(principal, student_id, "assessments")
+    rows = s.scalars(
+        select(Evaluation)
+        .where(Evaluation.student_id == student_id)
+        .order_by(Evaluation.created_at.desc())
+    ).all()
+    entries: list[AutopsyEntryOut] = []
+    for r in rows:
+        fb = r.feedback or {}
+        autopsy = fb.get("autopsy")
+        if not isinstance(autopsy, dict) or not autopsy.get("takeaway"):
+            continue
+        attempt = assessment.get_attempt(s, principal, r.attempt_id)
+        item = attempt.item
+        if subject_id is not None and item.subject_id != subject_id:
+            continue
+        obj_code = None
+        if item.objective_ids:
+            summaries = curriculum.objective_summaries(s, [item.objective_ids[0]])
+            if item.objective_ids[0] in summaries:
+                obj_code = summaries[item.objective_ids[0]].code
+        recorded_at_str = autopsy.get("recorded_at")
+        try:
+            rec_dt = datetime.fromisoformat(recorded_at_str) if recorded_at_str else r.created_at
+        except Exception:
+            rec_dt = r.created_at
+
+        entries.append(
+            AutopsyEntryOut(
+                evaluation_id=r.id,
+                attempt_id=r.attempt_id,
+                subject_id=item.subject_id,
+                objective_code=obj_code,
+                stem=item.stem,
+                category=str(autopsy.get("category", "conceptual")),
+                takeaway=str(autopsy.get("takeaway", "")),
+                marks_awarded=r.marks_awarded,
+                marks_available=r.marks_available,
+                recorded_at=rec_dt,
+            )
+        )
+    return entries

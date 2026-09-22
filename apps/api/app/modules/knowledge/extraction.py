@@ -162,13 +162,11 @@ def extract_text_layer(s: Session, *, tenant_id: UUID, doc: RegisteredDocument) 
 
 
 def label_text_layer_pages(s: Session, document_id: UUID) -> int:
-    """Fill in printed page labels the text layer does not carry (chunking.detect_printed_labels), so textbook
-    chunks can be tagged to objectives by printed page. Only unlabelled text-layer pages change. Returns labelled."""
-    rows = s.scalars(
-        select(DocumentPage).where(
-            DocumentPage.document_id == document_id, DocumentPage.extraction_method == "text_layer"
-        )
-    ).all()
+    """Fill in printed page labels a page does not carry (chunking.detect_printed_labels), so textbook chunks can be
+    tagged to objectives by printed page. A text layer never marks them, and a Markdown OCR page does not report
+    them either (the Chemistry and Biology scans, 22 Sep 2026), so every unlabelled page of the document is
+    considered. Only unlabelled pages change. Returns how many were labelled."""
+    rows = s.scalars(select(DocumentPage).where(DocumentPage.document_id == document_id)).all()
     labels = detect_printed_labels([(row.page_number, row.text) for row in rows])
     changed = 0
     for row in rows:
@@ -248,4 +246,7 @@ def run_ocr(
             report.cost_usd += result.cost_usd
             if on_progress:
                 on_progress(i, len(todo))
+    with session_factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        label_text_layer_pages(s, doc.document_id)  # printed page numbers, so chunks can be tagged to objectives
     return report

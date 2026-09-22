@@ -7,6 +7,7 @@ from app.modules.knowledge.chunking import (
     page_offset,
     printed_page_map,
     section_for_page,
+    sections_for_span,
 )
 
 # Fixture pages written for this test.
@@ -91,3 +92,12 @@ def test_front_matter_before_printed_page_one_has_no_printed_page() -> None:
     mapping = printed_page_map([(5, None), (30, "17"), (31, None)])
     assert 5 not in mapping, "PDF page 5 at offset 13 would be page -8"
     assert (mapping[30], mapping[31]) == (17, 18)
+
+
+def test_a_chunk_spanning_several_pages_belongs_to_every_objective_starting_inside_it() -> None:
+    """Chemistry 13.2 runs 261-266 as one heading: its chunks all carry page 261, yet Group I starts on 265 and
+    Group VII on 266. Tagging by the first page alone left both with no chunks (22 Sep 2026)."""
+    starts = [(259, "8.1"), (265, "8.2"), (266, "8.3"), (267, "8.5"), (269, "8.4")]
+    assert sections_for_span(261, 266, starts) == ["8.1", "8.2", "8.3"]
+    assert sections_for_span(266, 266, starts) == ["8.3"]
+    assert sections_for_span(250, 258, starts) == []  # before the first objective: untagged, as before

@@ -15,7 +15,7 @@ from pydantic import BaseModel, ValidationError
 
 from app.llm.config import RoleConfig, RolesConfig
 from app.llm.prompts import Prompt, PromptRegistry
-from app.llm.transport import ChatRequest, ChatResponse, ChatTransport, TransportError
+from app.llm.transport import BatchTransport, ChatRequest, ChatResponse, ChatTransport, TransportError
 
 ErrorCode = Literal["not_configured", "quota_exceeded", "provider_error", "invalid_output", "bad_request"]
 _PASSTHROUGH_CODES: frozenset[str] = frozenset({"not_configured", "quota_exceeded"})
@@ -102,6 +102,35 @@ class LLMResult[T]:
     output_tokens: int | None
     cost_usd: float | None
     latency_ms: int
+
+
+BATCH_TERMINAL = frozenset({"completed", "failed", "expired", "cancelled"})
+
+
+@dataclass(frozen=True)
+class BatchItem:
+    custom_id: str
+    variables: dict[str, str]
+
+
+@dataclass(frozen=True)
+class BatchHandle:
+    """A submitted batch: enough to collect it later, from this process or another (`--resume`)."""
+
+    id: str
+    role: str
+    model: str
+    prompt_name: str
+    prompt_version: str
+    custom_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class BatchOutcome[T]:
+    status: str
+    results: dict[str, LLMResult[T]]
+    failures: dict[str, str]  # custom_id -> error code (provider error, invalid_output, or the batch's own status)
+    cost_usd: float
 
 
 _FENCE = re.compile(r"^\s*```(?:json)?\s*(.*?)\s*```\s*$", re.DOTALL)
@@ -210,6 +239,115 @@ class LLMGateway:
                 raise LLMError("provider_error", f"{role}: empty audio")
             return resp.audio
         raise LLMError("provider_error", f"{role}: all models failed (last: {last_code})")
+
+    # -- batch (OpenRouter Batch API, `:batch` model variants) --------------------------------------------------
+
+    def _batch_transport(self) -> BatchTransport:
+        if not hasattr(self._transport, "submit_batch"):
+            raise LLMError("not_configured", "this transport has no Batch API")
+        return self._transport  # type: ignore[return-value]
+
+    def batch_submit[T: BaseModel](
+        self,
+        role: str,
+        prompt_name: str,
+        items: Sequence[BatchItem],
+        schema: type[T],
+        ctx: CallContext,
+        *,
+        prompt_version: str | None = None,
+    ) -> BatchHandle:
+        """Queue structured calls on the role's `batch_model`. Results come back within 24 h via `batch_collect`.
+
+        The Batch API takes only `provider.only`, so the per-request provider preferences cannot be sent: the
+        OpenRouter account's own data policy applies to batches (docs/STUDENT-APP.md §17)."""
+        cfg: RoleConfig = self._roles.role(role)
+        if not cfg.batch_model:
+            raise LLMError("not_configured", f"{role}: no batch_model in roles.yaml")
+        prompt = self._prompts.get(prompt_name, prompt_version)
+        json_schema = schema.model_json_schema()
+        response_format = {
+            "type": "json_schema",
+            "json_schema": {"name": schema.__name__, "strict": False, "schema": json_schema},
+        }
+        requests = [
+            {
+                "custom_id": item.custom_id,
+                "body": {
+                    "messages": self._messages(prompt, item.variables, (), json_schema=json_schema),
+                    "temperature": cfg.temperature,
+                    "max_tokens": cfg.max_tokens,
+                    "response_format": response_format,
+                    "usage": {"include": True},
+                    **({"reasoning": cfg.reasoning} if cfg.reasoning else {}),
+                },
+            }
+            for item in items
+        ]
+        started = self._clock()
+        try:
+            data = self._batch_transport().submit_batch(cfg.batch_model, requests, cfg.timeout_s)
+        except TransportError as exc:
+            self._record(
+                ctx, role, cfg.batch_model, None, prompt.name, prompt.version, None, None, None, started, "error",
+                False, exc.code,
+            )  # fmt: skip
+            code: ErrorCode = exc.code if exc.code in _PASSTHROUGH_CODES else "provider_error"  # type: ignore[assignment]
+            raise LLMError(code, f"{role}: batch submit failed ({exc.code})") from exc
+        return BatchHandle(
+            str(data["id"]), role, cfg.batch_model, prompt.name, prompt.version, tuple(i.custom_id for i in items)
+        )
+
+    def batch_status(self, handle: BatchHandle) -> dict[str, Any]:
+        return self._batch_transport().get_batch(handle.id, 120.0)
+
+    def batch_collect[T: BaseModel](
+        self, handle: BatchHandle, schema: type[T], ctx: CallContext
+    ) -> BatchOutcome[T] | None:
+        """None while the batch is still running. Once it ends, every request is recorded in llm_call with its
+        own cost, and each reply is validated against the schema; a reply that fails is a typed failure (the
+        caller may queue it again — a batch cannot repair in place)."""
+        data = self.batch_status(handle)
+        status = str(data.get("status"))
+        if status not in BATCH_TERMINAL:
+            return None
+        results: dict[str, LLMResult[T]] = {}
+        failures: dict[str, str] = {}
+        total = 0.0
+        by_id = {str(r.get("custom_id")): r for r in data.get("results") or []}
+        for custom_id in handle.custom_ids:
+            started = self._clock()
+            row = by_id.get(custom_id)
+            response = (row or {}).get("response") or {}
+            body = response.get("body") or {}
+            if row is None or row.get("error") or not body.get("choices"):
+                code = status if row is None else str((row.get("error") or {}).get("code") or "provider_error")
+                failures[custom_id] = code
+                self._record(
+                    ctx, handle.role, handle.model, None, handle.prompt_name, handle.prompt_version, None, None, None,
+                    started, "error", False, code,
+                )  # fmt: skip
+                continue
+            usage = body.get("usage") or {}
+            cost = usage.get("cost")
+            total += float(cost or 0)
+            text = _content_text_of(body["choices"][0])
+            latency = self._record(
+                ctx, handle.role, handle.model, body.get("provider"), handle.prompt_name, handle.prompt_version,
+                usage.get("prompt_tokens"), usage.get("completion_tokens"), cost, started, "ok", False, None,
+            )  # fmt: skip
+            try:
+                value = _validate(schema, text)
+            except ValidationError:
+                failures[custom_id] = "invalid_output"
+                continue
+            results[custom_id] = LLMResult(
+                value, text, handle.model, False, handle.prompt_name, handle.prompt_version,
+                usage.get("prompt_tokens"), usage.get("completion_tokens"), cost, latency,
+            )  # fmt: skip
+        # Replies usually carry no per-request cost; the batch reports its own total once it ends.
+        batch_cost = float(((data.get("usage") or {}).get("cost")) or 0)
+        return BatchOutcome(status, results, failures, round(total or batch_cost, 6))
 
     def structured[T: BaseModel](
         self,
@@ -366,6 +504,7 @@ class LLMGateway:
                     timeout_s=cfg.timeout_s,
                     response_format=response_format,
                     provider=self._roles.provider_preferences or None,
+                    reasoning=cfg.reasoning,
                 )
                 try:
                     resp = self._transport.chat(request)
@@ -448,6 +587,13 @@ class LLMGateway:
             )
         )
         return latency_ms
+
+
+def _content_text_of(choice: dict[str, Any]) -> str:
+    content = (choice.get("message") or {}).get("content")
+    if isinstance(content, list):
+        return "".join(part.get("text", "") for part in content if isinstance(part, dict))
+    return str(content or "")
 
 
 def _summarise_errors(error: ValidationError, limit: int = 8) -> str:

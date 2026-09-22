@@ -75,6 +75,7 @@ def post_read(objective_id: UUID, principal: PrincipalDep, s: DbDep) -> None:
 
 
 @router.get("/learn/objectives/{objective_id}/audio")
+@router.head("/learn/objectives/{objective_id}/audio")
 def get_lesson_audio(
     objective_id: UUID,
     request: Request,
@@ -95,12 +96,27 @@ def get_lesson_audio(
     if not text.strip():
         raise ApiError(400, "empty_text", "No text found for requested lesson component.")
 
-    ctx = CallContext(request_id=request_id_of(request), tenant_id=principal.tenant_id, student_id=principal.student_id)
+    ctx = CallContext(
+        request_id=request_id_of(request),
+        tenant_id=principal.tenant_id,
+        student_id=principal.student_id,
+    )
     try:
         audio_bytes = audio.get_or_synthesize_audio(llm_gateway(request), ctx, settings, text, voice=voice)
     except LLMError as exc:
         # The provider's own message stays in llm_call; the page gets a plain reason.
         raise ApiError(503, "audio_unavailable", "The voice isn't available right now. Try again later.") from exc
 
+    if not audio_bytes or len(audio_bytes) < 100:
+        raise ApiError(502, "audio_failed", "Failed to generate audio stream from voice provider.")
+
+    headers = {
+        "Cache-Control": "private, max-age=86400",
+        "Content-Length": str(len(audio_bytes)),
+        "Accept-Ranges": "bytes",
+    }
+    if request.method == "HEAD":
+        return Response(content=b"", media_type="audio/mpeg", headers=headers)
+
     # Signed-in content: the browser may keep it, a shared cache may not.
-    return Response(content=audio_bytes, media_type="audio/mpeg", headers={"Cache-Control": "private, max-age=86400"})
+    return Response(content=audio_bytes, media_type="audio/mpeg", headers=headers)

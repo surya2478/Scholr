@@ -31,9 +31,10 @@ from sqlalchemy import func, select
 import app.models_registry  # noqa: F401
 from app.core.config import API_ROOT
 from app.core.db import session_scope
+from app.jobs import batching
 from app.llm.config import load_roles
 from app.llm.factory import build_gateway
-from app.llm.gateway import CallContext, LLMError
+from app.llm.gateway import BatchItem, CallContext, LLMError
 from app.llm.models import LlmCall
 from app.modules.curriculum import service as curriculum
 from app.modules.curriculum.models import Subject
@@ -46,7 +47,8 @@ REPORTS = API_ROOT.parents[1] / "evals" / "reports"
 RUNS = API_ROOT.parents[1] / "evals" / "runs"
 # Measured 19 Sep 2026 on gemini-2.5-flash-lite (llm_call): $0.015 for 10 lessons, one of which looped to the cap
 # and was retried. Rounded up for retries. (gemini-3.5-flash, used for the first 29, cost ~$0.07 each.)
-COST_PER_LESSON_USD = 0.008  # gemini-2.5-flash, lesson v4: $0.005-0.008 each in the 21 Sep 2026 pilot
+# z-ai/glm-5.3-flash:batch at $0.075/M in, $0.25/M out: ~6k tokens in and ~3k out per v4 lesson, rounded up.
+COST_PER_LESSON_USD = 0.002
 
 
 def todo(subject_code: str, *, stale: bool, limit: int | None, missing: bool = True) -> list[UUID]:
@@ -165,6 +167,56 @@ def _objectives(nodes):  # type: ignore[no-untyped-def]
         yield from _objectives(node.children)
 
 
+def _store(prepared: learn.PreparedLesson, written: learn.WrittenLesson, *, rewrite: bool, now: datetime) -> dict:
+    if rewrite and written.status != "ready":
+        # Never swap a lesson she can read for a blank one: the old one stays and the topic is listed for a retry.
+        return {"status": "kept_old", **written.checks}
+    with session_scope(user_id=None, role="system") as s:
+        learn.record_lesson(s, prepared, written, actor=None, now=now)
+    return {"status": written.status, **written.checks}
+
+
+def write_batch(
+    pending: list[UUID], tenant_id: UUID, *, rewrite: bool, subject: str, resume: str | None = None
+) -> tuple[list[dict], float]:
+    """Write lessons through the Batch API on the role's `:batch` model (user rule, 21 Sep 2026). Retrieval and
+    the guard are exactly those of a live lesson; only the model call is queued."""
+    gateway = build_gateway()
+    now = datetime.now(UTC)
+    ctx = CallContext(request_id=f"lesson-batch-prep:{now:%Y%m%d%H%M%S}", tenant_id=tenant_id)
+    prepared: dict[str, learn.PreparedLesson] = {}
+    results: list[dict] = []
+    for oid in pending:
+        with session_scope(user_id=None, role="system") as s:
+            p = learn.prepare_lesson(s, gateway, ctx, oid, rewrite=rewrite)
+        if not isinstance(p, learn.PreparedLesson):
+            results.append({"status": p.status, "skipped": True})
+        elif not learn.needs_writing(p):
+            thin = learn.WrittenLesson("not_enough_material", {}, {"retrieval_state": p.retrieval_state}, None, None)
+            results.append(_store(p, thin, rewrite=rewrite, now=now))
+        else:
+            prepared[str(oid)] = p
+    if not prepared:
+        return results, 0.0
+    got, failed, cost = batching.run(
+        gateway,
+        learn.LESSON_ROLE,
+        learn.LESSON_PROMPT,
+        [BatchItem(cid, p.variables) for cid, p in prepared.items()],
+        lessons.LessonDraft,
+        tenant_id,
+        tag=f"lessons-{subject}",
+        prompt_version=learn.LESSON_PROMPT_VERSION,
+        resume=resume,
+    )
+    for cid, p in prepared.items():
+        if cid in got:
+            results.append(_store(p, learn.finish_lesson(p, got[cid]), rewrite=rewrite, now=now))
+        else:
+            results.append({"status": "failed", "error": failed.get(cid, "missing")})
+    return results, cost
+
+
 def main(argv: list[str]) -> None:
     parser = argparse.ArgumentParser(prog="app.jobs.lessons")
     parser.add_argument("--subject", required=True)
@@ -177,6 +229,10 @@ def main(argv: list[str]) -> None:
     parser.add_argument("--stale-only", action="store_true", help="rewrite out-of-date lessons; write no new ones")
     parser.add_argument("--run", action="store_true", help="make the calls; without it, print the estimate only")
     parser.add_argument("--concurrency", type=int, default=3)
+    parser.add_argument(
+        "--live", action="store_true", help="call the live model one lesson at a time instead of the Batch API"
+    )
+    parser.add_argument("--resume", metavar="BATCH_ID", help="collect a batch submitted by an interrupted run")
     parser.add_argument("--recheck", action="store_true", help="apply the current guard to stored lessons; no LLM")
     parser.add_argument("--pilot", help="objective codes to write beside the stored lessons; nothing is saved")
     parser.add_argument("--prompt-version", default=learn.LESSON_PROMPT_VERSION, help="with --pilot: e.g. v4")
@@ -185,6 +241,10 @@ def main(argv: list[str]) -> None:
 
     if args.pilot:
         codes = [c.strip() for c in args.pilot.split(",") if c.strip()]
+        # The user's rule (21 Sep 2026): the pilot may compare only the two allowed live models.
+        allowed = {"google/gemini-2.5-flash-lite", "z-ai/glm-5.3-flash"}
+        if args.model and args.model not in allowed:
+            raise SystemExit(f"--model must be one of {sorted(allowed)} (user rule, 21 Sep 2026)")
         models = [args.model] if args.model else None
         print(
             f"{args.subject}: pilot of {len(codes)} lessons, prompt {args.prompt_version}, "
@@ -218,7 +278,8 @@ def main(argv: list[str]) -> None:
         tenant_id = s.scalar(select(Tenant.id).order_by(Tenant.created_at))  # the household (product for one)
     stale = args.stale or args.stale_only
     pending = todo(args.subject, stale=stale, limit=args.limit, missing=not args.stale_only)
-    model = load_roles().role(learn.LESSON_ROLE).model
+    role = load_roles().role(learn.LESSON_ROLE)
+    model = role.model if args.live else (role.batch_model or role.model)
     print(
         f"{args.subject}: {len(pending)} lessons to write, estimate ${len(pending) * COST_PER_LESSON_USD:.2f} "
         f"(model {model}, prompt {learn.LESSON_PROMPT}/{learn.LESSON_PROMPT_VERSION})",
@@ -229,8 +290,12 @@ def main(argv: list[str]) -> None:
     if tenant_id is None:
         raise SystemExit("no household seeded (app.seed.household)")
 
-    with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
-        results = list(pool.map(lambda oid: write_one(oid, tenant_id, rewrite=stale), pending))
+    batch_cost: float | None = None
+    if args.live:
+        with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
+            results = list(pool.map(lambda oid: write_one(oid, tenant_id, rewrite=stale), pending))
+    else:
+        results, batch_cost = write_batch(pending, tenant_id, rewrite=stale, subject=args.subject, resume=args.resume)
 
     counted = [r for r in results if not r.get("skipped")]
     summary: dict = {
@@ -244,7 +309,8 @@ def main(argv: list[str]) -> None:
         "failed": sum(r["status"] == "failed" for r in counted),
         "kept_old": sum(r["status"] == "kept_old" for r in counted),
         "errors": sorted({r["error"] for r in counted if r.get("error")}),
-        "cost_usd": round(sum(r.get("cost_usd") or 0 for r in counted), 4),  # from llm_call, retries included
+        # from llm_call, retries included (live); the batch's own reported cost (batch)
+        "cost_usd": round(batch_cost if batch_cost is not None else sum(r.get("cost_usd") or 0 for r in counted), 4),
     }
     for key in lessons.GuardReport().as_dict():
         summary[key] = sum(r.get(key, 0) for r in counted)

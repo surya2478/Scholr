@@ -7,7 +7,7 @@ import pytest
 from pydantic import BaseModel
 
 from app.llm.config import EmbeddingConfig, RoleConfig, RolesConfig, load_roles
-from app.llm.gateway import CallContext, ImageInput, LLMError, LLMGateway, MemoryRecorder
+from app.llm.gateway import BatchItem, CallContext, ImageInput, LLMError, LLMGateway, MemoryRecorder
 from app.llm.prompts import PromptError, PromptRegistry, parse_prompt_file
 from app.llm.transport import ChatRequest, ChatResponse, EmbeddingResponse, SpeechResponse, TransportError
 
@@ -233,3 +233,76 @@ def test_speech_goes_through_the_gateway_recorded_and_priced(registry: PromptReg
     empty = SpeechTransport([SpeechResponse(b"", "p", None)])
     with pytest.raises(LLMError):
         LLMGateway(empty, VOICE_ROLES, registry, MemoryRecorder()).speech("voice", "Hi.", "bf_emma", CTX)
+
+
+class BatchFake(FakeTransport):
+    """The Batch API, in memory: a submit is 'in_progress' until `finish` fills in the results."""
+
+    def __init__(self) -> None:
+        super().__init__([])
+        self.submitted: list[tuple[str, list[dict]]] = []
+        self.state: dict = {"status": "validating", "results": None}
+
+    def submit_batch(self, model: str, requests: list[dict], timeout_s: float) -> dict:
+        self.submitted.append((model, requests))
+        return {"id": f"batch_{len(self.submitted)}", "status": "validating"}
+
+    def get_batch(self, batch_id: str, timeout_s: float) -> dict:
+        return self.state
+
+    def finish(self, replies: dict[str, str | None]) -> None:
+        results = []
+        for custom_id, text in replies.items():
+            if text is None:
+                results.append({"custom_id": custom_id, "error": {"code": "provider_error", "message": "x"}})
+            else:
+                body = {
+                    "choices": [{"message": {"content": text}}],
+                    "usage": {"prompt_tokens": 10, "completion_tokens": 5, "cost": 0.0001},
+                    "provider": "Fireworks",
+                }
+                results.append({"custom_id": custom_id, "response": {"status_code": 200, "body": body}})
+        self.state = {"status": "completed", "results": results}
+
+
+BATCH_ROLES = ROLES.model_copy(
+    update={
+        "roles": {
+            "writer": RoleConfig(model="glm", batch_model="glm:batch", max_tokens=500),
+            "tutor": RoleConfig(model="m1"),
+        }
+    }
+)
+
+
+def test_a_batch_runs_on_the_batch_variant_and_every_reply_is_checked_and_recorded(registry: PromptRegistry) -> None:
+    """User rule (21 Sep 2026): batch jobs run on the role's `:batch` model through the Batch API. Each reply is
+    validated against the schema and recorded with its cost; an unreadable one is a typed failure, not a guess."""
+    t = BatchFake()
+    rec = MemoryRecorder()
+    gw = LLMGateway(t, BATCH_ROLES, registry, rec)
+    items = [
+        BatchItem("a", {"question": "1+1"}),
+        BatchItem("b", {"question": "2+2"}),
+        BatchItem("c", {"question": "x"}),
+    ]
+    handle = gw.batch_submit("writer", "demo", items, Answer, CTX)
+    [(model, requests)] = t.submitted
+    assert model == "glm:batch" and handle.custom_ids == ("a", "b", "c")
+    assert requests[0]["body"]["response_format"]["type"] == "json_schema" and "stream" not in requests[0]["body"]
+
+    assert gw.batch_collect(handle, Answer, CTX) is None  # still running
+    t.finish({"a": '{"answer": "2", "confidence": 0.9}', "b": "not json", "c": None})
+    outcome = gw.batch_collect(handle, Answer, CTX)
+    assert outcome is not None and outcome.status == "completed"
+    assert outcome.results["a"].value.answer == "2" and outcome.results["a"].model == "glm:batch"
+    assert outcome.failures == {"b": "invalid_output", "c": "provider_error"}
+    assert outcome.cost_usd == pytest.approx(0.0002)
+    assert [(r.status, r.model) for r in rec.records] == [
+        ("ok", "glm:batch"),
+        ("ok", "glm:batch"),
+        ("error", "glm:batch"),
+    ]
+
+    with pytest.raises(LLMError):  # a role with no batch variant is never silently run on something else
+        gw.batch_submit("tutor", "demo", items, Answer, CTX)

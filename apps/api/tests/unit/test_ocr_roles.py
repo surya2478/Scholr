@@ -4,12 +4,13 @@ from app.llm.config import load_roles
 from app.llm.prompts import default_registry
 from app.modules.knowledge.manifest import load_all
 
-# User rule (19 Sep 2026): every LLM role — PDF extraction, batch jobs and marking — runs on Gemini 2.5 Flash-Lite
-# and never falls back to another model. Embeddings are a separate model (bge-m3) and not an LLM role.
-ONLY_MODEL = "google/gemini-2.5-flash-lite"
-# The one exception, the user's decision of 21 Sep 2026 after the lesson v4 pilot (docs/STUDENT-APP.md §15).
-# lesson_voice is a speech model (lesson read-aloud), not an LLM; put behind the gateway on 21 Sep 2026.
-EXCEPTIONS = {"lesson_writer": "google/gemini-2.5-flash", "lesson_voice": "hexgrad/kokoro-82m"}
+# User rule (21 Sep 2026): only two LLMs, each live and batch. Gemini 2.5 Flash-Lite for every role by default;
+# GLM 5.3 Flash for lesson_writer and exam_walker. No other model, no fallbacks. Two non-LLM models are kept by
+# the user's decision: Kokoro (read-aloud) and bge-m3 (embeddings, configured apart from the roles).
+FLASH_LITE = ("google/gemini-2.5-flash-lite", "google/gemini-2.5-flash-lite:batch")
+GLM = ("z-ai/glm-5.3-flash", "z-ai/glm-5.3-flash:batch")
+GLM_ROLES = {"lesson_writer", "exam_walker"}
+NOT_LLM = {"lesson_voice": "hexgrad/kokoro-82m"}
 
 
 def test_every_source_ocr_role_and_prompt_exist() -> None:
@@ -21,9 +22,14 @@ def test_every_source_ocr_role_and_prompt_exist() -> None:
             assert registry.get(source.ocr_prompt).name == source.ocr_prompt
 
 
-def test_every_role_uses_only_flash_lite() -> None:
+def test_every_role_uses_only_the_two_allowed_models() -> None:
     config = load_roles()
     for name in config.roles:
         role = config.role(name)
-        assert role.model == EXCEPTIONS.get(name, ONLY_MODEL), f"{name} uses {role.model}"
         assert not role.fallbacks, f"{name} would fall back to {role.fallbacks}"
+        if name in NOT_LLM:
+            assert role.model == NOT_LLM[name] and role.batch_model is None, name
+            continue
+        live, batch = GLM if name in GLM_ROLES else FLASH_LITE
+        assert role.model == live, f"{name} uses {role.model}"
+        assert role.batch_model in (None, batch), f"{name} batches on {role.batch_model}"

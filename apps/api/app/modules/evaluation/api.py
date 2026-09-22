@@ -11,7 +11,13 @@ from app.core.telemetry import request_id_of
 from app.llm.gateway import CallContext
 from app.modules.assessment.schemas import ExaminerInsightsOut
 from app.modules.evaluation import service
-from app.modules.evaluation.schemas import EvaluationOut, OverrideIn, ReviewItemOut
+from app.modules.evaluation.schemas import (
+    AutopsyEntryOut,
+    AutopsyIn,
+    EvaluationOut,
+    OverrideIn,
+    ReviewItemOut,
+)
 
 router = APIRouter(tags=["evaluation"])
 
@@ -38,9 +44,27 @@ def get_review_queue(principal: PrincipalDep, s: DbDep, student_id: UUID | None 
     return service.review_queue(s, principal, student_id=sid)
 
 
+@router.get("/evaluations/autopsies", response_model=list[AutopsyEntryOut])  # before /{evaluation_id}
+def get_autopsies(
+    principal: PrincipalDep,
+    s: DbDep,
+    student_id: UUID | None = None,
+    subject_id: UUID | None = None,
+) -> list[AutopsyEntryOut]:
+    sid = resolve_student_id(principal, student_id, scope="assessments")
+    return service.list_autopsies(s, principal, student_id=sid, subject_id=subject_id)
+
+
 @router.get("/evaluations/{evaluation_id}", response_model=EvaluationOut)
 def get_evaluation(evaluation_id: UUID, principal: PrincipalDep, s: DbDep) -> EvaluationOut:
     return service.get_evaluation(s, principal, evaluation_id)
+
+
+@router.post("/evaluations/{evaluation_id}/autopsy", response_model=EvaluationOut)
+def record_autopsy(
+    evaluation_id: UUID, body: AutopsyIn, principal: PrincipalDep, s: DbDep
+) -> EvaluationOut:
+    return service.record_autopsy(s, principal, evaluation_id, body, now=datetime.now(UTC))
 
 
 @router.get("/evaluations/{evaluation_id}/examiner-insights", response_model=ExaminerInsightsOut)

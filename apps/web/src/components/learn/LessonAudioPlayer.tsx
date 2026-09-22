@@ -50,7 +50,12 @@ export function LessonAudioPlayer({
       const body = await res.json().catch(() => ({}));
       throw new Error(body?.error?.message ?? "The voice isn't available right now.");
     }
-    const url = URL.createObjectURL(await res.blob());
+    const buffer = await res.arrayBuffer();
+    if (!buffer || buffer.byteLength < 100) {
+      throw new Error("Voice readout is preparing or empty. Please try again in a moment.");
+    }
+    const blob = new Blob([buffer], { type: "audio/mpeg" });
+    const url = URL.createObjectURL(blob);
     clips.current.set(key, url);
     return url;
   }
@@ -76,9 +81,9 @@ export function LessonAudioPlayer({
         .then(() => {
           setStatus("playing");
         })
-        .catch((e) => {
+        .catch(() => {
           setStatus("error");
-          setErrorMessage(e.message || "Failed to resume audio");
+          setErrorMessage("Failed to resume audio. Tap play again.");
         });
       return;
     }
@@ -87,7 +92,25 @@ export function LessonAudioPlayer({
     setErrorMessage(null);
     setStatus("loading");
     loadClip()
-      .then((url) => setAudioSrc(url))
+      .then((url) => {
+        setAudioSrc(url);
+        if (audioRef.current) {
+          audioRef.current.src = url;
+          audioRef.current.load();
+          audioRef.current.playbackRate = rate;
+          audioRef.current
+            .play()
+            .then(() => setStatus("playing"))
+            .catch((e) => {
+              if (e.name !== "NotAllowedError") {
+                setStatus("error");
+                setErrorMessage("Audio playback could not start. Please try playing again.");
+              } else {
+                setStatus("paused");
+              }
+            });
+        }
+      })
       .catch((e: Error) => {
         setStatus("error");
         setErrorMessage(e.message);
@@ -149,8 +172,12 @@ export function LessonAudioPlayer({
                 .play()
                 .then(() => setStatus("playing"))
                 .catch((e) => {
-                  setStatus("error");
-                  setErrorMessage(e.message || "Failed to start audio");
+                  if (e.name !== "NotAllowedError") {
+                    setStatus("error");
+                    setErrorMessage("Failed to start audio playback");
+                  } else {
+                    setStatus("paused");
+                  }
                 });
             }
           }}
@@ -160,12 +187,9 @@ export function LessonAudioPlayer({
             onSectionActive?.(null);
           }}
           onError={() => {
-            const err = audioRef.current?.error;
             setStatus("error");
             setErrorMessage(
-              err
-                ? `Audio load error (${err.code}): ${err.message || "source not supported"}`
-                : "Audio failed to load"
+              "Audio format was not accepted by browser media player. Try 'Summary only' or switch voice."
             );
             onSectionActive?.(null);
           }}

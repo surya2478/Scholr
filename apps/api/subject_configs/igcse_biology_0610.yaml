@@ -1,12 +1,20 @@
 # Subject Expertise Engine config — Cambridge IGCSE Biology 0610.
 #
-# stage: planned — see igcse_physics_0625.yaml. Scholr knows the syllabus structure and can name a topic to
-# revise, but has no question bank, retrieval corpus or marking for Biology, so the teaching blocks are
-# absent rather than invented. Its only job today is to give an IIT Foundation biology class IGCSE ground to
-# point at (docs/PHASE-3.md).
+# stage: lessons (the user's request of 22 Sep 2026 to complete the science lessons topic by topic; docs/STUDENT-APP.md
+# step 6). Scholr writes grounded topic lessons from her coursebook, OCR'd on 22 Sep 2026
+# (content/manifests/igcse-biology-0610.yaml), and the Tutor answers doubts on them (D4 amended). It sets and marks
+# nothing yet. It still names the IGCSE ground under an IIT Foundation biology class (docs/PHASE-3.md).
 key: igcse_biology_0610
 path: IGCSE
 subject_code: igcse-biology
 syllabus: { code: "0610", tier: extended, exam_session: "2028-06" }
 subject_type: mixed
-stage: planned
+stage: lessons
+retrieval:
+  allowed_authority_tiers: [A, B, C]   # the coursebook and syllabus; student notes never ground a lesson
+  grounding_critical_intents: [syllabus_scope, notation, exam_technique]
+pedagogy:
+  worked_example_style: step_by_step
+  # Biology is mostly explanation: one applied example per lesson, as in Sociology, rather than a forced
+  # calculation. (Magnification and percentage-change sums can come with a Biology question bank later.)
+  worked_example_check: none

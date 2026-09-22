@@ -17,7 +17,7 @@ from app.core.db import set_rls_context
 from app.llm.gateway import CallContext, LLMGateway
 from app.modules.audit import service as audit
 from app.modules.curriculum import service as curriculum
-from app.modules.knowledge.chunking import PageText, chunk_pages, page_offset, printed_page_map, section_for_page
+from app.modules.knowledge.chunking import PageText, chunk_pages, page_offset, printed_page_map, sections_for_span
 from app.modules.knowledge.models import DocumentPage, KnowledgeChunk, KnowledgeDocument, RetrievalLog, Source
 from app.modules.knowledge.ranking import (
     ALIGNMENT_BONUS,
@@ -100,14 +100,19 @@ def chunk_source(s: Session, *, source_key: str) -> ChunkReport:
             printed_end = printed.get(draft.page_end)
             embedding, embedding_model = previous.get(draft.content, (None, None))
             report.reused_embeddings += embedding is not None
-            section = section_for_page(printed_start, starts) if (printed_start is not None and starts) else None
+            sections = (
+                sections_for_span(printed_start, printed_end or printed_start, starts)
+                if (printed_start is not None and starts)
+                else []
+            )
+            section = sections[0] if sections else None
             s.add(
                 KnowledgeChunk(
                     tenant_id=source.tenant_id,
                     document_id=document.id,
                     subject_id=source.subject_id,
                     topic_id=section[1] if section else None,
-                    objective_ids=[section[0]] if section else [],
+                    objective_ids=list(dict.fromkeys(s_[0] for s_ in sections)),
                     content_kind=draft.content_kind,
                     authority_tier=source.authority_tier,
                     page_start=draft.page_start,
@@ -254,9 +259,25 @@ def search(
         .limit(CANDIDATES_PER_RANKING)
     ).all()
 
-    similarity = {row.id: 1.0 - float(row.distance) for row in vector_rows}
+    # The objective's own chunks, ranked by the same vector distance. Across a whole book the nearest chunks can all
+    # be chapter summaries and question pages, so the pages a topic is actually taught on were found only by
+    # keyword and carried no similarity (Biology 1.1 and 4.1, Chemistry 3.1, 22 Sep 2026). They are still held to
+    # the same thresholds below; this only makes sure they are measured.
+    aligned_rows = (
+        s.execute(
+            select(KnowledgeChunk.id, distance.label("distance"))
+            .where(*filters, KnowledgeChunk.embedding.is_not(None), KnowledgeChunk.objective_ids.overlap(list(wanted)))
+            .order_by(distance)
+            .limit(CANDIDATES_PER_RANKING)
+        ).all()
+        if wanted
+        else []
+    )
+    similarity = {row.id: 1.0 - float(row.distance) for row in (*vector_rows, *aligned_rows)}
     keyword_ids = {row.id for row in keyword_rows}
-    fused = reciprocal_rank_fusion([[r.id for r in vector_rows], [r.id for r in keyword_rows]])
+    fused = reciprocal_rank_fusion(
+        [[r.id for r in vector_rows], [r.id for r in keyword_rows], [r.id for r in aligned_rows]]
+    )
     ids = list(fused)
     rows = (
         {

@@ -269,6 +269,56 @@ def latest_attempts(
     return latest
 
 
+@dataclass(frozen=True)
+class ConfidenceAttempt:
+    id: UUID
+    question_item_id: UUID
+    subject_id: UUID
+    question_stem: str
+    pre_confidence: int
+    max_assistance_level: int
+    submitted_at: datetime
+
+
+def attempts_with_confidence(
+    s: Session,
+    *,
+    student_id: UUID,
+    subject_id: UUID | None = None,
+    limit: int = 100,
+) -> list[ConfidenceAttempt]:
+    """Attempts with a student-reported pre_confidence rating, newest first."""
+    query = (
+        select(
+            Attempt.id,
+            Attempt.question_item_id,
+            QuestionItem.subject_id,
+            QuestionItem.stem,
+            Attempt.pre_confidence,
+            Attempt.max_assistance_level,
+            Attempt.submitted_at,
+        )
+        .join(QuestionItem, QuestionItem.id == Attempt.question_item_id)
+        .where(Attempt.student_id == student_id, Attempt.pre_confidence.is_not(None))
+    )
+    if subject_id is not None:
+        query = query.where(QuestionItem.subject_id == subject_id)
+    query = query.order_by(Attempt.submitted_at.desc()).limit(limit)
+    rows = s.execute(query).all()
+    return [
+        ConfidenceAttempt(
+            id=r[0],
+            question_item_id=r[1],
+            subject_id=r[2],
+            question_stem=r[3],
+            pre_confidence=r[4],
+            max_assistance_level=r[5],
+            submitted_at=r[6],
+        )
+        for r in rows
+    ]
+
+
 def item_briefs(s: Session, item_ids: Sequence[UUID]) -> dict[UUID, ItemBrief]:
     if not item_ids:
         return {}

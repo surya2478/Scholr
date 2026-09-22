@@ -1,0 +1,155 @@
+{
+  "subject": "igcse-maths",
+  "prompt": "exam_walkthrough/v2",
+  "model": "z-ai/glm-5.3-flash:batch",
+  "tried": 28,
+  "kept": 19,
+  "rejected": {
+    "llm_invalid_output": 2,
+    "too_many_marks": 3,
+    "arithmetic": 4
+  },
+  "cost_usd": 0,
+  "per_topic": {
+    "1.4": [
+      "0580/22/MJ23/Q2",
+      true,
+      ""
+    ],
+    "2.3": [
+      "0580/21/MJ24/Q15",
+      true,
+      ""
+    ],
+    "2.5": [
+      "0580/41/MJ24/Q1(a)(iii)",
+      true,
+      ""
+    ],
+    "2.6": [
+      null,
+      false,
+      "llm_invalid_output"
+    ],
+    "2.7": [
+      "0580/42/ON24/Q1(b)",
+      false,
+      "too_many_marks"
+    ],
+    "2.8": [
+      "0580/42/MJ25/Q17(c)",
+      false,
+      "arithmetic"
+    ],
+    "7.1": [
+      "0580/21/ON24/Q4",
+      true,
+      ""
+    ],
+    "7.4": [
+      "0580/42/ON24/Q7(a)(vi)",
+      true,
+      ""
+    ],
+    "7.5": [
+      "0580/22/ON24/Q12",
+      true,
+      ""
+    ],
+    "8.4": [
+      "0580/41/MJ24/Q1(b)",
+      true,
+      ""
+    ],
+    "8.5": [
+      "0580/41/MJ25/Q22",
+      true,
+      ""
+    ],
+    "10.2": [
+      "0580/42/ON24/Q7(a)(vi)",
+      true,
+      ""
+    ],
+    "10.3": [
+      "0580/42/ON24/Q5(b)",
+      false,
+      "arithmetic"
+    ],
+    "11.2": [
+      "0580/42/ON24/Q1(b)",
+      true,
+      ""
+    ],
+    "13.1": [
+      "0580/22/MJ25/Q6(b)",
+      true,
+      ""
+    ],
+    "17.2": [
+      null,
+      false,
+      "llm_invalid_output"
+    ],
+    "17.4": [
+      "0580/21/MJ24/Q3(b)",
+      false,
+      "arithmetic"
+    ],
+    "19.1": [
+      "0580/22/MJ23/Q19",
+      true,
+      ""
+    ],
+    "15.4": [
+      "0580/41/MJ25/Q14(c)",
+      true,
+      ""
+    ],
+    "24.2": [
+      "0580/41/MJ24/Q6(c)",
+      true,
+      ""
+    ],
+    "24.8": [
+      "0580/21/ON24/Q14",
+      false,
+      "too_many_marks"
+    ],
+    "27.1": [
+      "0580/42/ON24/Q7(b)",
+      true,
+      ""
+    ],
+    "27.12": [
+      "0580/41/MJ24/Q7(b)(ii)",
+      false,
+      "arithmetic"
+    ],
+    "27.13": [
+      "0580/42/MJ25/Q6",
+      true,
+      ""
+    ],
+    "26.1": [
+      "0580/41/MJ24/Q7(b)(ii)",
+      true,
+      ""
+    ],
+    "26.6": [
+      "0580/41/MJ24/Q6(d)(ii)",
+      true,
+      ""
+    ],
+    "33.2": [
+      "0580/42/ON24/Q8(b)(ii)",
+      true,
+      ""
+    ],
+    "33.6": [
+      "0580/21/MJ24/Q22",
+      false,
+      "too_many_marks"
+    ]
+  }
+}

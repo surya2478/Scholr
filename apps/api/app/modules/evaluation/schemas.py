@@ -3,13 +3,34 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class AutopsyIn(BaseModel):
+    category: str
+    takeaway: str
+
+
+class AutopsyEntryOut(BaseModel):
+    evaluation_id: UUID
+    attempt_id: UUID
+    subject_id: UUID
+    objective_code: str | None
+    stem: str
+    category: str
+    takeaway: str
+    marks_awarded: float
+    marks_available: float
+    recorded_at: datetime
 
 
 class FeedbackOut(BaseModel):
     summary: str
     what_went_well: str | None
     next_step: str
+    autopsy: dict[str, Any] | None = None
 
 
 class AwardOut(BaseModel):

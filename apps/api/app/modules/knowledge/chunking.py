@@ -230,3 +230,18 @@ def section_for_page[T](printed_page: int, starts: Sequence[tuple[int, T]]) -> T
     """The section whose start page is the last one at or before printed_page (starts sorted by page)."""
     index = bisect.bisect_right([page for page, _ in starts], printed_page) - 1
     return starts[index][1] if index >= 0 else None
+
+
+def sections_for_span[T](first: int, last: int, starts: Sequence[tuple[int, T]]) -> list[T]:
+    """Every section a chunk spanning printed pages first..last belongs to: the one it opens in, and any that start
+    inside it. A long book section with no sub-headings is chunked as one heading, so its chunks all carry the
+    section's first page; tagging by that page alone gave Group I and Group VII (Chemistry 13.2) to the Periodic
+    Table topic before them (22 Sep 2026)."""
+    out: list[T] = []
+    opening = section_for_page(first, starts)
+    if opening is not None:
+        out.append(opening)
+    for page, section in starts:
+        if first < page <= last and section not in out:
+            out.append(section)
+    return out

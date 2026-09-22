@@ -1,10 +1,11 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnswerBox } from "@/components/AnswerBox";
 import { useMe } from "@/components/AppShell";
 import { MathText } from "@/components/MathText";
+import { OralDefenseViva } from "@/components/OralDefenseViva";
 import { Button, Card, Empty, ErrorNote } from "@/components/ui";
 import { api, type Question } from "@/lib/api";
 
@@ -17,6 +18,7 @@ export default function Practice() {
   const subjects = me?.student?.enrollments ?? [];
   const params = useSearchParams();
   const [subjectId, setSubjectId] = useState<string>(params.get("subject") ?? "");
+  const [practiceMode, setPracticeMode] = useState<"standard" | "viva">("standard");
   const [session, setSession] = useState<SessionOut | null>(null);
   const [question, setQuestion] = useState<Question | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -25,6 +27,16 @@ export default function Practice() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [answeredKey, setAnsweredKey] = useState(0);
+  const [struggleSeconds, setStruggleSeconds] = useState(45);
+
+  useEffect(() => {
+    setStruggleSeconds(45);
+    const interval = setInterval(() => {
+      setStruggleSeconds((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [answeredKey]);
+
 
   async function run<T>(fn: () => Promise<T>) {
     setBusy(true);
@@ -158,6 +170,32 @@ export default function Practice() {
           </div>
         </div>
 
+        {/* Mode Switcher */}
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+          <button
+            type="button"
+            onClick={() => setPracticeMode("standard")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-fun font-bold transition-all ${
+              practiceMode === "standard"
+                ? "bg-white text-orange-600 shadow-xs border border-orange-200"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            📐 Standard Lab
+          </button>
+          <button
+            type="button"
+            onClick={() => setPracticeMode("viva")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-fun font-bold transition-all ${
+              practiceMode === "viva"
+                ? "bg-purple-600 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            🎓 Oral Defense (Blackboard Viva)
+          </button>
+        </div>
+
         {/* Socratic Encouraging Meter */}
         <div className="flex items-center gap-3 bg-amber-50 px-4 py-2 rounded-2xl border border-amber-200">
           <span className="text-2xl select-none">🪄</span>
@@ -174,6 +212,9 @@ export default function Practice() {
         </div>
       </div>
 
+      {practiceMode === "viva" ? (
+        <OralDefenseViva />
+      ) : (
       <div className="grid gap-6 xl:grid-cols-12">
         {/* Left 7 cols: Question & Solver Canvas */}
         <div className="xl:col-span-7 space-y-4">
@@ -255,11 +296,18 @@ export default function Practice() {
               ))}
             </div>
 
-            {/* Hint Request Form */}
+            {/* Hint Request Form with Productive Struggle */}
             <div className="pt-2 border-t border-slate-100 space-y-2.5">
-              <span className="text-[11px] font-fun font-bold text-slate-500 uppercase tracking-wider block">
-                Need a little boost?
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-fun font-bold text-slate-500 uppercase tracking-wider block">
+                  Need a little boost?
+                </span>
+                {struggleSeconds > 0 && (
+                  <span className="text-[10.5px] font-fun font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full animate-pulse">
+                    ⏳ Struggle Window: {struggleSeconds}s
+                  </span>
+                )}
+              </div>
               <textarea
                 value={helpText}
                 onChange={(e) => setHelpText(e.target.value)}
@@ -267,14 +315,27 @@ export default function Practice() {
                 className="w-full rounded-2xl border-2 border-amber-200 bg-white p-3 text-xs font-normal outline-none focus:border-orange-400"
                 placeholder="What have you tried so far? (optional)"
               />
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-1.5">
                 <Button
-                  disabled={busy || !question}
+                  disabled={busy || !question || struggleSeconds > 0}
                   onClick={askHelp}
                   className="w-full"
                 >
-                  {busy ? "Thinking of a clue…" : "💡 Ask the Tutor for a hint"}
+                  {busy
+                    ? "Thinking of a clue…"
+                    : struggleSeconds > 0
+                    ? `⏳ Productive Struggle: Think first (${struggleSeconds}s)`
+                    : "💡 Ask the Tutor for a hint"}
                 </Button>
+                {struggleSeconds > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setStruggleSeconds(0)}
+                    className="text-[11px] text-slate-400 hover:text-slate-600 underline text-center cursor-pointer transition-colors"
+                  >
+                    I&apos;ve already spent time thinking, show hint now
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -291,6 +352,7 @@ export default function Practice() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

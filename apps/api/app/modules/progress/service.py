@@ -26,9 +26,11 @@ from app.modules.mastery.schemas import MasteryOut
 from app.modules.mistakes import service as mistakes
 from app.modules.mistakes.schemas import MistakeOut
 from app.modules.planner import service as planner
+from app.modules.progress import metacognition as metacognition_mod
 from app.modules.progress.schemas import (
     FocusOut,
     GuardianOverviewOut,
+    MetacognitionOut,
     MonthlySummaryOut,
     MonthSubjectOut,
     MonthTotalsOut,
@@ -591,3 +593,14 @@ def guardian_trends(s: Session, principal: Principal, *, student_id: UUID, weeks
         ],
         planned_minutes_per_day=round(sum(availability.values()) / WEEK_DAYS) if availability else 0,
     )
+
+
+def metacognition(
+    s: Session,
+    principal: Principal,
+    *,
+    student_id: UUID,
+    subject_id: UUID | None = None,
+) -> MetacognitionOut:
+    require_student_access(principal, student_id, scope="progress")
+    return metacognition_mod.get_metacognitive_profile(s, student_id=student_id, subject_id=subject_id)

@@ -1,7 +1,12 @@
 # Model assignment per role (ARCHITECTURE §19).
-# User rule (19 Sep 2026): every role — PDF extraction, batch jobs and marking — runs on google/gemini-2.5-flash-lite
-# with no fallback to another model. One exception, the user's decision of 21 Sep 2026: lesson_writer runs on
-# google/gemini-2.5-flash. tests/unit/test_ocr_roles.py enforces both. Screen any change with the role's eval.
+# User rule (21 Sep 2026, replacing the rule of 19 Sep): only two LLMs, each in its batch and its live form —
+#   google/gemini-2.5-flash-lite  (live)  and  google/gemini-2.5-flash-lite:batch  — every role by default;
+#   z-ai/glm-5.3-flash            (live)  and  z-ai/glm-5.3-flash:batch            — lesson_writer and exam_walker
+#                                                                                   (in place of gemini-2.5-flash).
+# `:batch` variants work only through OpenRouter's Batch API (up to 24 h, no streaming, no inline images or audio),
+# so batch jobs use `batch_model` and everything live — the Tutor, marking, OCR, voice — uses `model`. No other LLM,
+# no fallbacks. Two non-LLM models stay by the user's decision: hexgrad/kokoro-82m (read-aloud) and the bge-m3
+# embeddings. tests/unit/test_ocr_roles.py enforces all of it. Screen any change with the role's eval.
 version: 1
 
 provider_preferences:
@@ -137,10 +142,14 @@ roles:
     # (19 Sep 2026): batch jobs run on gemini-2.5-flash-lite only, no fallback. The first 29 lessons were written
     # on gemini-3.5-flash before this was applied. Guarded deterministically (app.modules.learn.lessons):
     # citations, copying, named studies, SymPy-checked worked examples. Screen with app.jobs.lessons.
-    # 21 Sep 2026, the user's decision after the lesson_write/v4 pilot (docs/STUDENT-APP.md §15): gemini-2.5-flash,
-    # the one exception to the Flash-Lite rule. She found Flash-Lite lessons "only the basics"; on five pilot topics
-    # 2.5 Flash wrote ~40% more, kept more exam-level examples, and taught exam technique. ~$0.007 a lesson.
-    model: google/gemini-2.5-flash
+    # 21 Sep 2026: gemini-2.5-flash after the lesson_write/v4 pilot (docs/STUDENT-APP.md §15); later the same day
+    # the user replaced it with GLM 5.3 Flash (§17): the batch job writes on the `:batch` variant, a lesson written
+    # on first open uses the live one.
+    model: z-ai/glm-5.3-flash
+    batch_model: z-ai/glm-5.3-flash:batch
+    # GLM 5.3 Flash always reasons; unchecked, it wrote 13k characters of thinking and hit the token cap before
+    # any JSON (21 Sep 2026). Low effort, excluded from the reply.
+    reasoning: {effort: low, exclude: true}
     fallbacks: []
     temperature: 0.3
     # Flash-Lite lessons need ~900-1,500 output tokens. Its failures are repetition loops that run to the cap,
@@ -155,6 +164,7 @@ roles:
     # that does not check out). Runs over lessons that are already written and hand-checked, so their text is
     # never touched. Flash-Lite, like every batch job (user rule, 19 Sep 2026).
     model: google/gemini-2.5-flash-lite
+    batch_model: google/gemini-2.5-flash-lite:batch
     fallbacks: []
     temperature: 0.2
     max_tokens: 900
@@ -163,9 +173,13 @@ roles:
   exam_walker:
     # Solves one real past-paper question per topic step by step, following its official mark scheme (docs/
     # STUDENT-APP.md AC-U16). Guarded deterministically (app.modules.learn.exam): the final answer must pass the
-    # same check that marks her answers, and every mark named must be one the scheme awards. Batch job, so
-    # Flash-Lite (user rule, 19 Sep 2026).
-    model: google/gemini-2.5-flash-lite
+    # same check that marks her answers, and every mark named must be one the scheme awards. GLM 5.3 Flash by the
+    # user's decision of 21 Sep 2026 (Flash-Lite passed the checks about half the time), on its `:batch` variant.
+    model: z-ai/glm-5.3-flash
+    batch_model: z-ai/glm-5.3-flash:batch
+    # GLM 5.3 Flash always reasons; unchecked, it wrote 13k characters of thinking and hit the token cap before
+    # any JSON (21 Sep 2026). Low effort, excluded from the reply.
+    reasoning: {effort: low, exclude: true}
     fallbacks: []
     temperature: 0.2
     max_tokens: 1200
@@ -206,6 +220,7 @@ roles:
     # Reads one examiner report page into short paraphrased points. Never quotes: the reports are UCLES
     # copyright held for private study, so only our own wording with a reference is stored.
     model: google/gemini-2.5-flash-lite
+    batch_model: google/gemini-2.5-flash-lite:batch
     fallbacks: []
     temperature: 0.0
     max_tokens: 3000
@@ -213,6 +228,7 @@ roles:
     retries: 1
   summarizer:
     model: google/gemini-2.5-flash-lite
+    batch_model: google/gemini-2.5-flash-lite:batch
     fallbacks: []
     temperature: 0.2
     max_tokens: 1200

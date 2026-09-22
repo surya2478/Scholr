@@ -11,6 +11,14 @@ import { MathText } from "./MathText";
 import { PhotoAnswer } from "./PhotoAnswer";
 import { Button, ErrorNote } from "./ui";
 
+const POLYA_STRATEGIES = [
+  { label: "Algebraic Factorisation", emoji: "📐" },
+  { label: "Substitution & Elimination", emoji: "🔄" },
+  { label: "Diagram / Geometric Sketch", emoji: "📊" },
+  { label: "Formula & Unit Conversion", emoji: "⚡" },
+  { label: "IIT Shortcut / Symmetry / Elimination", emoji: "🎯" },
+];
+
 // One question: pre-answer confidence (AC-L4), typed working + final answer, then marking (unless a study test).
 // Subjects whose config sets answer_input "expression" get the MathLive maths keyboard; answers are sent as $LaTeX$.
 export function AnswerBox({
@@ -30,6 +38,7 @@ export function AnswerBox({
   const enrollments = me?.student?.enrollments ?? [];
   const maths = enrollments.find((e) => e.subject_id === question.subject_id)?.answer_input === "expression";
   const [confidence, setConfidence] = useState<number | null>(null);
+  const [strategy, setStrategy] = useState<string | null>(null);
   const [working, setWorking] = useState("");
   const [line, setLine] = useState("");
   const [finalAnswer, setFinal] = useState("");
@@ -50,13 +59,16 @@ export function AnswerBox({
     setBusy(true);
     setError(null);
     const answer = finalAnswer.trim();
+    const finalWorking = strategy && !working.includes(strategy)
+      ? `[Attack Strategy: ${strategy}]\n\n${working}`
+      : working;
     try {
       const attempt = await api<Attempt>("/attempts", {
         method: "POST",
         json: {
           question_item_id: question.id,
           idempotency_key: crypto.randomUUID(),
-          working: working || null,
+          working: finalWorking || null,
           final_answer: answer ? (maths ? `$${answer}$` : answer) : null,
           pre_confidence: confidence,
           session_id: sessionId ?? null,
@@ -176,6 +188,42 @@ export function AnswerBox({
             </div>
           </fieldset>
 
+          {/* Polya Pre-Flight Attack Strategy */}
+          <fieldset className="flex flex-col gap-2 rounded-2xl border border-purple-200/70 bg-[#FAF7FD] p-4 text-xs">
+            <div className="flex items-center justify-between">
+              <legend className="font-fun font-bold text-purple-900 text-xs px-1 flex items-center gap-1.5">
+                <span>🧠</span>
+                <span>Pre-Flight Strategy (Polya Heuristic): Plan your method before computing</span>
+              </legend>
+              {strategy && (
+                <button
+                  type="button"
+                  onClick={() => setStrategy(null)}
+                  className="text-[10.5px] text-purple-600 hover:underline font-medium cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {POLYA_STRATEGIES.map((item) => (
+                <button
+                  type="button"
+                  key={item.label}
+                  onClick={() => setStrategy(strategy === item.label ? null : item.label)}
+                  className={`flex items-center gap-1.5 rounded-xl border px-3 py-1 font-fun font-bold text-[11px] transition-all cursor-pointer ${
+                    strategy === item.label
+                      ? "border-purple-500 bg-purple-100 text-purple-900 shadow-2xs scale-105"
+                      : "border-purple-200 bg-white text-slate-600 hover:bg-purple-50/60"
+                  }`}
+                >
+                  <span>{item.emoji}</span>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
           {/* Working Textarea */}
           <label className="flex flex-col gap-1.5 text-xs font-fun font-bold text-slate-800">
             Show your step-by-step method / working:
@@ -262,7 +310,7 @@ export function AnswerBox({
       )}
 
       {error ? <ErrorNote error={error} /> : null}
-      {evaluation && <EvaluationCard evaluation={evaluation} />}
+      {evaluation && <EvaluationCard evaluation={evaluation} confidence={confidence} />}
       {evaluation && !assessmentId && (
         // Not inside a test: a submitted test is reviewed with the parent, and tutoring is off during one (AC-L5).
         <Link

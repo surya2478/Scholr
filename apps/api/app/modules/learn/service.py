@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError, not_found
 from app.core.rbac import Principal, require_student_access
-from app.llm.gateway import CallContext, LLMGateway
+from app.llm.gateway import CallContext, LLMGateway, LLMResult
 from app.modules.assessment import service as assessment
 from app.modules.audit import service as audit
 from app.modules.curriculum import service as curriculum
@@ -731,6 +731,16 @@ def write_lesson(
         prompt_version=prompt_version,
         models=models,
     )
+    return finish_lesson(prepared, result)
+
+
+def needs_writing(prepared: PreparedLesson) -> bool:
+    """Whether the material is good enough to ask a model at all (AC-U3)."""
+    return prepared.retrieval_state in lessons.GROUNDED_STATES and bool(prepared.excerpts)
+
+
+def finish_lesson(prepared: PreparedLesson, result: LLMResult[lessons.LessonDraft]) -> WrittenLesson:
+    """The guard, applied to a draft however it was written — live, or in a batch."""
     guarded = lessons.guard(
         result.value,
         prepared.excerpts,
@@ -756,7 +766,7 @@ class Illustrated:
 
 
 def illustrate_lesson(
-    s: Session, gateway: LLMGateway, ctx: CallContext, row: Lesson, *, subject_code: str
+    s: Session, gateway: LLMGateway | None, ctx: CallContext | None, row: Lesson, *, subject_code: str
 ) -> Illustrated:
     """Add diagrams to a lesson that is already written (AC-U14). Its text is never touched.
 
@@ -781,7 +791,15 @@ def illustrate_lesson(
         "max_diagrams": str(MAX_DIAGRAMS),
         "lesson": _lesson_for_prompt(content),
     }
+    if gateway is None:  # a batch job: it wants the prompt, and calls finish_illustration with the reply
+        return Illustrated([], {"variables": variables, "allowed": sorted(allowed)}, None, None)
     result = gateway.structured(ILLUSTRATE_ROLE, ILLUSTRATE_PROMPT, variables, lessons.DiagramDrafts, ctx)
+    return finish_illustration(row, result, allowed=allowed)
+
+
+def finish_illustration(row: Lesson, result: LLMResult[lessons.DiagramDrafts], *, allowed: set[str]) -> Illustrated:
+    """The diagram checks, applied to a reply however it was written — live, or in a batch."""
+    sections = (row.content or {}).get("sections", [])
     kept, report = lessons.guard_diagrams(result.value.diagrams, sections, allowed=allowed, limit=MAX_DIAGRAMS)
     return Illustrated(kept, {**report, "cost_usd": result.cost_usd}, result.prompt_version, result.model)
 
@@ -945,6 +963,11 @@ class WrittenWalkthrough:
 
 def write_walkthrough(gateway: LLMGateway, ctx: CallContext, prepared: PreparedWalkthrough) -> WrittenWalkthrough:
     result = gateway.structured(WALK_ROLE, WALK_PROMPT, prepared.variables, exam.WalkthroughDraft, ctx)
+    return finish_walkthrough(prepared, result)
+
+
+def finish_walkthrough(prepared: PreparedWalkthrough, result: LLMResult[exam.WalkthroughDraft]) -> WrittenWalkthrough:
+    """The guard, applied to a walkthrough however it was written — live, or in a batch."""
     content, report = exam.guard_walkthrough(result.value, prepared.item)
     checks = {**report.as_dict(), "source_ref": prepared.item.source_ref, "cost_usd": result.cost_usd}
     return WrittenWalkthrough(content, checks, result.prompt_version, result.model)

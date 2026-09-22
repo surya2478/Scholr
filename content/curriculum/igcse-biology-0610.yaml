@@ -25,6 +25,10 @@ syllabus:
     Verified 16 Sep 2026 against the official 0610 syllabus for 2026-2028: 21 topics and
     61 subtopics, with the Extended assessment overview (Papers 2, 4 and 6). Term 1 coverage
     from the school's Year 10 Term 1 planner.
+# `pages`: printed pages of the coursebook (Cambridge IGCSE Biology Coursebook) where each objective starts, from
+# its contents pages and, where two objectives share a section, the section's own headings in the OCR text
+# (22 Sep 2026). A chunk belongs to the objective whose start page last precedes it (knowledge.chunking). 15.1
+# (Drugs) has no section in this book — only "antibiotic resistance" inside selection — so it has no pages.
 subject: { code: igcse-biology, name: Biology, config_key: igcse_biology_0610 }
 
 # Extended route. All three sciences share this structure in the 2026-2028 syllabuses.
@@ -58,81 +62,81 @@ topics:
   - code: "1"
     name: "Characteristics and classification of living organisms"
     objectives:
-      - { code: "1.1", statement: "Characteristics of living organisms" }   # Term 1
-      - { code: "1.2", statement: "Concept and uses of classification systems" }   # Term 1
-      - { code: "1.3", statement: "Features of organisms" }   # Term 1
+      - { code: "1.1", statement: "Characteristics of living organisms", pages: [3] }   # Term 1
+      - { code: "1.2", statement: "Concept and uses of classification systems", pages: [5, 7] }   # Term 1
+      - { code: "1.3", statement: "Features of organisms", pages: [10, 15, 24] }   # Term 1
   - code: "2"
     name: "Organisation of the organism"
     objectives:
-      - { code: "2.1", statement: "Cell structure" }   # Term 1
-      - { code: "2.2", statement: "Size of specimens" }   # Term 1
+      - { code: "2.1", statement: "Cell structure", pages: [33, 40, 41] }   # Term 1
+      - { code: "2.2", statement: "Size of specimens", pages: [42] }   # Term 1
   - code: "3"
     name: "Movement into and out of cells"
     objectives:
-      - { code: "3.1", statement: "Diffusion" }   # Term 1
-      - { code: "3.2", statement: "Osmosis" }   # Term 1
-      - { code: "3.3", statement: "Active transport" }   # Term 1
+      - { code: "3.1", statement: "Diffusion", pages: [51] }   # Term 1
+      - { code: "3.2", statement: "Osmosis", pages: [55] }   # Term 1
+      - { code: "3.3", statement: "Active transport", pages: [61] }   # Term 1
   - code: "4"
     name: "Biological molecules"
     objectives:
-      - { code: "4.1", statement: "Biological molecules" }   # Term 1
+      - { code: "4.1", statement: "Biological molecules", pages: [70, 77] }   # Term 1
   - code: "5"
     name: "Enzymes"
     objectives:
-      - { code: "5.1", statement: "Enzymes" }
+      - { code: "5.1", statement: "Enzymes", pages: [84] }
   - code: "6"
     name: "Plant nutrition"
     objectives:
-      - { code: "6.1", statement: "Photosynthesis" }
-      - { code: "6.2", statement: "Leaf structure" }
+      - { code: "6.1", statement: "Photosynthesis", pages: [99, 107] }
+      - { code: "6.2", statement: "Leaf structure", pages: [103] }
   - code: "7"
     name: "Human nutrition"
     objectives:
-      - { code: "7.1", statement: "Diet" }
-      - { code: "7.2", statement: "Digestive system" }
-      - { code: "7.3", statement: "Physical digestion" }
-      - { code: "7.4", statement: "Chemical digestion" }
-      - { code: "7.5", statement: "Absorption" }
+      - { code: "7.1", statement: "Diet", pages: [128] }
+      - { code: "7.2", statement: "Digestive system", pages: [132] }
+      - { code: "7.3", statement: "Physical digestion", pages: [136] }
+      - { code: "7.4", statement: "Chemical digestion", pages: [138] }
+      - { code: "7.5", statement: "Absorption", pages: [140] }
   - code: "8"
     name: "Transport in plants"
     objectives:
-      - { code: "8.1", statement: "Xylem and phloem" }
-      - { code: "8.2", statement: "Water uptake" }
-      - { code: "8.3", statement: "Transpiration" }
-      - { code: "8.4", statement: "Translocation" }
+      - { code: "8.1", statement: "Xylem and phloem", pages: [149] }
+      - { code: "8.2", statement: "Water uptake", pages: [152] }
+      - { code: "8.3", statement: "Transpiration", pages: [154] }
+      - { code: "8.4", statement: "Translocation", pages: [159] }
   - code: "9"
     name: "Transport in animals"
     objectives:
-      - { code: "9.1", statement: "Circulatory systems" }
-      - { code: "9.2", statement: "Heart" }
-      - { code: "9.3", statement: "Blood vessels" }
-      - { code: "9.4", statement: "Blood" }
+      - { code: "9.1", statement: "Circulatory systems", pages: [170] }
+      - { code: "9.2", statement: "Heart", pages: [172] }
+      - { code: "9.3", statement: "Blood vessels", pages: [178] }
+      - { code: "9.4", statement: "Blood", pages: [182] }
   - code: "10"
     name: "Diseases and immunity"
     objectives:
-      - { code: "10.1", statement: "Diseases and immunity" }
+      - { code: "10.1", statement: "Diseases and immunity", pages: [193] }
   - code: "11"
     name: "Gas exchange in humans"
     objectives:
-      - { code: "11.1", statement: "Gas exchange in humans" }
+      - { code: "11.1", statement: "Gas exchange in humans", pages: [220] }
   - code: "12"
     name: "Respiration"
     objectives:
-      - { code: "12.1", statement: "Respiration" }
-      - { code: "12.2", statement: "Aerobic respiration" }
-      - { code: "12.3", statement: "Anaerobic respiration" }
+      - { code: "12.1", statement: "Respiration", pages: [215] }
+      - { code: "12.2", statement: "Aerobic respiration", pages: [217] }
+      - { code: "12.3", statement: "Anaerobic respiration", pages: [218] }
   - code: "13"
     name: "Excretion in humans"
     objectives:
-      - { code: "13.1", statement: "Excretion in humans" }
+      - { code: "13.1", statement: "Excretion in humans", pages: [262] }
   - code: "14"
     name: "Coordination and response"
     objectives:
-      - { code: "14.1", statement: "Coordination and response" }
-      - { code: "14.2", statement: "Sense organs" }
-      - { code: "14.3", statement: "Hormones" }
-      - { code: "14.4", statement: "Homeostasis" }
-      - { code: "14.5", statement: "Tropic responses" }
+      - { code: "14.1", statement: "Coordination and response", pages: [235] }
+      - { code: "14.2", statement: "Sense organs", pages: [241] }
+      - { code: "14.3", statement: "Hormones", pages: [246] }
+      - { code: "14.4", statement: "Homeostasis", pages: [266] }
+      - { code: "14.5", statement: "Tropic responses", pages: [247] }
   - code: "15"
     name: "Drugs"
     objectives:
@@ -140,42 +144,42 @@ topics:
   - code: "16"
     name: "Reproduction"
     objectives:
-      - { code: "16.1", statement: "Asexual reproduction" }
-      - { code: "16.2", statement: "Sexual reproduction" }
-      - { code: "16.3", statement: "Sexual reproduction in plants" }
-      - { code: "16.4", statement: "Sexual reproduction in humans" }
-      - { code: "16.5", statement: "Sex hormones in humans" }
-      - { code: "16.6", statement: "Sexually transmitted infections" }
+      - { code: "16.1", statement: "Asexual reproduction", pages: [283, 293] }
+      - { code: "16.2", statement: "Sexual reproduction", pages: [284] }
+      - { code: "16.3", statement: "Sexual reproduction in plants", pages: [286] }
+      - { code: "16.4", statement: "Sexual reproduction in humans", pages: [304] }
+      - { code: "16.5", statement: "Sex hormones in humans", pages: [310] }
+      - { code: "16.6", statement: "Sexually transmitted infections", pages: [312] }
   - code: "17"
     name: "Inheritance"
     objectives:
-      - { code: "17.1", statement: "Chromosomes, genes and proteins" }
-      - { code: "17.2", statement: "Mitosis" }
-      - { code: "17.3", statement: "Meiosis" }
-      - { code: "17.4", statement: "Monohybrid inheritance" }
+      - { code: "17.1", statement: "Chromosomes, genes and proteins", pages: [322, 337] }
+      - { code: "17.2", statement: "Mitosis", pages: [324] }
+      - { code: "17.3", statement: "Meiosis", pages: [325] }
+      - { code: "17.4", statement: "Monohybrid inheritance", pages: [326] }
   - code: "18"
     name: "Variation and selection"
     objectives:
-      - { code: "18.1", statement: "Variation" }
-      - { code: "18.2", statement: "Adaptive features" }
-      - { code: "18.3", statement: "Selection" }
+      - { code: "18.1", statement: "Variation", pages: [348] }
+      - { code: "18.2", statement: "Adaptive features", pages: [352] }
+      - { code: "18.3", statement: "Selection", pages: [357, 362] }
   - code: "19"
     name: "Organisms and their environment"
     objectives:
-      - { code: "19.1", statement: "Energy flow" }   # Term 1
-      - { code: "19.2", statement: "Food chains and food webs" }   # Term 1
-      - { code: "19.3", statement: "Nutrient cycles" }   # Term 1
-      - { code: "19.4", statement: "Populations" }   # Term 1
+      - { code: "19.1", statement: "Energy flow", pages: [372] }   # Term 1
+      - { code: "19.2", statement: "Food chains and food webs", pages: [373] }   # Term 1
+      - { code: "19.3", statement: "Nutrient cycles", pages: [379] }   # Term 1
+      - { code: "19.4", statement: "Populations", pages: [382] }   # Term 1
   - code: "20"
     name: "Human influences on ecosystems"
     objectives:
-      - { code: "20.1", statement: "Food supply" }
-      - { code: "20.2", statement: "Habitat destruction" }
-      - { code: "20.3", statement: "Pollution" }
-      - { code: "20.4", statement: "Conservation" }
+      - { code: "20.1", statement: "Food supply", pages: [396] }
+      - { code: "20.2", statement: "Habitat destruction", pages: [402] }
+      - { code: "20.3", statement: "Pollution", pages: [405] }
+      - { code: "20.4", statement: "Conservation", pages: [411] }
   - code: "21"
     name: "Biotechnology and genetic modification"
     objectives:
-      - { code: "21.1", statement: "Biotechnology and genetic modification" }
-      - { code: "21.2", statement: "Biotechnology" }
-      - { code: "21.3", statement: "Genetic modification" }
+      - { code: "21.1", statement: "Biotechnology and genetic modification", pages: [425] }
+      - { code: "21.2", statement: "Biotechnology", pages: [427] }
+      - { code: "21.3", statement: "Genetic modification", pages: [434] }

@@ -31,20 +31,22 @@ from sqlalchemy import select
 import app.models_registry  # noqa: F401
 from app.core.config import API_ROOT
 from app.core.db import session_scope
+from app.jobs import batching
 from app.jobs.lessons import spent
 from app.llm.config import load_roles
 from app.llm.factory import build_gateway
-from app.llm.gateway import CallContext, LLMError
+from app.llm.gateway import BatchItem, CallContext, LLMError
 from app.llm.prompts import default_registry
 from app.modules.curriculum import service as curriculum
 from app.modules.curriculum.models import Subject
 from app.modules.identity.models import Tenant
+from app.modules.learn import exam
 from app.modules.learn import service as learn
 from app.modules.learn.models import Lesson
 
 REPORTS = API_ROOT.parents[1] / "evals" / "reports"
-# Measured 21 Sep 2026: ~$0.0003 per call on gemini-2.5-flash-lite; up to two calls per topic, rounded up.
-COST_PER_WALKTHROUGH_USD = 0.0008
+# z-ai/glm-5.3-flash:batch ($0.075/M in, $0.25/M out): ~1.5k tokens in, ~0.6k out, up to two calls; rounded up.
+COST_PER_WALKTHROUGH_USD = 0.0005
 ATTEMPTS = 2
 
 
@@ -100,6 +102,54 @@ def write_one(objective_id: UUID, tenant_id: UUID) -> dict:
     return {**written.checks, "kept": stored, "cost_usd": spent(ctx.request_id)}
 
 
+def write_batch(
+    pending: list[tuple[UUID, str, str]], tenant_id: UUID, *, resume: str | None = None
+) -> tuple[list[dict], float]:
+    """Write walkthroughs through the Batch API on the role's `:batch` model (user rule, 21 Sep 2026). One batch,
+    then one more for those the guard threw out — the same two tries as the live path, and the same guard."""
+    gateway = build_gateway()
+    now = datetime.now(UTC)
+    prepared: dict[str, learn.PreparedWalkthrough] = {}
+    codes: dict[str, str] = {}
+    with session_scope(user_id=None, role="system") as s:
+        for oid, code, _ in pending:
+            p = learn.prepare_walkthrough(s, oid)
+            if p is not None:
+                prepared[str(oid)] = p
+                codes[str(oid)] = code
+    written: dict[str, learn.WrittenWalkthrough] = {}
+    failed: dict[str, str] = {}
+    cost = 0.0  # the batches' own reported cost: a batch reply carries no per-request cost
+    todo_ids = list(prepared)
+    for attempt in range(ATTEMPTS):
+        if not todo_ids:
+            break
+        got, errors, spent_here = batching.run(
+            gateway,
+            learn.WALK_ROLE,
+            learn.WALK_PROMPT,
+            [BatchItem(cid, prepared[cid].variables) for cid in todo_ids],
+            exam.WalkthroughDraft,
+            tenant_id,
+            tag="walkthroughs",
+            resume=resume if attempt == 0 else None,
+        )
+        failed.update(errors)
+        cost += spent_here
+        for cid, result in got.items():
+            written[cid] = learn.finish_walkthrough(prepared[cid], result)
+        todo_ids = [cid for cid in todo_ids if cid in written and written[cid].content is None]
+    results = []
+    for cid, p in prepared.items():
+        if cid not in written:
+            results.append({"code": codes[cid], "kept": False, "reason": f"llm_{failed.get(cid, 'missing')}"})
+            continue
+        with session_scope(user_id=None, role="system") as s:
+            stored = learn.record_walkthrough(s, p.objective_id, written[cid], actor=None, now=now)
+        results.append({"code": codes[cid], **written[cid].checks, "kept": stored})
+    return results, round(cost, 6)
+
+
 def review(pairs: list[tuple[UUID, str]]) -> None:
     with session_scope(user_id=None, role="system") as s:
         for oid, code in pairs:
@@ -132,6 +182,8 @@ def main(argv: list[str]) -> None:
     parser.add_argument("--approve", nargs="+", metavar="CODE", help="objective codes whose walkthrough she may see")
     parser.add_argument("--reject", nargs="+", metavar="CODE", help="objective codes whose walkthrough to delete")
     parser.add_argument("--concurrency", type=int, default=3)
+    parser.add_argument("--live", action="store_true", help="call the live model per topic instead of the Batch API")
+    parser.add_argument("--resume", metavar="BATCH_ID", help="collect a batch submitted by an interrupted run")
     args = parser.parse_args(argv[1:])
 
     if args.approve or args.reject:
@@ -144,7 +196,8 @@ def main(argv: list[str]) -> None:
         return
     pending = todo(pairs, redo=args.redo)
     pending = pending[: args.limit] if args.limit else pending
-    model = load_roles().role(learn.WALK_ROLE).model
+    role = load_roles().role(learn.WALK_ROLE)
+    model = role.model if args.live else (role.batch_model or role.model)
     version = default_registry().get(learn.WALK_PROMPT).version
     print(
         f"{args.subject}: {len(pending)} walkthroughs to write, estimate "
@@ -158,8 +211,12 @@ def main(argv: list[str]) -> None:
     if tenant_id is None:
         raise SystemExit("no household seeded (app.seed.household)")
 
-    with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
-        results = list(pool.map(lambda p: {"code": p[1], **write_one(p[0], tenant_id)}, pending))
+    batch_cost: float | None = None
+    if args.live:
+        with ThreadPoolExecutor(max_workers=args.concurrency) as pool:
+            results = list(pool.map(lambda p: {"code": p[1], **write_one(p[0], tenant_id)}, pending))
+    else:
+        results, batch_cost = write_batch(pending, tenant_id, resume=args.resume)
 
     reasons: dict[str, int] = {}
     for r in results:
@@ -172,7 +229,7 @@ def main(argv: list[str]) -> None:
         "tried": len(results),
         "kept": sum(bool(r.get("kept")) for r in results),
         "rejected": reasons,
-        "cost_usd": round(sum(r.get("cost_usd") or 0 for r in results), 4),
+        "cost_usd": round(batch_cost if batch_cost is not None else sum(r.get("cost_usd") or 0 for r in results), 4),
         "per_topic": {r["code"]: (r.get("source_ref"), r.get("kept"), r.get("reason")) for r in results},
     }
     REPORTS.mkdir(parents=True, exist_ok=True)
