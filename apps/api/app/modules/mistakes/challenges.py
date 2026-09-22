@@ -12,6 +12,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from app.core.errors import not_found
+
 
 class SolutionStep(BaseModel):
     step_number: int
@@ -43,6 +45,7 @@ class BugVerificationIn(BaseModel):
 class BugVerificationOut(BaseModel):
     correct_step: bool
     correct_type: bool
+    correct_mark: bool = False  # her decision on the method mark matched the scheme
     success: bool
     score: int  # 0 to 100
     examiner_report: str
@@ -258,38 +261,31 @@ def get_challenge(challenge_id: str) -> BugChallenge | None:
 
 
 def verify_challenge(challenge_id: str, submission: BugVerificationIn) -> BugVerificationOut:
-    """Verify student's Chief Examiner decision."""
+    """Mark her Chief Examiner decision: the faulty step (50), the kind of error (25), and whether the method mark
+    stands (25). Until 22 Sep 2026 the method-mark decision was asked for and never checked."""
     challenge = get_challenge(challenge_id)
     if not challenge:
-        return BugVerificationOut(
-            correct_step=False,
-            correct_type=False,
-            success=False,
-            score=0,
-            examiner_report="Challenge not found.",
-            official_mark="0 / 0",
-        )
+        raise not_found("challenge")
 
     actual_bug_step = next(s for s in challenge.student_steps if s.is_bug)
     correct_step = submission.selected_step == actual_bug_step.step_number
     correct_type = submission.selected_bug_type.lower() == challenge.bug_type.lower()
+    method_mark_due = bool(challenge.marks_to_award.get("M1", False))
+    correct_mark = submission.award_method_mark == method_mark_due
 
-    score = 0
-    if correct_step:
-        score += 60
-    if correct_type:
-        score += 40
+    score = (50 if correct_step else 0) + (25 if correct_type else 0) + (25 if correct_mark else 0)
+    success = correct_step and correct_mark
 
-    success = correct_step and score >= 60
-
+    decision = "should" if method_mark_due else "should not"
     report = (
         f"Step {actual_bug_step.step_number} was the fatal breakdown: {actual_bug_step.explanation} "
-        f"{challenge.examiner_rationale}"
+        f"The method mark {decision} be awarded. {challenge.examiner_rationale}"
     )
 
     return BugVerificationOut(
         correct_step=correct_step,
         correct_type=correct_type,
+        correct_mark=correct_mark,
         success=success,
         score=score,
         examiner_report=report,

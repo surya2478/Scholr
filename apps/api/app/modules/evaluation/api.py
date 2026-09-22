@@ -61,9 +61,7 @@ def get_evaluation(evaluation_id: UUID, principal: PrincipalDep, s: DbDep) -> Ev
 
 
 @router.post("/evaluations/{evaluation_id}/autopsy", response_model=EvaluationOut)
-def record_autopsy(
-    evaluation_id: UUID, body: AutopsyIn, principal: PrincipalDep, s: DbDep
-) -> EvaluationOut:
+def record_autopsy(evaluation_id: UUID, body: AutopsyIn, principal: PrincipalDep, s: DbDep) -> EvaluationOut:
     return service.record_autopsy(s, principal, evaluation_id, body, now=datetime.now(UTC))
 
 

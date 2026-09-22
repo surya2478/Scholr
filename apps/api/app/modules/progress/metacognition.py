@@ -158,6 +158,25 @@ def derive_independence(attempts: Sequence[assessment.ConfidenceAttempt]) -> Ind
     )
 
 
+def _empty_profile(student_id: UUID, attempts: Sequence[assessment.ConfidenceAttempt]) -> MetacognitionOut:
+    return MetacognitionOut(
+        student_id=student_id,
+        total_evaluated_with_confidence=0,
+        brier_calibration_score=100.0,
+        calibration_rating="Gathering Data",
+        quadrants={
+            "true_mastery": QuadrantCount(count=0, percentage=0.0),
+            "dangerous_blindspot": QuadrantCount(count=0, percentage=0.0),
+            "hesitant_mastery": QuadrantCount(count=0, percentage=0.0),
+            "known_gap": QuadrantCount(count=0, percentage=0.0),
+        },
+        blindspots=[],
+        recent_items=[],
+        advice="Rate your confidence on at least 3 practice questions to reveal your metacognitive pattern.",
+        independence=derive_independence(attempts),
+    )
+
+
 def get_metacognitive_profile(
     s: Session,
     *,
@@ -168,22 +187,7 @@ def get_metacognitive_profile(
     """Aggregate confidence attempts and their evaluations into a complete Metacognition profile."""
     attempts = assessment.attempts_with_confidence(s, student_id=student_id, subject_id=subject_id, limit=limit)
     if not attempts:
-        return MetacognitionOut(
-            student_id=student_id,
-            total_evaluated_with_confidence=0,
-            brier_calibration_score=100.0,
-            calibration_rating="Gathering Data",
-            quadrants={
-                "true_mastery": QuadrantCount(count=0, percentage=0.0),
-                "dangerous_blindspot": QuadrantCount(count=0, percentage=0.0),
-                "hesitant_mastery": QuadrantCount(count=0, percentage=0.0),
-                "known_gap": QuadrantCount(count=0, percentage=0.0),
-            },
-            blindspots=[],
-            recent_items=[],
-            advice="Rate your confidence on at least 3 practice questions to reveal your metacognitive pattern.",
-            independence=derive_independence([]),
-        )
+        return _empty_profile(student_id, attempts)
 
     eval_map = evaluation.evaluation_summaries_for_attempts(s, [a.id for a in attempts])
 
@@ -219,21 +223,8 @@ def get_metacognitive_profile(
 
     total = len(items)
     if total == 0:
-        return MetacognitionOut(
-            student_id=student_id,
-            total_evaluated_with_confidence=0,
-            brier_calibration_score=100.0,
-            calibration_rating="Gathering Data",
-            quadrants={
-                "true_mastery": QuadrantCount(count=0, percentage=0.0),
-                "dangerous_blindspot": QuadrantCount(count=0, percentage=0.0),
-                "hesitant_mastery": QuadrantCount(count=0, percentage=0.0),
-                "known_gap": QuadrantCount(count=0, percentage=0.0),
-            },
-            blindspots=[],
-            recent_items=[],
-            advice="Rate your confidence on at least 3 practice questions to reveal your metacognitive pattern.",
-        )
+        # Rated but not yet marked: this path once omitted `independence` and the endpoint failed (review, 22 Sep).
+        return _empty_profile(student_id, attempts)
 
     counts = {
         "true_mastery": sum(1 for it in items if it.quadrant == "true_mastery"),

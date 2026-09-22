@@ -639,6 +639,7 @@ export type BugChallenge = {
 export type BugVerificationOut = {
   correct_step: boolean;
   correct_type: boolean;
+  correct_mark: boolean; // her method-mark decision matched the scheme
   success: boolean;
   score: number;
   examiner_report: string;

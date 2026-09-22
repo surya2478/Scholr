@@ -53,8 +53,9 @@ def test_verify_challenge_partial_diagnosis() -> None:
     result = verify_challenge("bug-math-01", sub)
     assert result.correct_step is True
     assert result.correct_type is False
-    assert result.success is True  # Step was correct, score 60
-    assert result.score == 60
+    # Step and method-mark decision right (bug-math-01 earns no M1), type wrong: 50 + 25 (22 Sep 2026 scoring).
+    assert result.success is True
+    assert result.score == 75
 
 
 def test_verify_challenge_wrong_step() -> None:
@@ -67,4 +68,28 @@ def test_verify_challenge_wrong_step() -> None:
     result = verify_challenge("bug-math-01", sub)
     assert result.correct_step is False
     assert result.success is False
-    assert result.score == 40
+    assert result.score == 25  # only the error type is right; awarding M1 here is wrong
+
+
+def test_the_method_mark_decision_counts_and_an_unknown_challenge_is_404() -> None:
+    """Review of 22 Sep 2026: her award_method_mark answer was asked for and never checked."""
+    import pytest
+
+    from app.core.errors import ApiError
+    from app.modules.mistakes import challenges
+    from app.modules.mistakes.challenges import BugVerificationIn
+
+    # bug-math-02: the bug is step 2, a calculation slip, and the method mark M1 stands.
+    right = challenges.verify_challenge(
+        "bug-math-02", BugVerificationIn(selected_step=2, selected_bug_type="calculation", award_method_mark=True)
+    )
+    assert (right.success, right.score, right.correct_mark) == (True, 100, True)
+    wrong_mark = challenges.verify_challenge(
+        "bug-math-02", BugVerificationIn(selected_step=2, selected_bug_type="calculation", award_method_mark=False)
+    )
+    assert (wrong_mark.success, wrong_mark.score, wrong_mark.correct_mark) == (False, 75, False)
+    with pytest.raises(ApiError) as err:
+        challenges.verify_challenge(
+            "no-such-challenge", BugVerificationIn(selected_step=1, selected_bug_type="x", award_method_mark=True)
+        )
+    assert err.value.status == 404

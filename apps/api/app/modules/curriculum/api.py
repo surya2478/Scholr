@@ -70,6 +70,6 @@ def get_related_objectives(objective_id: UUID, principal: PrincipalDep, s: DbDep
 
 
 @router.get("/curriculum/crucible", response_model=list[crucible.CrucibleTopic])
-def list_crucible_debates(syllabus_unit: str | None = None) -> list[crucible.CrucibleTopic]:
+def list_crucible_debates(principal: PrincipalDep, syllabus_unit: str | None = None) -> list[crucible.CrucibleTopic]:
     """Retrieve multi-perspective roundtable debates for Sociology 0495."""
     return crucible.list_crucible_topics(syllabus_unit=syllabus_unit)

@@ -257,12 +257,17 @@ export function BugHunter() {
                       </span>
                     </div>
 
+                    <p className="text-[11px] font-semibold">
+                      {verdict.correct_step ? "✓" : "✗"} faulty step · {verdict.correct_type ? "✓" : "✗"} kind of error ·{" "}
+                      {verdict.correct_mark ? "✓" : "✗"} method mark decision
+                    </p>
                     <p className="text-xs leading-relaxed font-medium">
                       {verdict.examiner_report}
                     </p>
 
                     <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs font-semibold">
-                      <span>Official Cambridge Mark:</span>
+                      {/* Written for this exercise, not taken from a Cambridge mark scheme (review, 22 Sep 2026). */}
+                      <span>How this would be marked:</span>
                       <span className="font-fun font-bold">{verdict.official_mark}</span>
                     </div>
                   </div>

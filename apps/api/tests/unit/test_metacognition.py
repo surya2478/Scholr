@@ -148,3 +148,20 @@ def test_get_metacognitive_profile_aggregation(monkeypatch) -> None:  # noqa: AN
     assert profile.independence.unassisted_count == 2
     assert profile.independence.nudged_count == 1
     assert profile.independence.assisted_count == 1
+
+
+def test_rated_but_not_yet_marked_attempts_do_not_break_the_profile(monkeypatch) -> None:  # noqa: ANN001
+    """Review of 22 Sep 2026: with confidence ratings but no evaluation yet, the profile was built without its
+    required `independence` block and the endpoint failed."""
+    from datetime import UTC, datetime
+    from uuid import uuid4
+
+    from app.modules.assessment import service as assessment
+    from app.modules.evaluation import service as evaluation
+    from app.modules.progress import metacognition
+
+    attempt = assessment.ConfidenceAttempt(uuid4(), uuid4(), uuid4(), "stem", 4, 0, datetime.now(UTC))
+    monkeypatch.setattr(assessment, "attempts_with_confidence", lambda *a, **k: [attempt])
+    monkeypatch.setattr(evaluation, "evaluation_summaries_for_attempts", lambda *a, **k: {})
+    profile = metacognition.get_metacognitive_profile(None, student_id=uuid4())  # type: ignore[arg-type]
+    assert profile.total_evaluated_with_confidence == 0 and profile.independence.total == 1

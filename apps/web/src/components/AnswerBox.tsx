@@ -59,16 +59,14 @@ export function AnswerBox({
     setBusy(true);
     setError(null);
     const answer = finalAnswer.trim();
-    const finalWorking = strategy && !working.includes(strategy)
-      ? `[Attack Strategy: ${strategy}]\n\n${working}`
-      : working;
+    // The strategy chip helps her plan; it is not part of her answer, so it is never sent to the marker.
     try {
       const attempt = await api<Attempt>("/attempts", {
         method: "POST",
         json: {
           question_item_id: question.id,
           idempotency_key: crypto.randomUUID(),
-          working: finalWorking || null,
+          working: working || null,
           final_answer: answer ? (maths ? `$${answer}$` : answer) : null,
           pre_confidence: confidence,
           session_id: sessionId ?? null,

@@ -429,9 +429,7 @@ def list_autopsies(
 ) -> list[AutopsyEntryOut]:
     require_student_access(principal, student_id, "assessments")
     rows = s.scalars(
-        select(Evaluation)
-        .where(Evaluation.student_id == student_id)
-        .order_by(Evaluation.created_at.desc())
+        select(Evaluation).where(Evaluation.student_id == student_id).order_by(Evaluation.created_at.desc())
     ).all()
     entries: list[AutopsyEntryOut] = []
     for r in rows:

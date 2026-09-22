@@ -6,6 +6,8 @@ import { AnswerBox } from "@/components/AnswerBox";
 import { useMe } from "@/components/AppShell";
 import { MathText } from "@/components/MathText";
 import { OralDefenseViva } from "@/components/OralDefenseViva";
+
+const VIVA_ENABLED = false;
 import { Button, Card, Empty, ErrorNote } from "@/components/ui";
 import { api, type Question } from "@/lib/api";
 
@@ -183,7 +185,9 @@ export default function Practice() {
           >
             📐 Standard Lab
           </button>
-          <button
+          {/* Hidden 22 Sep 2026: the Viva's replies were scripted (any answer was praised) and it sent her voice to
+              the browser's speech service. It returns once rebuilt on the grounded Tutor (review of 22 Sep). */}
+          {VIVA_ENABLED && <button
             type="button"
             onClick={() => setPracticeMode("viva")}
             className={`px-3 py-1.5 rounded-xl text-xs font-fun font-bold transition-all ${
@@ -193,7 +197,7 @@ export default function Practice() {
             }`}
           >
             🎓 Oral Defense (Blackboard Viva)
-          </button>
+          </button>}
         </div>
 
         {/* Socratic Encouraging Meter */}
@@ -212,7 +216,7 @@ export default function Practice() {
         </div>
       </div>
 
-      {practiceMode === "viva" ? (
+      {VIVA_ENABLED && practiceMode === "viva" ? (
         <OralDefenseViva />
       ) : (
       <div className="grid gap-6 xl:grid-cols-12">

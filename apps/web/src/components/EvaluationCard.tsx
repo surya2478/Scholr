@@ -21,19 +21,22 @@ export function EvaluationCard({
   const [category, setCategory] = useState("conceptual");
   const [takeaway, setTakeaway] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   async function handleSaveAutopsy() {
     if (!takeaway.trim()) return;
     setSaving(true);
+    setSaveError(null);
     try {
       const updated = await api<Evaluation>(`/evaluations/${evaluation.id}/autopsy`, {
         method: "POST",
         json: { category, takeaway: takeaway.trim() },
       });
-      setAutopsy(updated.feedback.autopsy ?? { category, takeaway: takeaway.trim(), recorded_at: new Date().toISOString() });
+      if (updated.feedback.autopsy) setAutopsy(updated.feedback.autopsy);
+      else setSaveError("It didn't save. Try again in a moment.");
     } catch {
-      // fallback optimistic update
-      setAutopsy({ category, takeaway: takeaway.trim(), recorded_at: new Date().toISOString() });
+      // Never show "saved" for something that was not: she would rely on a diary entry that does not exist.
+      setSaveError("It didn't save. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -224,6 +227,7 @@ export function EvaluationCard({
                 >
                   {saving ? "Saving to Diary…" : "Save Rule to Personal Error Diary 📔"}
                 </Button>
+                {saveError && <span className="text-[11px] font-semibold text-rose-700">{saveError}</span>}
                 <span className="text-[10.5px] text-slate-400 italic">
                   Saved directly to your personal Mistakes Diary
                 </span>
