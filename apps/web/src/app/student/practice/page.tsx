@@ -7,7 +7,8 @@ import { useMe } from "@/components/AppShell";
 import { MathText } from "@/components/MathText";
 import { OralDefenseViva } from "@/components/OralDefenseViva";
 
-const VIVA_ENABLED = false;
+// Rebuilt 22 Sep 2026 on approved walkthroughs, judged by the viva_judge role and checked in code (§19).
+const VIVA_ENABLED = true;
 import { Button, Card, Empty, ErrorNote } from "@/components/ui";
 import { api, type Question } from "@/lib/api";
 
@@ -217,7 +218,7 @@ export default function Practice() {
       </div>
 
       {VIVA_ENABLED && practiceMode === "viva" ? (
-        <OralDefenseViva />
+        <OralDefenseViva subjectId={subjectId} />
       ) : (
       <div className="grid gap-6 xl:grid-cols-12">
         {/* Left 7 cols: Question & Solver Canvas */}

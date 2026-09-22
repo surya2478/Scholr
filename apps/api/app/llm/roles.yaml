@@ -206,6 +206,16 @@ roles:
     max_tokens: 600
     timeout_s: 30
     retries: 1
+  viva_judge:
+    # Judges her explanation of one step of an approved walkthrough against that step only (docs/STUDENT-APP.md
+    # §19). Feedback, never a mark; app.modules.learn.viva checks the verdict, her numbers and hint leaks.
+    # Flash-Lite, live (user rule, 21 Sep 2026). Replaced a scripted "examiner" that praised any answer.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 500
+    timeout_s: 30
+    retries: 1
   essay_planner:
     # Plans an extended answer, never writes one (AC-R5). Low-cost model (budget rule): the guard that
     # matters is deterministic — app.modules.tutoring.planning rejects any plan containing prose long

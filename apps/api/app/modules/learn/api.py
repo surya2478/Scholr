@@ -13,7 +13,17 @@ from app.core.rbac import Principal, resolve_student_id
 from app.core.telemetry import request_id_of
 from app.llm.gateway import CallContext, LLMError
 from app.modules.learn import audio, service
-from app.modules.learn.schemas import LessonOut, PastPapersOut, StreamOut, SubjectLearnOut, TopicOut
+from app.modules.learn.schemas import (
+    LessonOut,
+    PastPapersOut,
+    StreamOut,
+    SubjectLearnOut,
+    TopicOut,
+    VivaQuestionOut,
+    VivaStepIn,
+    VivaStepOut,
+    VivaTopicOut,
+)
 
 router = APIRouter(tags=["learn"])
 
@@ -120,3 +130,24 @@ def get_lesson_audio(
 
     # Signed-in content: the browser may keep it, a shared cache may not.
     return Response(content=audio_bytes, media_type="audio/mpeg", headers=headers)
+
+
+@router.get("/learn/viva", response_model=list[VivaTopicOut])
+def get_viva_topics(subject_id: UUID, principal: PrincipalDep, s: DbDep) -> list[VivaTopicOut]:
+    """Topics whose approved solved exam question she can defend step by step (docs/STUDENT-APP.md §19)."""
+    return service.viva_topics(s, subject_id)
+
+
+@router.get("/learn/viva/{objective_id}", response_model=VivaQuestionOut)
+def get_viva_question(objective_id: UUID, principal: PrincipalDep, s: DbDep) -> VivaQuestionOut:
+    return service.viva_question(s, objective_id)
+
+
+@router.post("/learn/viva/{objective_id}/steps/{index}", response_model=VivaStepOut)
+def post_viva_step(
+    objective_id: UUID, index: int, body: VivaStepIn, request: Request, principal: PrincipalDep, s: DbDep
+) -> VivaStepOut:
+    ctx = CallContext(request_id=request_id_of(request), tenant_id=principal.tenant_id, student_id=principal.student_id)
+    return service.judge_viva_step(
+        s, llm_gateway(request), ctx, principal, objective_id, index, body, now=datetime.now(UTC)
+    )

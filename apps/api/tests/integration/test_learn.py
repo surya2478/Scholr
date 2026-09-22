@@ -23,6 +23,7 @@ from app.main import create_app
 from app.modules.assessment.models import QuestionItem
 from app.modules.audit.models import AuditLog
 from app.modules.curriculum.models import LearningObjective, Subject, Topic
+from app.modules.events.models import LearningEvent
 from app.modules.knowledge import service as knowledge
 from app.modules.learn import service as learn
 from app.seed.curriculum import load_file, seed_curriculum
@@ -397,3 +398,68 @@ def test_rewriting_a_lesson_keeps_its_solved_exam_question(
         row = learn.record_lesson(s, lesson_prep, rewritten, actor=None, now=datetime.now(UTC))
         assert row.content["exam"]["final_answer"] == "1, 2, 3, 4, 6, 12"
         assert row.content["sections"][0]["heading"] == "Pairs"
+
+
+SAFE = {"category": "none", "severity": 0, "confidence": 0.9, "rationale": "study"}
+
+
+def test_the_viva_judges_each_step_against_the_approved_walkthrough_and_records_no_mark(
+    world: SimpleNamespace, auth_headers: Auth, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """docs/STUDENT-APP.md §19: only an approved walkthrough can be defended; a verdict is checked in code, recorded
+    as her self-explanation (not a mark), and a parent cannot answer for her."""
+    student, parent = auth_headers("test|student"), auth_headers("test|parent")
+    fixed_retrieval(monkeypatch, "HIGH")
+    world.transport.reply(DRAFT)
+    world.client.post(f"/learn/objectives/{world.objective}/lesson", headers=student)
+    ctx = CallContext(request_id="test-viva", tenant_id=world.tenant_id)
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        prepared = learn.prepare_walkthrough(s, world.objective_uuid)
+    assert prepared is not None
+    world.transport.reply(WALKTHROUGH)
+    written = learn.write_walkthrough(world.gateway, ctx, prepared)
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        learn.record_walkthrough(s, world.objective_uuid, written, actor=None, now=datetime.now(UTC))
+
+    # Not approved yet: nothing to defend.
+    assert world.client.get(f"/learn/viva?subject_id={world.subject_id}", headers=student).json() == []
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        learn.decide_walkthrough(s, world.objective_uuid, approved=True, actor=None)
+    [topic] = world.client.get(f"/learn/viva?subject_id={world.subject_id}", headers=student).json()
+    assert (topic["objective_id"], topic["steps"], topic["marks"]) == (world.objective, 2, 3)
+    question = world.client.get(f"/learn/viva/{world.objective}", headers=student).json()
+    assert "steps" in question and "step_text" not in question  # the solution is not sent with the question
+
+    step1 = f"/learn/viva/{world.objective}/steps/1"
+    world.transport.reply(SAFE)
+    world.transport.reply({"verdict": "right", "what_was_right": "Pairing works.", "missing": "", "hint": ""})
+    out = world.client.post(
+        step1, headers=student, json={"explanation": "I pair factors that multiply to 12, like 3 and 4"}
+    )
+    assert out.status_code == 200, out.text
+    body = out.json()
+    assert body["verdict"] == "right" and body["step_text"].startswith("Pair the factors") and body["last"] is False
+    # A one-word answer is "not yet", whatever the model says.
+    world.transport.reply(SAFE)
+    world.transport.reply({"verdict": "right", "what_was_right": "Great!", "missing": "", "hint": ""})
+    assert world.client.post(step1, headers=student, json={"explanation": "pairs"}).json()["verdict"] == "not_yet"
+
+    assert world.client.post(step1, headers=parent, json={"explanation": "she would pair them"}).status_code == 403
+    assert (
+        world.client.post(
+            f"/learn/viva/{world.objective}/steps/9", headers=student, json={"explanation": "x y z"}
+        ).status_code
+        == 404
+    )
+
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        rows = s.execute(
+            select(LearningEvent.type, LearningEvent.payload).where(LearningEvent.type == "self_explanation_given")
+        ).all()
+    assert [r.payload["verdict"] for r in rows] == ["right", "not_yet"]
+    assert all("explanation" not in r.payload for r in rows)  # her words are not kept in the event
+    assert world.client.get("/mastery", headers=student).json() == []  # a verdict is not a mark

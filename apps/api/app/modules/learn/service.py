@@ -28,7 +28,7 @@ from app.modules.events import service as events
 from app.modules.external_training import service as external_training
 from app.modules.identity import service as identity
 from app.modules.knowledge import service as knowledge
-from app.modules.learn import diagrams, exam, labels, lessons, pacing
+from app.modules.learn import diagrams, exam, labels, lessons, pacing, viva
 from app.modules.learn.models import Lesson
 from app.modules.learn.schemas import (
     ChapterOut,
@@ -54,12 +54,17 @@ from app.modules.learn.schemas import (
     SubjectCardOut,
     SubjectLearnOut,
     TopicOut,
+    VivaQuestionOut,
+    VivaStepIn,
+    VivaStepOut,
+    VivaTopicOut,
     WalkStepOut,
     WorkedExamOut,
     WorkedExampleOut,
 )
 from app.modules.mastery import service as mastery
 from app.modules.mistakes import service as mistakes
+from app.modules.safety import service as safety
 from app.modules.studies import service as studies
 from app.modules.subjects import service as subjects
 from app.tools.dates import local_date
@@ -74,6 +79,8 @@ ILLUSTRATE_ROLE = "lesson_illustrator"
 ILLUSTRATE_PROMPT = "lesson_illustrate"
 WALK_ROLE = "exam_walker"
 WALK_PROMPT = "exam_walkthrough"
+VIVA_ROLE = "viva_judge"
+VIVA_PROMPT = "viva_judge"
 MAX_DIAGRAMS = 2
 EXCERPTS = 8
 CHECK_YOURSELF = 3
@@ -1110,3 +1117,136 @@ def record_read(s: Session, principal: Principal, objective_id: UUID, *, now: da
         ref_id=row.id,
     )
     mastery.project(s, [event], tenant_id=principal.tenant_id, now=now)
+
+
+# ---------------------------------------------------------------------------
+# Viva: defend each step of an approved solved exam question (docs/STUDENT-APP.md §19)
+# ---------------------------------------------------------------------------
+
+
+def _approved_walkthrough(s: Session, objective_id: UUID) -> tuple[Lesson, dict] | None:
+    row = s.scalar(select(Lesson).where(Lesson.objective_id == objective_id))
+    walk = (row.content or {}).get("exam") if row else None
+    return (row, walk) if row and walk and walk.get("approved") and walk.get("steps") else None
+
+
+def viva_topics(s: Session, subject_id: UUID) -> list[VivaTopicOut]:
+    """Topics with an approved walkthrough, in syllabus order: only a person-approved solution is a fair reference."""
+    tree = curriculum.subject_tree(s, subject_id)
+    out = []
+    for node in tree.topics if tree else []:
+        for objective in _all_objectives(node):
+            found = _approved_walkthrough(s, objective.id)
+            if found is None:
+                continue
+            _, walk = found
+            item = assessment.servable_item(s, UUID(walk["item_id"]))
+            out.append(
+                VivaTopicOut(
+                    objective_id=objective.id,
+                    code=objective.code,
+                    statement=objective.statement,
+                    label=labels.item_label(item.source_ref, "past_paper"),
+                    marks=item.marks,
+                    steps=len(walk["steps"]),
+                )
+            )
+    return out
+
+
+def _all_objectives(node: TopicNode) -> list:  # type: ignore[type-arg]
+    return [*node.objectives, *(o for child in node.children for o in _all_objectives(child))]
+
+
+def viva_question(s: Session, objective_id: UUID) -> VivaQuestionOut:
+    found = _approved_walkthrough(s, objective_id)
+    detail = curriculum.objective_detail(s, objective_id)
+    if found is None or detail is None:
+        raise not_found("viva question")
+    _, walk = found
+    item = assessment.servable_item(s, UUID(walk["item_id"]))
+    return VivaQuestionOut(
+        objective_id=objective_id,
+        code=detail.code,
+        statement=detail.statement,
+        label=labels.item_label(item.source_ref, "past_paper"),
+        marks=item.marks,
+        steps=len(walk["steps"]),
+        context=item.context,
+        stem=item.stem,
+        has_diagram=item.has_diagram,
+    )
+
+
+def judge_viva_step(
+    s: Session,
+    gateway: LLMGateway,
+    ctx: CallContext,
+    principal: Principal,
+    objective_id: UUID,
+    index: int,
+    body: VivaStepIn,
+    *,
+    now: datetime,
+) -> VivaStepOut:
+    """Judge her explanation of step `index` (1-based) against that step of the approved walkthrough, check the
+    verdict in code (learn.viva), and record it as her self-explanation. Her words go through the safety pipeline
+    first, as anything she types to the Tutor does."""
+    if principal.role != "student" or principal.student_id is None:
+        raise ApiError(403, "students_only", "Only the student defends her own working.")
+    found = _approved_walkthrough(s, objective_id)
+    if found is None:
+        raise not_found("viva question")
+    row, walk = found
+    steps = walk["steps"]
+    if not 1 <= index <= len(steps):
+        raise not_found("viva step")
+    step = steps[index - 1]
+    reveal = {"step_text": step["text"], "step_mark": step.get("mark", ""), "last": index == len(steps)}
+    outcome = safety.check_input(
+        s, gateway, ctx, tenant_id=principal.tenant_id, student_id=principal.student_id, text=body.explanation, now=now
+    )
+    if outcome.blocks_tutoring:
+        return VivaStepOut(verdict="safety", safety_message=outcome.response, last=reveal["last"])
+    item = assessment.servable_item(s, UUID(walk["item_id"]))
+    result = gateway.structured(
+        VIVA_ROLE,
+        VIVA_PROMPT,
+        {
+            "marks": str(item.marks),
+            "question": " ".join(f"{item.context or ''} {item.stem}".split()),
+            "shown": "\n".join(f"{n}. {x['text']}" for n, x in enumerate(steps[: index - 1], start=1)) or "(none yet)",
+            "step_number": str(index),
+            "step_mark": step.get("mark") or "no mark on its own",
+            "reference": step["text"],
+            "explanation": body.explanation,
+        },
+        viva.VivaJudgement,
+        ctx,
+    )
+    # The question and the steps already shown: their numbers are hers to use, not secrets.
+    known = " ".join([item.context or "", item.stem, *(x["text"] for x in steps[: index - 1])])
+    judged = viva.guard(
+        result.value,
+        explanation=body.explanation,
+        step_text=step["text"],
+        later_steps=[x["text"] for x in steps[index:]],
+        known=known,
+    )
+    events.append(
+        s,
+        tenant_id=principal.tenant_id,
+        student_id=principal.student_id,
+        event_type="self_explanation_given",
+        occurred_at=now,
+        payload={"source": "viva", "item_id": item.id, "step": index, "verdict": judged.verdict},
+        subject_id=row.subject_id,
+        objective_ids=[objective_id],
+    )
+    return VivaStepOut(
+        verdict=judged.verdict,
+        what_was_right=judged.what_was_right,
+        missing=judged.missing,
+        hint=judged.hint,
+        **reveal,
+    )

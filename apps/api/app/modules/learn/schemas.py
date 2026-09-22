@@ -264,3 +264,36 @@ class PastPapersOut(BaseModel):
     series: list[str]
     total: int
     attempted: int
+
+
+class VivaTopicOut(BaseModel):
+    """A topic whose approved solved exam question can be defended step by step (docs/STUDENT-APP.md §19)."""
+
+    objective_id: UUID
+    code: str
+    statement: str
+    label: str  # "June 2025 · Paper 21 · Q18(d)"
+    marks: int
+    steps: int
+
+
+class VivaQuestionOut(VivaTopicOut):
+    context: str | None
+    stem: str
+    has_diagram: bool
+
+
+class VivaStepIn(BaseModel):
+    explanation: str = Field(min_length=1, max_length=1500)
+
+
+class VivaStepOut(BaseModel):
+    verdict: Literal["right", "partly", "not_yet", "safety"]
+    what_was_right: str = ""
+    missing: str = ""
+    hint: str = ""
+    # The reference step, for the page to show when she has got it or asks to see it.
+    step_text: str = ""
+    step_mark: str = ""
+    last: bool = False
+    safety_message: str | None = None  # set when her words raised a safety concern; nothing was judged

@@ -84,6 +84,12 @@ class HelpGiven(_Payload):
 class SelfExplanationGiven(_Payload):
     attempt_id: UUID | None = None
     message_id: UUID | None = None
+    # The viva (docs/STUDENT-APP.md §19): which solved question and step she explained, and how it was judged.
+    # Her words are not kept in the event.
+    source: Literal["viva"] | None = None
+    item_id: UUID | None = None
+    step: int | None = None
+    verdict: Literal["right", "partly", "not_yet"] | None = None
 
 
 class ConfidenceReported(_Payload):

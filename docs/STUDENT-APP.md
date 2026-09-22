@@ -574,3 +574,24 @@ marked (Chemistry marking needs the equation balancer and mole checks first; doc
 - **Rendering.** Guard v8 wraps maths written outside `$…$` ("H_2O", "12x^3", "10^23") so it renders — chemistry and
   units upright — applied to 21 stored lessons.
 
+## 19. Status — 22 Sep 2026: the oral defence (viva), rebuilt
+
+A review of features added in another session found the "Oral Defense Viva" scripted: whatever she typed, the
+"examiner" answered "Precisely… +10 rigor points" and "top marks", and it sent her voice to the browser's speech
+service. It was hidden, then rebuilt at the user's request:
+
+- **The reference.** Only a topic with an approved walkthrough (AC-U16) can be defended — a real past-paper question
+  whose steps passed the mark-scheme checks and a person's review. `GET /learn/viva?subject_id=` lists them;
+  `GET /learn/viva/{objective}` sends the question without its steps.
+- **Her turn.** Before each step is shown she says (server-side transcription, §16) or types what she would do next
+  and why: `POST /learn/viva/{objective}/steps/{n}`. Students only; her words go through the safety pipeline first.
+- **The judge.** Role `viva_judge` (Flash-Lite, prompt `viva_judge/v1`) compares her explanation with that step only:
+  right / partly / not yet, what was right, what is missing, and a hint. `learn/viva.py` then checks it in code:
+  a couple of words is "not yet"; "right" needs her numbers to agree with the numbers the step introduces; a hint
+  or "missing" may not give away the numbers this step or a later one introduces (numbers from the question and
+  earlier steps are hers to use — a step like "these numbers are −8 and +6" has no "=" and is protected all the same).
+- **The record.** Each verdict is a `self_explanation_given` event (source `viva`, item, step, verdict; her words
+  are not kept). Mastery does not read it: feedback on reasoning, never a mark. No score, points or "top marks".
+- On 13.3 (solve $x^2 - 2x - 48 = 0$ by factorising) the live judge accepted the right pairing, and turned down
+  the quadratic formula, a completing-the-square start and "banana banana banana", each with a question as a hint.
+

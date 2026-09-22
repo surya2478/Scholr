@@ -665,3 +665,24 @@ export type CrucibleTopic = {
 };
 
 
+
+// The viva (docs/STUDENT-APP.md §19): defend each step of an approved solved exam question.
+export type VivaTopic = {
+  objective_id: string;
+  code: string;
+  statement: string;
+  label: string;
+  marks: number;
+  steps: number;
+};
+export type VivaQuestion = VivaTopic & { context: string | null; stem: string; has_diagram: boolean };
+export type VivaStep = {
+  verdict: "right" | "partly" | "not_yet" | "safety";
+  what_was_right: string;
+  missing: string;
+  hint: string;
+  step_text: string;
+  step_mark: string;
+  last: boolean;
+  safety_message: string | null;
+};
