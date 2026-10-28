@@ -143,7 +143,7 @@ def prepare(s: Session, principal: Principal, attempt_id: UUID) -> PreparedEvalu
     existing = latest_row(s, attempt.id)
     if existing is not None:
         return to_out(existing)
-    if attempt.assessment_kind in assessment.EXAM_STYLE_KINDS and attempt.assessment_status not in (
+    if attempt.assessment_kind in assessment.EXAM_CONDITION_KINDS and attempt.assessment_status not in (
         "submitted",
         "evaluated",
     ):

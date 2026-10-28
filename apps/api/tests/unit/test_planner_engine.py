@@ -13,6 +13,7 @@ from app.modules.planner.engine import (
     build_plan,
     day_capacity,
     entry_for,
+    notice_codes,
     priority,
 )
 from app.tools.dates import RecurrenceError, occurs_on, parse_rrule
@@ -128,3 +129,17 @@ def test_the_traces_own_order_decides_between_equal_candidates() -> None:
     draft = build_plan([second, best], capacity_minutes=240, control_objectives=set())
     kept = [e for e in draft.entries if e.kind == "reinforcement"]
     assert [e.objective_id for e in kept] == [best.objective_id]
+
+
+def test_a_day_with_no_study_time_says_only_that() -> None:
+    # Her Monday, 26 Oct 2026: an IIT class in the evening, no study window, and the plan said both "today is
+    # full, so optional practice was left out" and "no study time is planned for today".
+    assert notice_codes(overload=True, lighter_day=True, capacity_minutes=0) == ["no_capacity"]
+    assert notice_codes(overload=False, lighter_day=False, capacity_minutes=0) == ["no_capacity"]
+
+
+def test_a_full_day_and_a_lighter_day_still_say_so() -> None:
+    assert notice_codes(overload=True, lighter_day=False, capacity_minutes=60) == ["overload"]
+    assert notice_codes(overload=False, lighter_day=True, capacity_minutes=60) == ["lighter_day"]
+    assert notice_codes(overload=True, lighter_day=True, capacity_minutes=60) == ["overload", "lighter_day"]
+    assert notice_codes(overload=False, lighter_day=False, capacity_minutes=60) == []

@@ -75,7 +75,7 @@ function RequestCard({
   const [yearGroup, setYearGroup] = useState("");
 
   return (
-    <section className="flex flex-col gap-3 rounded-3xl border-2 border-amber-200/80 bg-white p-5 shadow-sm">
+    <section className="flex flex-col gap-3 rounded-3xl border-2 border-slate-200/90 bg-white p-5 shadow-sm">
       <div>
         <h2 className="font-semibold text-slate-900">{account.display_name}</h2>
         <p className="text-xs text-muted">
@@ -90,7 +90,7 @@ function RequestCard({
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="h-9 rounded-xl border-2 border-amber-200 px-2 text-sm font-normal"
+            className="h-9 rounded-xl border-2 border-slate-200 px-2 text-sm font-normal"
           >
             <option value="student">Student</option>
             <option value="guardian">Parent</option>
@@ -104,7 +104,7 @@ function RequestCard({
               value={yearGroup}
               onChange={(e) => setYearGroup(e.target.value)}
               placeholder="Year 10"
-              className="h-9 w-28 rounded-xl border-2 border-amber-200 px-2 text-sm font-normal"
+              className="h-9 w-28 rounded-xl border-2 border-slate-200 px-2 text-sm font-normal"
             />
           </label>
         )}

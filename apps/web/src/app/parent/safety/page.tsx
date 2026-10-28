@@ -36,7 +36,7 @@ function IncidentRow({ incident, onChange }: { incident: Incident; onChange: () 
 
   return (
     <li className={`flex flex-col gap-3 rounded-2xl border p-4.5 transition shadow-xs ${
-      isResolved ? "border-line-soft bg-white/60 opacity-80" : "border-amber-200 bg-gradient-to-r from-[#FFFDF9] to-[#FFF9F2]"
+      isResolved ? "border-line-soft bg-white/60 opacity-80" : "border-slate-200 bg-gradient-to-r from-[#FFFDF9] to-[#FFF9F2]"
     }`}>
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <div className="flex items-center gap-2">

@@ -199,6 +199,24 @@ def build_plan(
     return PlanDraft(planned, dropped, capacity_minutes, overload, excluded)
 
 
+def notice_codes(*, overload: bool, lighter_day: bool, capacity_minutes: int) -> list[str]:
+    """What the plan says about the shape of the day, in the order it should be read.
+
+    A day with no capacity says only that. "Today is full, so optional practice was left out" is about a day full
+    of study, and on a day with no study time in it nothing was left out *because the day was full* — the core
+    work simply had nowhere to go. Said together the two read as nonsense, which is what her plan did on Monday
+    26 Oct 2026: one IIT class in the evening, no study window, and both notices at once.
+    """
+    if capacity_minutes <= 0:
+        return ["no_capacity"]
+    codes = []
+    if overload:
+        codes.append("overload")
+    if lighter_day:
+        codes.append("lighter_day")
+    return codes
+
+
 # --- day timeline ------------------------------------------------------------------------------------------------
 
 # Where study blocks may be placed around fixed commitments. Starting assumption (CONTEXT U13: school in the day,

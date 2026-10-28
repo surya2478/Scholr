@@ -8,8 +8,8 @@ export type ConversationStarter = {
 const THEMES = {
   orange: {
     bg: "bg-[#FFFBF5]",
-    border: "border-orange-200",
-    badge: "text-orange-700",
+    border: "border-blue-200",
+    badge: "text-blue-700",
   },
   emerald: {
     bg: "bg-[#F6FEF9]",
@@ -53,7 +53,7 @@ export function DinnerStartersCard({
   const items = starters && starters.length > 0 ? starters : defaultStarters;
 
   return (
-    <div className="bg-white rounded-3xl border-2 border-amber-200/80 p-6 shadow-sm space-y-4">
+    <div className="bg-white rounded-3xl border-2 border-slate-200/90 p-6 shadow-sm space-y-4">
       <div className="flex items-center gap-3">
         <span className="text-3xl select-none">🍽️</span>
         <div>

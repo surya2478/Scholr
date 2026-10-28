@@ -28,7 +28,6 @@ export default function Entry() {
         try {
           go(await devSignIn("student"));
         } catch (err) {
-          // 404: the API is not in development mode, so it expects an email and password.
           if (err instanceof ApiError && err.status === 404) router.replace("/sign-in");
           else if (!cancelled) setFailed(true);
         }
@@ -40,42 +39,36 @@ export default function Entry() {
   }, [router]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 bg-ground">
-      <div className="card flex w-full max-w-md flex-col items-center gap-4 p-8 text-center rounded-3xl border border-[#FFE8CD] bg-white shadow-lg">
+    <main className="flex min-h-screen items-center justify-center px-4 bg-[#0B1528] text-white">
+      <div className="flex w-full max-w-md flex-col items-center gap-5 p-8 text-center rounded-3xl border border-slate-800 bg-[#111C35] shadow-2xl">
         <div className="relative">
-          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-[#FF7A00] to-[#FFA940] text-white shadow-md text-3xl font-fun font-bold animate-pulse">
-            🦉
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-emerald-400 text-white shadow-lg font-mono text-2xl font-extrabold animate-pulse">
+            S
           </div>
-          <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-bold ring-2 ring-white">
-            ⚡
-          </span>
         </div>
 
         <div>
-          <h1 className="font-fun text-3xl font-extrabold tracking-tight text-ink">
-            Scholr
+          <h1 className="text-2xl font-extrabold tracking-tight text-white">
+            SCHOLR <span className="font-mono text-sm text-emerald-400">PRO</span>
           </h1>
-          <p className="mt-1 text-xs font-medium text-muted">
-            Cambridge IGCSE & IIT Foundation Study Space
+          <p className="mt-1 text-xs font-medium text-slate-400">
+            Cambridge IGCSE Extended &amp; IIT Foundation Academic Studio
           </p>
         </div>
 
         {failed ? (
-          <div className="flex flex-col gap-2 rounded-2xl border border-rose-200 bg-rose-50/70 p-4 text-xs text-rose-900">
+          <div className="flex flex-col gap-2 rounded-2xl border border-rose-500/30 bg-rose-950/50 p-4 text-xs text-rose-200">
             <span className="font-bold text-sm">Development API Required</span>
-            <p className="text-rose-800">
-              The API needs to be running in development mode on this machine to create your session.
-            </p>
-            <p className="text-[11px] text-muted mt-1">
-              Start the backend service and reload this page to enter.
+            <p>
+              The API service needs to be running on port 8000 to initialise your session.
             </p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 pt-2">
-            <div className="h-2 w-28 overflow-hidden rounded-full bg-sand">
-              <div className="h-full w-full bg-gradient-to-r from-brand to-brand-strong animate-[pulse_1.2s_ease-in-out_infinite]" />
+            <div className="h-1.5 w-32 overflow-hidden rounded-full bg-slate-800">
+              <div className="h-full w-full bg-gradient-to-r from-blue-500 to-emerald-400 animate-[pulse_1.2s_ease-in-out_infinite]" />
             </div>
-            <p className="text-xs font-semibold text-ink-2">Opening your learning space…</p>
+            <p className="text-xs font-semibold text-slate-300">Initialising academic workspace…</p>
           </div>
         )}
       </div>

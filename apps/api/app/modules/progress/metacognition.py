@@ -14,8 +14,16 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.modules.assessment import service as assessment
+from app.modules.curriculum import service as curriculum
 from app.modules.evaluation import service as evaluation
-from app.modules.progress.schemas import IndependenceStats, MetacognitionItem, MetacognitionOut, QuadrantCount
+from app.modules.progress.schemas import (
+    IndependenceStats,
+    MetacognitionItem,
+    MetacognitionOut,
+    QuadrantCount,
+    VelocityQuadrant,
+    VelocityStats,
+)
 
 CONFIDENCE_LABELS: dict[int, str] = {
     1: "Not sure",
@@ -158,6 +166,75 @@ def derive_independence(attempts: Sequence[assessment.ConfidenceAttempt]) -> Ind
     )
 
 
+VelocityCategory = Literal["optimal_flow", "speed_trap", "time_sink", "hesitant_success", "untracked"]
+# Rushed: marks lost in under half the time the paper allows for them.
+RUSHED_SHARE = 0.5
+
+
+def classify_velocity(
+    time_spent_s: int | None, marks_awarded: float, marks_available: int, exam_seconds_per_mark: float | None
+) -> VelocityCategory:
+    """Where an answer falls on time against accuracy. The pace is her own subject's papers' (minutes allowed over
+    marks), not a general rule; with no timing or no timed paper the answer is "untracked".
+
+    - right (>= 70%) within the time the paper allows: optimal_flow
+    - right, but over that time: hesitant_success
+    - marks lost in under half that time: speed_trap (rushed)
+    - marks lost, taking longer: time_sink
+    """
+    if not time_spent_s or time_spent_s <= 0 or marks_available <= 0 or not exam_seconds_per_mark:
+        return "untracked"
+    allowed = exam_seconds_per_mark * marks_available
+    if marks_awarded / marks_available >= MASTERY_ACCURACY_THRESHOLD:
+        return "optimal_flow" if time_spent_s <= allowed else "hesitant_success"
+    return "speed_trap" if time_spent_s <= allowed * RUSHED_SHARE else "time_sink"
+
+
+def derive_velocity_stats(items: Sequence[MetacognitionItem], allowed_s: Sequence[float]) -> VelocityStats:
+    """Counts per category, and her time against the time her papers allow (``allowed_s``: one per tracked item)."""
+    tracked = [it for it in items if it.velocity_category != "untracked" and it.time_spent_s]
+    counts = {k: sum(1 for it in tracked if it.velocity_category == k) for k in VELOCITY_KEYS}
+    total = len(tracked)
+    quadrants = {
+        k: VelocityQuadrant(count=n, percentage=round(n / total * 100, 1) if total else 0.0) for k, n in counts.items()
+    }
+    used = sum(it.time_spent_s or 0 for it in tracked)
+    marks = sum(it.marks_available for it in tracked)
+    return VelocityStats(
+        speed_trap_count=counts["speed_trap"],
+        time_sink_count=counts["time_sink"],
+        optimal_flow_count=counts["optimal_flow"],
+        hesitant_count=counts["hesitant_success"],
+        average_seconds_per_mark=round(used / marks, 1) if marks else 0.0,
+        exam_time_used_percent=round(used / sum(allowed_s) * 100) if total and sum(allowed_s) else None,
+        quadrants=quadrants,
+        diagnosis=_velocity_diagnosis(counts, total),
+    )
+
+
+VELOCITY_KEYS = ("optimal_flow", "speed_trap", "time_sink", "hesitant_success")
+
+
+def _velocity_diagnosis(counts: dict[str, int], total: int) -> str:
+    if total == 0:
+        return "Answer a few questions and the time you take will show here, against the time your exam allows."
+    if counts["speed_trap"] >= 2 and counts["speed_trap"] >= counts["time_sink"]:
+        return (
+            "Several answers that lost marks took less than half the time the exam allows for them. "
+            "Reading the question again before you answer may help."
+        )
+    if counts["time_sink"] >= 2:
+        return (
+            "Several questions took longer than the exam allows and still lost marks. In an exam, it can be "
+            "better to move on and come back to them at the end."
+        )
+    if counts["hesitant_success"] >= 2:
+        return "Your answers are mostly right but often take longer than the exam allows. Timed practice will help."
+    if counts["optimal_flow"] >= total / 2:
+        return "Most of your answers were right and within the time the exam allows."
+    return "No clear pattern yet — it will show as you answer more questions."
+
+
 def _empty_profile(student_id: UUID, attempts: Sequence[assessment.ConfidenceAttempt]) -> MetacognitionOut:
     return MetacognitionOut(
         student_id=student_id,
@@ -174,6 +251,7 @@ def _empty_profile(student_id: UUID, attempts: Sequence[assessment.ConfidenceAtt
         recent_items=[],
         advice="Rate your confidence on at least 3 practice questions to reveal your metacognitive pattern.",
         independence=derive_independence(attempts),
+        velocity=derive_velocity_stats([], []),
     )
 
 
@@ -190,6 +268,8 @@ def get_metacognitive_profile(
         return _empty_profile(student_id, attempts)
 
     eval_map = evaluation.evaluation_summaries_for_attempts(s, [a.id for a in attempts])
+    paces = curriculum.exam_seconds_per_mark(s, list({a.subject_id for a in attempts}))
+    allowed_s: list[float] = []
 
     items: list[MetacognitionItem] = []
     pairs_for_brier: list[tuple[float, float]] = []
@@ -202,6 +282,9 @@ def get_metacognitive_profile(
         acc = min(1.0, max(0.0, ev.marks_awarded / ev.marks_available))
         conf_prob = CONFIDENCE_PROBABILITIES.get(att.pre_confidence, 0.5)
         quad = classify_quadrant(att.pre_confidence, acc)
+        vel_cat = classify_velocity(att.time_spent_s, ev.marks_awarded, ev.marks_available, paces.get(att.subject_id))
+        if vel_cat != "untracked":
+            allowed_s.append(paces[att.subject_id] * ev.marks_available)
 
         pairs_for_brier.append((conf_prob, acc))
 
@@ -218,6 +301,8 @@ def get_metacognitive_profile(
                 quadrant=quad,
                 mistakes=list(ev.mistake_descriptions),
                 submitted_at=att.submitted_at,
+                time_spent_s=att.time_spent_s,
+                velocity_category=vel_cat,
             )
         )
 
@@ -255,4 +340,5 @@ def get_metacognitive_profile(
         recent_items=items[:15],
         advice=advice,
         independence=derive_independence(attempts),
+        velocity=derive_velocity_stats(items, allowed_s),
     )

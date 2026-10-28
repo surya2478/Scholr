@@ -25,9 +25,10 @@ from app.modules.events import service as events
 from app.modules.external_training import service as external_training
 from app.modules.identity import service as identity
 from app.modules.learn import labels
+from app.modules.learn import service as learn
 from app.modules.mastery import service as mastery
 from app.modules.mistakes import service as mistakes
-from app.modules.planner import daily, engine
+from app.modules.planner import daily, engine, sessions
 from app.modules.planner.models import DailyPractice, PlanItem, StudyPlan
 from app.modules.planner.schemas import (
     DailyItemOut,
@@ -35,7 +36,9 @@ from app.modules.planner.schemas import (
     DroppedOut,
     PlanItemOut,
     PlanOut,
+    SessionDoorOut,
     TimelineBlockOut,
+    TomorrowTopicOut,
 )
 from app.modules.studies import service as studies
 from app.modules.subjects import service as subjects
@@ -221,13 +224,14 @@ def _out(s: Session, plan: StudyPlan) -> PlanOut:
         sid: sub.name for sid, sub in curriculum.subject_summaries(s, [i.subject_id for i in items]).items()
     }
     texts = reasons()
-    notices = []
-    if snapshot.get("overload"):
-        notices.append(texts["notices"]["overload"])
-    if (snapshot.get("capacity") or {}).get("lighter_day") and plan.capacity_minutes > 0:
-        notices.append(texts["notices"]["lighter_day"])
-    if plan.capacity_minutes == 0:
-        notices.append(texts["notices"]["no_capacity"])
+    notices = [
+        texts["notices"][code]
+        for code in engine.notice_codes(
+            overload=bool(snapshot.get("overload")),
+            lighter_day=bool((snapshot.get("capacity") or {}).get("lighter_day")),
+            capacity_minutes=plan.capacity_minutes,
+        )
+    ]
     item_outs = [
         PlanItemOut(
             id=i.id,
@@ -308,12 +312,20 @@ def _taught_subjects(s: Session, student_id: UUID) -> set[UUID]:
     return out
 
 
-def _daily_wants(s: Session, plan: StudyPlan, student_id: UUID) -> list[daily.Want]:
-    wants = [
+def _plan_wants(s: Session, plan: StudyPlan) -> list[daily.Want]:
+    return [
         daily.Want(item.objective_id, item.reason_code)
         for item in s.scalars(select(PlanItem).where(PlanItem.plan_id == plan.id).order_by(PlanItem.position))
         if item.objective_id is not None
     ]
+
+
+def _state_wants(s: Session, student_id: UUID) -> list[daily.Want]:
+    """What her record alone asks for, in order of claim: open mistakes, retention risk, then lessons only read.
+
+    Split from the plan's wants so tomorrow's preview can be built without generating tomorrow's plan.
+    """
+    wants: list[daily.Want] = []
     open_mistakes = [
         m for m in mistakes.list_mistakes(s, student_id=student_id) if m.objective_id and m.status != "resolved"
     ]
@@ -328,16 +340,143 @@ def _daily_wants(s: Session, plan: StudyPlan, student_id: UUID) -> list[daily.Wa
     return wants
 
 
-def _build_daily(s: Session, *, tenant_id: UUID, student_id: UUID, day: date, now: datetime) -> DailyPractice:
-    plan = _ensure_plan(s, tenant_id=tenant_id, student_id=student_id, day=day, now=now)
+def _daily_wants(s: Session, plan: StudyPlan, student_id: UUID) -> list[daily.Want]:
+    return _plan_wants(s, plan) + _state_wants(s, student_id)
+
+
+def _servable(
+    s: Session, wants: Sequence[daily.Want], student_id: UUID
+) -> tuple[list[daily.Want], dict[UUID, list[daily.Candidate]], dict[UUID, curriculum.ObjectiveSummary]]:
+    """Keep the wants that name a topic in a taught subject, with that topic's bank items."""
     taught = _taught_subjects(s, student_id)
-    wants = _daily_wants(s, plan, student_id)
     summaries = curriculum.objective_summaries(s, [w.objective_id for w in wants])
-    wants = [w for w in wants if w.objective_id in summaries and summaries[w.objective_id].subject_id in taught]
+    kept = [w for w in wants if w.objective_id in summaries and summaries[w.objective_id].subject_id in taught]
     candidates = {
         oid: [daily.Candidate(i.id, i.marks) for i in assessment.items_for_objective(s, oid)]
-        for oid in {w.objective_id for w in wants}
+        for oid in {w.objective_id for w in kept}
     }
+    return kept, candidates, summaries
+
+
+def _doors(s: Session, *, student_id: UUID, items: list[DailyItemOut], now: datetime) -> list[SessionDoorOut]:
+    """The three ways into today's work, each with the minutes its own content actually takes.
+
+    All three are always returned, a closed one carrying the reason it is closed: a door that hides itself reads
+    as a feature that does not exist (AC-U13 made the same call for the parts of a topic page).
+    """
+    texts = reasons()
+    door_text, closed_text = texts["doors"], texts["closed"]
+    pool = [
+        sessions.Item(
+            item_id=x.item_id,
+            objective_id=x.objective_id,
+            marks=x.marks,
+            reason_code=x.reason_code,
+            to_do=x.status == "to_do",
+        )
+        for x in items
+    ]
+    left_items = sessions.to_do(pool)
+    empty_reason = "nothing_today" if not pool else "set_finished"
+
+    quick = sessions.quick_pick(pool)
+    out = [
+        SessionDoorOut(
+            key="quick",
+            text=door_text["quick"],
+            minutes=sessions.minutes_for(quick),
+            questions=len(quick),
+            open=bool(quick),
+            closed_reason=None if quick else closed_text[empty_reason if not left_items else "nothing_due"],
+        ),
+        SessionDoorOut(
+            key="today",
+            text=door_text["today"],
+            minutes=sessions.minutes_for(left_items),
+            questions=len(left_items),
+            open=bool(left_items),
+            closed_reason=None if left_items else closed_text[empty_reason],
+        ),
+    ]
+
+    # The first of today's topics that still has something to read or try. The first by claim can be one she has
+    # already read and practised (seen on her own record, 25 Oct 2026), so the door looks past it.
+    candidates = sessions.deep_candidates(pool)
+    objective_id, minutes, parts = None, 0, []
+    for candidate in candidates[: sessions.MAX_DEEP_LOOKUPS]:
+        part = learn.next_part(s, candidate, student_id=student_id, now=now)
+        if part is not None:
+            label, minutes, after = part
+            objective_id, parts = candidate, [label, *after]
+            break
+    topic = next((x for x in items if x.objective_id == objective_id), None) if objective_id else None
+    # Why it is closed, truthfully: the set is empty, or she has finished it, or today's topics have nothing left
+    # on their pages and what remains is the questions themselves.
+    deep_closed = empty_reason if not left_items else "nothing_left"
+
+    out.append(
+        SessionDoorOut(
+            key="deep",
+            text=door_text["deep"],
+            minutes=minutes,
+            questions=0,
+            objective_id=objective_id,
+            objective_code=topic.objective_code if topic else None,
+            objective_statement=topic.objective_statement if topic else None,
+            parts=parts,
+            open=objective_id is not None,
+            closed_reason=None if objective_id is not None else closed_text[deep_closed],
+        )
+    )
+    return out
+
+
+def _tomorrow_topics(s: Session, *, student_id: UUID, day: date, now: datetime) -> list[TomorrowTopicOut]:
+    """The topics tomorrow's set would start from, by the same rule over the record as it stands now.
+
+    Tomorrow's plan does not exist yet and generating it would write rows for a day that has not started, so this
+    takes her state wants only — open mistakes, retention risk, lessons only read. A topic is named only if it still
+    has a question she has not answered inside the rule's recent window, so the preview cannot promise work that is
+    not there. Tomorrow's plan may add topics on top, which is why the UI says it can change.
+    """
+    tomorrow = day + timedelta(days=1)
+    wants, candidates, summaries = _servable(s, _state_wants(s, student_id), student_id)
+    picks = daily.choose(
+        wants,
+        candidates,
+        recent=assessment.recent_item_ids(
+            s, student_id=student_id, since=now + timedelta(days=1) - timedelta(days=daily.RECENT_DAYS)
+        ),
+        excluded=studies.control_objective_ids(s, student_id=student_id, at=now),
+        seed=f"{student_id}:{tomorrow.isoformat()}",
+        size=daily.PREVIEW_SIZE,
+    )
+    subject_names = {
+        x.id: x.name for x in curriculum.subject_summaries(s, [o.subject_id for o in summaries.values()]).values()
+    }
+    texts = reasons()["reasons"]
+    out: list[TomorrowTopicOut] = []
+    for pick in picks:
+        objective = summaries.get(pick.objective_id)
+        if objective is None or any(t.objective_id == pick.objective_id for t in out):
+            continue  # one line per topic, however many of its questions the rule would set
+        out.append(
+            TomorrowTopicOut(
+                subject_id=objective.subject_id,
+                subject_name=subject_names.get(objective.subject_id, ""),
+                objective_id=pick.objective_id,
+                objective_code=objective.code,
+                objective_statement=objective.statement,
+                reason_code=pick.reason_code,
+                reason=texts.get(pick.reason_code, ""),
+            )
+        )
+    return out
+
+
+def _build_daily(s: Session, *, tenant_id: UUID, student_id: UUID, day: date, now: datetime) -> DailyPractice:
+    plan = _ensure_plan(s, tenant_id=tenant_id, student_id=student_id, day=day, now=now)
+    wants, candidates, _ = _servable(s, _daily_wants(s, plan, student_id), student_id)
     picks = daily.choose(
         wants,
         candidates,
@@ -421,13 +560,21 @@ def daily_practice(s: Session, principal: Principal, *, student_id: UUID, now: d
                 marks_awarded=mark.marks_awarded if mark else None,
             )
         )
+    plan = _plan_for(s, student_id, day)
+    done = sum(1 for x in out if x.status != "to_do")
+    finished = bool(out) and done == len(out)
     return DailyPracticeOut(
         practice_date=day,
         rule_version=row.rule_version,
         items=out,
-        done=sum(1 for x in out if x.status != "to_do"),
+        done=done,
         total=len(out),
+        tomorrow=_tomorrow_topics(s, student_id=student_id, day=day, now=now) if finished else [],
+        doors=_doors(s, student_id=student_id, items=out, now=now),
         notice=None if out else "Nothing to practise today — your plan has no topics with questions yet.",
+        answering_minutes=round(assessment.seconds_answering_since(s, student_id=student_id, since=since) / 60),
+        planned_minutes=plan.capacity_minutes if plan else None,
+        external_minutes=external_training.minutes_on(s, student_id=student_id, day=day),
     )
 
 

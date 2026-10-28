@@ -23,12 +23,13 @@ from app.modules.assessment import service as assessment
 from app.modules.audit import service as audit
 from app.modules.curriculum import service as curriculum
 from app.modules.curriculum.schemas import SubjectOut, TopicNode, TopicRef
+from app.modules.enrollment import service as enrollment
 from app.modules.evaluation import service as evaluation
 from app.modules.events import service as events
 from app.modules.external_training import service as external_training
 from app.modules.identity import service as identity
 from app.modules.knowledge import service as knowledge
-from app.modules.learn import crucible, diagrams, exam, labels, lessons, pacing, viva
+from app.modules.learn import crucible, diagrams, exam, homework, labels, lessons, pacing, viva
 from app.modules.learn.models import Lesson
 from app.modules.learn.schemas import (
     ChapterOut,
@@ -37,19 +38,24 @@ from app.modules.learn.schemas import (
     CrucibleOut,
     CruciblePerspectiveOut,
     DiagramOut,
+    ExamAnswerOut,
     ExamLevelOut,
     ExternalLessonOut,
     GroundOut,
+    HomeworkMatchOut,
+    HomeworkPhotoOut,
     HowExaminedOut,
     ItemCardOut,
     KeyTermOut,
     LessonOut,
     LessonSectionOut,
+    LessonTableOut,
     MistakeCardOut,
     ObjectiveCardOut,
     PastPaperChapterOut,
     PastPaperItemOut,
     PastPapersOut,
+    PodcastDialogueTurnOut,
     SourceRefOut,
     StepOut,
     StreamOut,
@@ -75,8 +81,9 @@ SCOPE = "mastery"
 LESSON_ROLE = "lesson_writer"
 LESSON_PROMPT = "lesson_write"
 # The version lessons are written with: v4 (exam standard, examples rising to exam level), switched on 21 Sep 2026
-# after the pilot (docs/STUDENT-APP.md §15). Changing it makes every stored lesson stale for `app.jobs.lessons`.
-LESSON_PROMPT_VERSION = "v4"
+# after the pilot (docs/STUDENT-APP.md §15); v5 (revision notes: definitions, bullets, tables, model exam answers)
+# on 22 Sep 2026 (§21); v6 (coaching center framework + NotebookLM podcast) in Oct 2026.
+LESSON_PROMPT_VERSION = "v6"
 ILLUSTRATE_ROLE = "lesson_illustrator"
 ILLUSTRATE_PROMPT = "lesson_illustrate"
 WALK_ROLE = "exam_walker"
@@ -86,10 +93,11 @@ VIVA_PROMPT = "viva_judge"
 CRUCIBLE_ROLE = "crucible_writer"
 CRUCIBLE_PROMPT = "crucible_write"
 CRUCIBLE_MIN_MARKS = 10
-MAX_DIAGRAMS = 2
-EXCERPTS = 8
+MAX_DIAGRAMS = 3
+EXCERPTS = 10  # v5 notes cover the whole objective
+TABLE_EXCERPTS = 3  # the book's own tables on it, added beside the searched excerpts
 CHECK_YOURSELF = 3
-EXAM_QUESTIONS = 6
+EXAM_QUESTIONS = 50
 SCHOOL_LED_NOTICE = (
     "This topic is being learnt at school for now, as part of the study you agreed to. "
     "Its lesson and practice open here after the study's retention test."
@@ -252,24 +260,64 @@ def _lesson_out(row: Lesson) -> LessonOut:
             seen.setdefault((src["title"], page), SourceRefOut(title=src["title"], page=page))
         return list(seen.values())
 
+    podcast_audio_url = content.get("podcast_audio_url") or None
+    if not podcast_audio_url:
+        from app.core.config import get_settings
+
+        podcasts_dir = get_settings().private_content_dir / "podcasts"
+        if (podcasts_dir / f"{row.objective_id}.mp3").exists():
+            podcast_audio_url = f"/api/learn/objectives/{row.objective_id}/podcast"
+
     return LessonOut(
         id=row.id,
         status=row.status,  # type: ignore[arg-type]
         summary=content.get("summary", ""),
+        introduction=content.get("introduction", ""),
+        podcast_audio_url=podcast_audio_url,
+        podcast_script=[
+            PodcastDialogueTurnOut(speaker=turn.get("speaker", "Host"), text=turn.get("text", ""))
+            for turn in content.get("podcast_script", [])
+        ],
         sections=[
-            LessonSectionOut(heading=x["heading"], body=x["body"], sources=refs(x["sources"]))
+            LessonSectionOut(
+                heading=x["heading"],
+                body=x["body"],
+                definition=x.get("definition", ""),
+                points=x.get("points", []),
+                exam_tip=x.get("exam_tip", ""),
+                mental_model=x.get("mental_model", ""),
+                formula_notes=x.get("formula_notes", ""),
+                sources=refs(x["sources"]),
+            )
             for x in content.get("sections", [])
+        ],
+        tables=[
+            LessonTableOut(
+                title=x["title"],
+                columns=x["columns"],
+                rows=x["rows"],
+                section=x.get("section", 0),
+                sources=refs(x["sources"]),
+            )
+            for x in content.get("tables", [])
+        ],
+        exam_answers=[
+            ExamAnswerOut(question=x["question"], points=x["points"], sources=refs(x["sources"]))
+            for x in content.get("exam_answers", [])
         ],
         key_terms=[KeyTermOut(term=x["term"], meaning=x["meaning"]) for x in content.get("key_terms", [])],
         worked_examples=[
             WorkedExampleOut(
                 problem=x["problem"],
+                strategy=x.get("strategy", ""),
                 steps=x["steps"],
                 final_answer=x["final_answer"],
                 unit=x.get("unit") or None,
                 checked=x.get("checked"),
+                coaching_takeaway=x.get("coaching_takeaway", ""),
                 sources=refs(x.get("sources", [])),
                 level=x.get("level") or None,
+                section=x.get("section", 0),
             )
             for x in content.get("worked_examples", [])
         ],
@@ -284,7 +332,12 @@ def _lesson_out(row: Lesson) -> LessonOut:
     )
 
 
-def _item_card(item: assessment.ItemBrief) -> ItemCardOut:
+def _item_card(
+    item: assessment.ItemBrief,
+    *,
+    last_status: str | None = None,
+    last_marks: float | None = None,
+) -> ItemCardOut:
     return ItemCardOut(
         id=item.id,
         source_ref=item.source_ref,
@@ -293,6 +346,10 @@ def _item_card(item: assessment.ItemBrief) -> ItemCardOut:
         command_word=item.command_word,
         stem=item.stem,
         context=item.context,
+        difficulty=item.difficulty,
+        origin=item.origin,
+        last_status=last_status,  # type: ignore[arg-type]
+        last_marks=last_marks,
     )
 
 
@@ -361,10 +418,29 @@ def topic_view(s: Session, objective_id: UUID, *, student_id: UUID | None, now: 
     items = [i for i in items if i.id != worked_id]
     past = [i for i in items if i.origin == "past_paper"]
     other = [i for i in items if i.origin != "past_paper"]
+    attempts = (
+        assessment.latest_attempts(s, student_id=student_id, item_ids=[i.id for i in items])
+        if student_id is not None and items
+        else {}
+    )
+    marks_by_attempt = evaluation.marks_for_attempts(s, list(attempts.values())) if attempts else {}
+
+    def _card_with_status(brief: assessment.ItemBrief) -> ItemCardOut:
+        attempt_id = attempts.get(brief.id)
+        mark = marks_by_attempt.get(attempt_id) if attempt_id else None
+        status = (
+            None
+            if attempt_id is None
+            else "answered"
+            if mark is None
+            else ("provisional" if mark.status == "needs_review" else "marked")
+        )
+        return _item_card(brief, last_status=status, last_marks=mark.marks_awarded if mark else None)
+
     # Check yourself: short items first; past-paper parts fill in when the bank has nothing else.
-    out.check_yourself = [_item_card(i) for i in (other or past)[:CHECK_YOURSELF]]
+    out.check_yourself = [_card_with_status(i) for i in (other or past)[:CHECK_YOURSELF]]
     shown = {c.id for c in out.check_yourself}
-    out.exam_questions = [_item_card(i) for i in past if i.id not in shown][:EXAM_QUESTIONS]
+    out.exam_questions = [_card_with_status(i) for i in past if i.id not in shown][:EXAM_QUESTIONS]
     if student_id is not None:
         out.mistakes = [
             MistakeCardOut(description=m.description, occurrences=m.occurrences, status=m.status)
@@ -433,6 +509,96 @@ def _exam_level(
         worked=worked,
         examiner=assessment.examiner_insights(s, worked.item_id) if worked else None,
     )
+
+
+HOMEWORK_UNREADABLE = (
+    "I couldn't read that photo. Try again in better light, with the page flat and the writing in focus."
+)
+HOMEWORK_NO_MATCH = (
+    "I couldn't tell which topic this is from your own books. Open the subject and pick the topic yourself — "
+    "everything on the topic page works the same."
+)
+
+
+def homework_photo(
+    s: Session,
+    gateway: LLMGateway,
+    ctx: CallContext,
+    *,
+    student_id: UUID,
+    data: bytes,
+    now: datetime,
+) -> HomeworkPhotoOut:
+    """Read a photo of her homework and offer the topics it is on, for her to confirm (F3).
+
+    The reader transcribes the questions; which topic it is comes from matching that text against her own books
+    (`knowledge.topics_for_text`), held to the bar lessons use. A topic the validation study is keeping at school
+    is left out (AC-P2), as are subjects Scholr does not explain. Nothing is stored: not the photo, not the text.
+    """
+    read = homework.read_photo(gateway, ctx, data=data)
+    if not read.readable:
+        return HomeworkPhotoOut(read=False, text_preview="", state="NONE", matches=[], notice=HOMEWORK_UNREADABLE)
+
+    found = knowledge.topics_for_text(
+        s, gateway, ctx, text=read.text, subject_ids=_explained_subject_ids(s, student_id)
+    )
+    school_led = studies.control_objective_ids(s, student_id=student_id, at=now)
+    wanted = [m for m in found.matches if m.objective_id not in school_led]
+    summaries = curriculum.objective_summaries(s, [m.objective_id for m in wanted])
+    names = {x.id: x.name for x in curriculum.subject_summaries(s, [m.subject_id for m in wanted]).values()}
+    matches = [
+        HomeworkMatchOut(
+            objective_id=m.objective_id,
+            code=summaries[m.objective_id].code,
+            statement=summaries[m.objective_id].statement,
+            subject_id=m.subject_id,
+            subject_name=names.get(m.subject_id, ""),
+            similarity=m.similarity,
+        )
+        for m in wanted
+        if m.objective_id in summaries
+    ]
+    return HomeworkPhotoOut(
+        read=True,
+        text_preview=homework.preview(read.text),
+        state=found.state,  # type: ignore[arg-type]
+        matches=matches,
+        notice=None if matches else HOMEWORK_NO_MATCH,
+    )
+
+
+def _explained_subject_ids(s: Session, student_id: UUID) -> list[UUID]:
+    """The subjects she is enrolled in that Scholr explains — the only corpora her photo is matched against.
+
+    Identifying which topic a page is on has to look across her subjects, so the boundary is kept where it
+    matters instead: only topic names come back, never a line of any book (PRINCIPLES §7).
+    """
+    enrolled = {e.subject_id for e in enrollment.list_enrollments(s, [student_id])}
+    out = []
+    for subject in curriculum.subject_summaries(s, list(enrolled)).values():
+        try:
+            if subjects.config_for(subject.code).explains:
+                out.append(subject.id)
+        except subjects.SubjectConfigError:
+            continue
+    return out
+
+
+def next_part(s: Session, objective_id: UUID, *, student_id: UUID, now: datetime) -> tuple[str, int, list[str]] | None:
+    """The next part of this topic page she has not done: its name, its minutes, and the parts after it.
+
+    Read through the same view the page itself is built from, so a door that offers a topic and the page it opens
+    can never disagree about how long a part takes (pacing.py, AC-U13). None for a topic with nothing left, or
+    one that is not taught, school-led or has no lesson yet.
+
+    A part rather than the whole page, because the whole page is not a session: on her own record (25 Oct 2026)
+    Sociology 1.1.1 had 124 minutes left on it, which is two hours, not the half hour the long door is for.
+    """
+    out = topic_view(s, objective_id, student_id=student_id, now=now)
+    left = [step for step in out.steps if not step.done]
+    if not left:
+        return None
+    return left[0].label, left[0].minutes, [step.label for step in left[1:]]
 
 
 def _add_steps(s: Session, out: TopicOut, *, row: Lesson | None, student_id: UUID | None, objective_id: UUID) -> None:
@@ -709,9 +875,16 @@ def prepare_lesson(
         objective_ids=[objective_id],
         k=EXCERPTS,
     )
+    # Plus the book's own tables on the objective: a lesson's tables must be built from them (lesson v5).
+    found = {c.id for c in result.chunks}
+    tables = [
+        c
+        for c in knowledge.objective_tables(s, subject_id=detail.subject_id, objective_id=objective_id)
+        if c.id not in found
+    ][:TABLE_EXCERPTS]
     excerpts = [
         lessons.Excerpt(str(c.id), c.source_title, c.printed_page if (c.printed_page or 0) >= 1 else None, c.content)
-        for c in result.chunks
+        for c in [*result.chunks, *tables]
         if c.content_kind != "question"
     ]
     examined = _examined(s, objective_id) if isinstance(config, subjects.TaughtSubjectConfig) else []
@@ -907,7 +1080,16 @@ def record_lesson(
     if row is None:
         row = Lesson(tenant_id=prepared.tenant_id, subject_id=prepared.subject_id, objective_id=prepared.objective_id)
         s.add(row)
-    kept = {k: row.content[k] for k in ("exam", "crucible") if row.content and row.content.get(k)}
+    kept = {
+        k: row.content[k]
+        for k in ("exam", "crucible", "diagrams", "podcast_audio_url")
+        if row.content and row.content.get(k)
+    }
+    if "diagrams" in kept and written.content.get("sections"):
+        max_sec = len(written.content["sections"]) - 1
+        kept["diagrams"] = [
+            {**d, "sections": [min(max(0, idx), max_sec) for idx in d.get("sections", [0])]} for d in kept["diagrams"]
+        ]
     row.status = written.status
     row.retrieval_state = prepared.retrieval_state
     # The worked exam question does not depend on the lesson text, so a rewrite keeps it.

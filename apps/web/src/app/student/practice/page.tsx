@@ -95,22 +95,21 @@ export default function Practice() {
   if (!session) {
     return (
       <div className="space-y-6">
-        <div className="rounded-3xl border-2 border-orange-200 bg-gradient-to-br from-amber-50 via-[#FFF4E8] to-orange-50 p-6 md:p-8 shadow-sm">
+        <div className="rounded-3xl bg-gradient-to-r from-[#0B1528] via-[#13294B] to-[#1E3A8A] p-6 md:p-8 text-white shadow-xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-center md:text-left">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-fun font-bold border border-orange-200">
-                <span>🎯</span> Cambridge Practice Lab
+            <div className="space-y-2 text-center md:text-left">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-emerald-300 font-mono text-xs font-bold border border-white/15">
+                <span>🎯</span> CAMBRIDGE CIE QUESTION BANK &amp; PRACTICE LAB
               </span>
-              <h1 className="text-2xl md:text-3xl font-fun font-bold text-slate-900 tracking-tight">
-                Practice Lab & Question Bank 📐
+              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                Topic Question Bank &amp; Adaptive Practice
               </h1>
-              <p className="text-xs md:text-sm text-slate-600 font-medium max-w-xl">
-                Questions are selected from your verified question bank and matched to your current learning needs.
-                SymPy automatic checking ensures 100% correct answers.
+              <p className="text-xs md:text-sm text-slate-300 font-medium max-w-xl leading-relaxed">
+                Calibrated past-paper and practice questions matched to your syllabus mastery, with SymPy symbolic verification and official Cambridge rubric marking.
               </p>
             </div>
-            <div className="h-20 w-20 rounded-3xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-4xl text-white shadow-md shadow-orange-500/20 select-none animate-float">
-              🧩
+            <div className="h-16 w-16 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center font-mono text-xl font-extrabold text-emerald-300 flex-none">
+              QB
             </div>
           </div>
         </div>
@@ -123,7 +122,7 @@ export default function Practice() {
               <select
                 value={subjectId}
                 onChange={(e) => setSubjectId(e.target.value)}
-                className="h-11 rounded-2xl border-2 border-amber-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none focus:border-orange-400"
+                className="h-11 rounded-2xl border-2 border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 outline-none focus:border-blue-500"
               >
                 <option value="">Choose a subject to practice…</option>
                 {subjects.map((s) => (
@@ -149,18 +148,18 @@ export default function Practice() {
   return (
     <div className="space-y-5">
       {/* Friendly Header Banner from Reference Design */}
-      <div className="bg-white border-2 border-orange-200 rounded-3xl p-5 shadow-sm flex items-center justify-between flex-wrap gap-4">
+      <div className="bg-white border-2 border-blue-200 rounded-3xl p-5 shadow-sm flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <button
             onClick={end}
             title="Leave session"
-            className="h-11 w-11 rounded-2xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center hover:bg-orange-100 font-bold transition-all hover:scale-105 cursor-pointer"
+            className="h-11 w-11 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center hover:bg-blue-50 font-bold transition-all hover:scale-105 cursor-pointer"
           >
             ←
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-fun font-bold border border-orange-200">
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-fun font-bold border border-blue-200">
                 {currentSubject}
               </span>
               <span className="text-xs text-slate-400 font-medium">
@@ -180,7 +179,7 @@ export default function Practice() {
             onClick={() => setPracticeMode("standard")}
             className={`px-3 py-1.5 rounded-xl text-xs font-fun font-bold transition-all ${
               practiceMode === "standard"
-                ? "bg-white text-orange-600 shadow-xs border border-orange-200"
+                ? "bg-white text-blue-600 shadow-xs border border-blue-200"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -202,7 +201,7 @@ export default function Practice() {
         </div>
 
         {/* Socratic Encouraging Meter */}
-        <div className="flex items-center gap-3 bg-amber-50 px-4 py-2 rounded-2xl border border-amber-200">
+        <div className="flex items-center gap-3 bg-amber-50 px-4 py-2 rounded-2xl border border-slate-200">
           <span className="text-2xl select-none">🪄</span>
           <div>
             <div className="text-[10.5px] uppercase tracking-wider font-fun font-bold text-amber-800">
@@ -228,12 +227,12 @@ export default function Practice() {
             subtitle="SymPy automatic verification is active"
           >
             {notice && (
-              <p className="rounded-2xl bg-orange-50 border border-orange-200 px-4 py-2.5 text-sm text-orange-800 font-medium">
+              <p className="rounded-2xl bg-blue-50 border border-blue-200 px-4 py-2.5 text-sm text-blue-800 font-medium">
                 {notice}
               </p>
             )}
             {session.state.needs_similar_question && (
-              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 font-medium flex items-center gap-2">
+              <div className="rounded-2xl bg-amber-50 border border-slate-200 p-3 text-xs text-amber-900 font-medium flex items-center gap-2">
                 <span>🔄</span>
                 <span>Next up: a twin question to lock in what you just learned.</span>
               </div>
@@ -257,9 +256,9 @@ export default function Practice() {
           </Card>
         </div>
 
-        {/* Right 5 cols: Mascot Socratic AI Buddy */}
+        {/* Right 5 cols: the Tutor */}
         <div className="xl:col-span-5 space-y-4">
-          <div className="bg-white rounded-3xl border-2 border-amber-200 p-5 shadow-sm space-y-4">
+          <div className="bg-white rounded-3xl border-2 border-slate-200 p-5 shadow-sm space-y-4">
             {/* Mascot Header */}
             <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
               <div className="h-12 w-12 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-3xl shadow-xs select-none">
@@ -274,8 +273,8 @@ export default function Practice() {
             {/* Conversation Clues Stream */}
             <div className="space-y-3 text-xs leading-relaxed max-h-[380px] overflow-y-auto pr-1">
               {help.length === 0 && (
-                <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 text-slate-700 space-y-1">
-                  <span className="font-fun font-bold text-orange-700 block text-sm">
+                <div className="bg-amber-50/80 border border-slate-200 rounded-2xl p-4 text-slate-700 space-y-1">
+                  <span className="font-fun font-bold text-blue-700 block text-sm">
                     Ready when you are! 🌟
                   </span>
                   <p>
@@ -286,13 +285,13 @@ export default function Practice() {
 
               {help.map((turn, i) => (
                 <div key={i} className="space-y-2">
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl rounded-tl-none p-3.5 text-slate-800 shadow-2xs">
-                    <span className="font-fun font-bold text-orange-600 block mb-1">
+                  <div className="bg-amber-50 border border-slate-200 rounded-2xl rounded-tl-none p-3.5 text-slate-800 shadow-2xs">
+                    <span className="font-fun font-bold text-blue-600 block mb-1">
                       {turn.kind === "ask_for_attempt" ? "💡 First Step Nudge:" : `Hint Level ${turn.reply.assistance_level}:`}
                     </span>
                     <MathText text={turn.reply.content} />
                     {turn.check_question && (
-                      <div className="mt-2 bg-white p-2.5 rounded-xl border border-amber-200 font-medium text-slate-900">
+                      <div className="mt-2 bg-white p-2.5 rounded-xl border border-slate-200 font-medium text-slate-900">
                         <MathText text={turn.check_question} />
                       </div>
                     )}
@@ -317,7 +316,7 @@ export default function Practice() {
                 value={helpText}
                 onChange={(e) => setHelpText(e.target.value)}
                 rows={2}
-                className="w-full rounded-2xl border-2 border-amber-200 bg-white p-3 text-xs font-normal outline-none focus:border-orange-400"
+                className="w-full rounded-2xl border-2 border-slate-200 bg-white p-3 text-xs font-normal outline-none focus:border-blue-500"
                 placeholder="What have you tried so far? (optional)"
               />
               <div className="flex flex-col gap-1.5">

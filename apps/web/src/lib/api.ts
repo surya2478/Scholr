@@ -43,6 +43,7 @@ export type Enrollment = {
   subject_name: string;
   tier: string | null;
   answer_input: "expression" | "text";
+  stage: SubjectStage;
 };
 export type Me = {
   user: { id: string; display_name: string; role: "student" | "guardian" | "admin" };
@@ -110,7 +111,13 @@ export type ProgressSummary = {
     plan_items_completed: number;
     plan_items_skipped: number;
   };
-  focus: { kind: "mistake" | "retention"; objective_code: string | null; label: string }[];
+  focus: {
+    kind: "mistake" | "retention";
+    subject_id: string;
+    objective_id: string | null;
+    objective_code: string | null;
+    label: string;
+  }[];
   recent_wins: { objective_code: string; objective_statement: string; level_name: string }[];
 };
 export type MetacognitionItem = {
@@ -125,6 +132,27 @@ export type MetacognitionItem = {
   quadrant: "true_mastery" | "dangerous_blindspot" | "hesitant_mastery" | "known_gap";
   mistakes: string[];
   submitted_at: string;
+  time_spent_s?: number | null;
+  velocity_category?: "optimal_flow" | "speed_trap" | "time_sink" | "hesitant_success" | "untracked";
+};
+export type VelocityQuadrant = {
+  count: number;
+  percentage: number;
+};
+export type VelocityStats = {
+  speed_trap_count: number;
+  time_sink_count: number;
+  optimal_flow_count: number;
+  hesitant_count: number;
+  average_seconds_per_mark: number;
+  exam_time_used_percent: number | null;
+  quadrants: {
+    optimal_flow: VelocityQuadrant;
+    speed_trap: VelocityQuadrant;
+    time_sink: VelocityQuadrant;
+    hesitant_success: VelocityQuadrant;
+  };
+  diagnosis: string;
 };
 export type Metacognition = {
   student_id: string;
@@ -149,6 +177,7 @@ export type Metacognition = {
     total: number;
     advice: string;
   };
+  velocity?: VelocityStats | null;
 };
 export type GuardianOverview = {
   student_id: string;
@@ -159,6 +188,16 @@ export type GuardianOverview = {
   upcoming_assessments: UpcomingBrief[] | null;
   safety: { open_total: number; open_by_severity: Record<string, number>; latest_open_at: string | null } | null;
   suggestions: { lead: string; text: string }[];
+};
+// A recurring fixed commitment (a coaching class, sport, school hours). Her own record: `GET /commitments`.
+export type Commitment = {
+  id: string;
+  kind: string;
+  title: string;
+  rrule: string;
+  start_time: string | null;
+  duration_min: number;
+  notes: string | null;
 };
 export type UpcomingBrief = {
   subject_id: string;
@@ -311,6 +350,15 @@ export type ReviewItem = {
 };
 
 // ---- assessments ---------------------------------------------------------------------------------------------
+// A topic exam's settings; past papers and study tests carry only total_marks and objective_ids.
+export type AssessmentConfig = {
+  title?: string;
+  exam_category?: ExamCategory;
+  duration_min?: number;
+  target_marks?: number;
+  total_marks?: number;
+  objective_ids?: string[];
+};
 export type AssessmentBrief = {
   id: string;
   subject_id: string;
@@ -320,9 +368,11 @@ export type AssessmentBrief = {
   total_marks: number;
   created_at: string;
   submitted_at: string | null;
+  config?: AssessmentConfig | null;
 };
 export type Assessment = AssessmentBrief & {
   no_help: boolean;
+  started_at: string | null;
   items: {
     position: number;
     question_item_id: string;
@@ -333,6 +383,61 @@ export type Assessment = AssessmentBrief & {
     marks_awarded: number | null;
   }[];
   score: { awarded: number; available: number; answered: number; unmarked: number; pending_review: number; final: boolean } | null;
+};
+
+export type ObjectiveNode = {
+  id: string;
+  code: string;
+  statement: string;
+  tier: string;
+  verification_status: string;
+};
+
+export type TopicNode = {
+  id: string;
+  code: string;
+  name: string;
+  depth: number;
+  verification_status: string;
+  objectives: ObjectiveNode[];
+  children: TopicNode[];
+};
+
+export type SubjectTree = {
+  subject: {
+    id: string;
+    code: string;
+    name: string;
+    syllabus_code: string | null;
+    syllabus_title: string | null;
+    stage: string;
+    taught_here: boolean;
+  };
+  topics: TopicNode[];
+};
+
+export type ExamCategory = "practice_exam" | "pre_term" | "term" | "mid_term" | "final";
+
+export type Bookmark = {
+  question_item_id: string;
+  subject_id: string;
+  source_ref: string | null;
+  stem: string;
+  marks: number;
+  tag: BookmarkTag;
+  note: string | null;
+  saved_at: string;
+};
+export type BookmarkTag = "examiner_trap" | "calc_heavy" | "must_revise";
+export type CommandWords = { source: string | null; definitions: Record<string, string> };
+
+export type ExamFromTopicsIn = {
+  subject_id: string;
+  title: string;
+  exam_category: ExamCategory;
+  objective_ids: string[];
+  target_marks?: number;
+  duration_minutes?: number;
 };
 
 // ---- safety --------------------------------------------------------------------------------------------------
@@ -442,16 +547,36 @@ export type Lesson = {
   id: string;
   status: "ready" | "not_enough_material";
   summary: string;
-  sections: { heading: string; body: string; sources: SourceRef[] }[];
+  introduction: string; // lesson v5; empty before
+  podcast_audio_url?: string | null;
+  podcast_script?: { speaker: string; text: string }[];
+  // v5 sections are revision notes: a definition, bullet points and an exam tip (body = the points joined, for
+  // the voice). Older sections have prose in `body` only.
+  sections: {
+    heading: string;
+    body: string;
+    definition: string;
+    points: string[];
+    exam_tip: string;
+    mental_model?: string;
+    formula_notes?: string;
+    sources: SourceRef[];
+  }[];
+  // Every number in a table is in the pages it cites; `section` (from 1) is where it goes, 0 = after the sections.
+  tables: { title: string; columns: string[]; rows: string[][]; section: number; sources: SourceRef[] }[];
+  exam_answers: { question: string; points: string[]; sources: SourceRef[] }[];
   key_terms: { term: string; meaning: string }[];
   worked_examples: {
     problem: string;
+    strategy?: string; // coaching game plan ("How to Think")
     steps: string[];
     final_answer: string;
     unit: string | null; // Physics: checked by Pint; blank when the answer has no unit
     checked: "sympy" | null;
+    coaching_takeaway?: string; // trap warning / takeaway
     sources: SourceRef[];
     level: "basic" | "standard" | "exam" | null; // lesson v4: examples rise to exam standard
+    section: number; // lesson v5: the section it follows (from 1); 0 = after the sections
   }[];
   // Pictures the page draws for itself: `data` is what the API's check computed (AC-U14).
   diagrams: { kind: string; caption: string; data: Record<string, unknown>; sections: number[] }[];
@@ -468,6 +593,10 @@ export type ItemCard = {
   command_word: string | null;
   stem?: string | null;
   context?: string | null;
+  difficulty?: number | null;
+  origin?: string | null;
+  last_status?: "answered" | "provisional" | "marked" | null;
+  last_marks?: number | null;
 };
 // The exam level of a topic (AC-U16): how the papers ask about it, counted from the bank, and one real past-paper
 // question solved to full marks. The walkthrough's answer passed the check that marks hers, its marks are ones the
@@ -560,6 +689,47 @@ export type DailyItem = {
   evaluation_id: string | null;
   marks_awarded: number | null;
 };
+// A topic tomorrow's set would start from. Served only once today's set is finished, and it can change: tomorrow's
+// plan is built in the morning, and anything she does between now and then changes what is waiting.
+export type TomorrowTopic = {
+  subject_id: string;
+  subject_name: string;
+  objective_id: string;
+  objective_code: string;
+  objective_statement: string;
+  reason_code: string;
+  reason: string;
+};
+// A topic her homework photo looks like. No book text comes with it: she is offered a topic, never an excerpt.
+export type HomeworkMatch = {
+  objective_id: string;
+  code: string;
+  statement: string;
+  subject_id: string;
+  subject_name: string;
+  similarity: number;
+};
+export type HomeworkPhoto = {
+  read: boolean;
+  text_preview: string;
+  state: "HIGH" | "MEDIUM" | "LOW" | "NONE";
+  matches: HomeworkMatch[];
+  notice: string | null;
+};
+// One way into today's work. `minutes` is what the door's own content takes — about a minute a mark for
+// questions, the topic page's own estimate for "deep" — not the size the door aims at. A closed door says why.
+export type SessionDoor = {
+  key: "quick" | "today" | "deep";
+  text: string;
+  minutes: number;
+  questions: number;
+  objective_id: string | null;
+  objective_code: string | null;
+  objective_statement: string | null;
+  parts: string[];
+  open: boolean;
+  closed_reason: string | null;
+};
 export type DailyPractice = {
   practice_date: string;
   rule_version: string;
@@ -567,6 +737,11 @@ export type DailyPractice = {
   done: number;
   total: number;
   notice: string | null;
+  answering_minutes: number;
+  planned_minutes: number | null;
+  external_minutes: number;
+  tomorrow: TomorrowTopic[];
+  doors: SessionDoor[];
 };
 export type PastPaperItem = {
   id: string;
@@ -681,3 +856,81 @@ export type VivaStep = {
   last: boolean;
   safety_message: string | null;
 };
+
+// Digital Notebooks (Quizrr-inspired)
+export type Notebook = {
+  id: string;
+  student_id: string;
+  title: string;
+  description: string | null;
+  icon: string;
+  color: string;
+  subject_id: string | null;
+  item_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type NotebookItem = {
+  id: string;
+  notebook_id: string;
+  question_item_id: string;
+  student_notes: string | null;
+  created_at: string;
+  question?: Question | null;
+};
+
+// Assessment Performance Diagnostic Report (15-Page In-Depth Analytics)
+export type TimeSinkItem = {
+  position: number;
+  question_id: string;
+  stem_snippet: string;
+  marks_available: number;
+  marks_awarded: number;
+  time_spent_s: number;
+  pace_seconds_per_mark: number;
+};
+
+export type TopicBreakdownItem = {
+  topic_id: string;
+  code: string;
+  title: string;
+  marks_available: number;
+  marks_awarded: number;
+  accuracy_pct: number;
+  status: "mastered" | "solid" | "needs_work";
+};
+
+export type DifficultyBreakdownItem = {
+  tier: number;
+  label: string;
+  marks_available: number;
+  marks_awarded: number;
+  accuracy_pct: number;
+};
+
+export type PacingSummary = {
+  total_time_seconds: number;
+  avg_time_per_question_s: number;
+  avg_time_per_mark_s: number;
+  target_pace_s_per_mark: number;
+  pace_status: "optimal" | "rushed" | "slow";
+};
+
+export type AssessmentReport = {
+  assessment_id: string;
+  title: string;
+  kind: string;
+  total_questions: number;
+  total_marks_available: number;
+  total_marks_awarded: number;
+  score_percentage: number;
+  projected_grade: string;
+  pacing: PacingSummary;
+  time_sinks: TimeSinkItem[];
+  topic_breakdown: TopicBreakdownItem[];
+  difficulty_breakdown: DifficultyBreakdownItem[];
+  mistake_types_summary: Record<string, number>;
+  action_plan: string[];
+};
+

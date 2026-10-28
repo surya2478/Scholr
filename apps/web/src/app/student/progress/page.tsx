@@ -18,22 +18,22 @@ export default function Progress() {
 
   return (
     <div className="space-y-6">
-      {/* Friendly Header */}
-      <div className="rounded-3xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-[#FFF4E8] to-orange-50 p-6 md:p-8 shadow-sm">
+      {/* Header */}
+      <div className="rounded-3xl bg-gradient-to-r from-[#0B1528] via-[#13294B] to-[#1E3A8A] p-6 md:p-8 text-white shadow-xl">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center sm:text-left">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-fun font-bold border border-orange-200">
-              <span>🏆</span> Cambridge Mastery Dashboard
+          <div className="space-y-2 text-center sm:text-left">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-emerald-300 font-mono text-xs font-bold border border-white/15">
+              <span>📈</span> PERFORMANCE ANALYTICS &amp; AO TELEMETRY
             </span>
-            <h1 className="text-2xl md:text-3xl font-fun font-bold text-slate-900">
-              My Learning Progress & Skills
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              Performance Analytics &amp; Syllabus Mastery
             </h1>
-            <p className="text-xs md:text-sm text-slate-600 font-medium max-w-xl">
-              Levels reflect marked work and verified answers, not just time spent in the app.
+            <p className="text-xs md:text-sm text-slate-300 font-medium max-w-xl leading-relaxed">
+              Every mastery level, Brier calibration score, and Assessment Objective breakdown is computed from verified answers and marked scripts.
             </p>
           </div>
-          <div className="h-16 w-16 rounded-3xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-3xl text-white shadow-md select-none animate-float">
-            🌟
+          <div className="h-16 w-16 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center font-mono text-xl font-extrabold text-emerald-300 flex-none">
+            AO
           </div>
         </div>
       </div>
@@ -78,9 +78,9 @@ export default function Progress() {
           {skills.data?.map((sk) => (
             <li
               key={`${sk.subject_id}${sk.skill_code}`}
-              className="flex flex-wrap items-center gap-3 p-3.5 rounded-2xl border border-amber-200/70 bg-[#FFFDF9] shadow-2xs"
+              className="flex flex-wrap items-center gap-3 p-3.5 rounded-2xl border border-slate-200/90 bg-white shadow-2xs"
             >
-              <span className="px-2.5 py-1 rounded-xl bg-orange-100 text-orange-800 text-xs font-fun font-bold border border-orange-200 flex-none">
+              <span className="px-2.5 py-1 rounded-xl bg-blue-50 text-blue-800 text-xs font-fun font-bold border border-blue-200 flex-none">
                 {sk.skill_code}
               </span>
               <span className="min-w-0 flex-1 text-sm font-semibold text-slate-800">
@@ -108,13 +108,13 @@ export default function Progress() {
         {mastery.data?.length === 0 && (
           <Empty>Answer some practice questions in the Maths Lab or Sociology Club to start building your topic levels.</Empty>
         )}
-        <ul className="flex flex-col divide-y divide-amber-100">
+        <ul className="flex flex-col divide-y divide-slate-100">
           {mastery.data
             ?.slice()
             .sort((a, b) => a.objective_code.localeCompare(b.objective_code, undefined, { numeric: true }))
             .map((m) => (
               <li key={m.objective_id} className="flex flex-wrap items-center gap-3 py-3">
-                <span className="w-14 text-xs font-fun font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200/80 text-center flex-none">
+                <span className="w-14 text-xs font-fun font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/80 text-center flex-none">
                   {m.objective_code}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">

@@ -22,7 +22,7 @@ export function TopicSteps({
   const left = steps.filter((s) => !s.done).reduce((total, s) => total + s.minutes, 0);
 
   return (
-    <div className="sticky top-2 z-20 flex flex-col gap-2 rounded-2xl border border-amber-200 bg-white/95 p-3 shadow-sm backdrop-blur">
+    <div className="sticky top-2 z-20 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-sm backdrop-blur">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-xs font-bold text-slate-700">
           {done === steps.length
@@ -42,7 +42,7 @@ export function TopicSteps({
                 step.done
                   ? "bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
                   : i === current
-                    ? "bg-orange-100 text-orange-900 hover:bg-orange-200"
+                    ? "bg-blue-50 text-blue-900 hover:bg-orange-200"
                     : "bg-slate-100 text-slate-500 hover:bg-slate-200"
               }`}
             >

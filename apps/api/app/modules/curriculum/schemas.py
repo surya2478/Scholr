@@ -15,6 +15,13 @@ class ComponentOut(BaseModel):
     calculator_allowed: bool | None
 
 
+class CommandWordsOut(BaseModel):
+    """Cambridge's command-word definitions for a subject, where a checked source has them; otherwise empty."""
+
+    source: str | None
+    definitions: dict[str, str]
+
+
 class SubjectOut(BaseModel):
     id: UUID
     code: str

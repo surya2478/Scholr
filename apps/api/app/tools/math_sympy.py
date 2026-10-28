@@ -239,7 +239,10 @@ _PLAIN_NUMBER = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)$")
 
 
 def _to_decimal(expr: sympy.Expr) -> Decimal:
-    return Decimal(str(sympy.N(expr, 30)))
+    try:
+        return Decimal(str(sympy.N(expr, 30)))
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise MathParseError(str(exc)) from exc
 
 
 def _sig_fig_options(number_text: str) -> range:

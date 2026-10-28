@@ -6,6 +6,11 @@ saves a small state file so an interrupted wait can be picked up again (`--resum
 batch ends, and submits the requests whose reply was unreadable once more. It never falls back to a live model.
 
 The state file holds the batch id, role, model, prompt and the request ids — no lesson or student text.
+
+`run(..., live=True)` sends the same requests one at a time to the role's **live** model instead. That is a mode
+a person chooses (a job's `--live`), never something this module does on its own: it still never falls back. It
+exists because a `:batch` variant can simply be unavailable — on 27 Oct 2026 OpenRouter answered
+`google/gemini-2.5-flash-lite:batch` with "does not have a :batch endpoint", which blocks every batch job.
 """
 
 from __future__ import annotations
@@ -20,7 +25,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from app.core.config import API_ROOT
-from app.llm.gateway import BatchHandle, BatchItem, BatchOutcome, CallContext, LLMGateway, LLMResult
+from app.llm.gateway import BatchHandle, BatchItem, BatchOutcome, CallContext, LLMError, LLMGateway, LLMResult
 from app.llm.transport import TransportError
 
 STATE = API_ROOT.parents[1] / "evals" / "runs" / "batches"
@@ -84,11 +89,14 @@ def run[T: BaseModel](
     tag: str,
     prompt_version: str | None = None,
     resume: str | None = None,
+    live: bool = False,
     say: Callable[[str], None] = print,
 ) -> tuple[dict[str, LLMResult[T]], dict[str, str], float]:
     """(results by custom_id, failures by custom_id, cost). Up to ROUNDS batches; later rounds only for replies
-    that failed their schema."""
+    that failed their schema. With `live`, the same requests go one at a time to the role's live model."""
     ctx = CallContext(request_id=f"batch:{tag}:{datetime.now(UTC):%Y%m%d%H%M%S}", tenant_id=tenant_id)
+    if live:
+        return _live(gateway, role, prompt_name, items, schema, ctx, prompt_version=prompt_version, say=say)
     results: dict[str, LLMResult[T]] = {}
     failures: dict[str, str] = {}
     cost = 0.0
@@ -109,4 +117,30 @@ def run[T: BaseModel](
         retry = {cid for cid, code in outcome.failures.items() if code == "invalid_output"}
         failures = {cid: code for cid, code in {**failures, **outcome.failures}.items() if cid not in results}
         pending = [i for i in pending if i.custom_id in retry]
+    return results, failures, round(cost, 6)
+
+
+def _live[T: BaseModel](
+    gateway: LLMGateway,
+    role: str,
+    prompt_name: str,
+    items: Sequence[BatchItem],
+    schema: type[T],
+    ctx: CallContext,
+    *,
+    prompt_version: str | None,
+    say: Callable[[str], None],
+) -> tuple[dict[str, LLMResult[T]], dict[str, str], float]:
+    """The same requests, one at a time on the role's live model. Same prompt, same schema, same guards after."""
+    results: dict[str, LLMResult[T]] = {}
+    failures: dict[str, str] = {}
+    say(f"  live: {len(items)} requests, one at a time")
+    for item in items:
+        try:
+            results[item.custom_id] = gateway.structured(
+                role, prompt_name, item.variables, schema, ctx, prompt_version=prompt_version
+            )
+        except LLMError as exc:
+            failures[item.custom_id] = exc.code
+    cost = sum(r.cost_usd or 0.0 for r in results.values())  # each call's own recorded cost, retries included
     return results, failures, round(cost, 6)

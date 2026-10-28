@@ -23,10 +23,10 @@ export default function MonthlySummaryPage() {
   return (
     <div className="space-y-6">
       {/* Warm Header Banner */}
-      <div className="rounded-3xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-[#FFF4E8] to-orange-50 p-6 md:p-8 shadow-sm">
+      <div className="rounded-3xl border-2 border-slate-200 bg-gradient-to-br from-slate-50 via-white to-blue-50/50 p-6 md:p-8 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-fun font-bold border border-orange-200">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-800 text-xs font-fun font-bold border border-blue-200">
               <span>📅</span> Monthly Learning Report
             </span>
             <h1 className="text-2xl md:text-3xl font-fun font-bold text-slate-900">

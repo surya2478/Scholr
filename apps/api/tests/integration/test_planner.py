@@ -166,3 +166,32 @@ def test_schedule_endpoints_and_my_day(world: SimpleNamespace, auth_headers: Aut
         },
     )
     assert result.status_code == 201
+
+
+def test_a_day_with_no_study_time_never_also_says_the_day_is_full(world: SimpleNamespace, auth_headers: Auth) -> None:
+    """Her Monday, 26 Oct 2026: one IIT class in the evening, no study window — and My Day said both "today is
+    full, so optional practice was left out" and "no study time is planned for today. Enjoy the break!"."""
+    student, parent = auth_headers("test|student"), auth_headers("test|parent")
+    c = world.client
+    assert c.put(f"/students/{world.student_id}/availability", headers=parent, json={"minutes": [0] * 7}).json()
+    # Core work the planner wants to set, with nowhere to put it: that is what made it call the day "full".
+    assert (
+        c.post(
+            "/upcoming-assessments",
+            headers=parent,
+            json={
+                "subject_id": str(world.subject_id),
+                "title": "Unit test",
+                "due_at": (datetime.now(UTC) + timedelta(days=5)).isoformat(),
+                "objective_ids": [str(world.objectives[1])],
+            },
+        ).status_code
+        == 201
+    )
+
+    plan = c.post("/plan/regenerate", headers=student).json()
+    assert plan["capacity_minutes"] == 0 and plan["items"] == []
+    assert plan["dropped"], "the day had core work it could not place — the old notice called that 'full'"
+    assert len(plan["notices"]) == 1
+    assert "No study time is planned" in plan["notices"][0]
+    assert not any("optional practice" in n for n in plan["notices"])

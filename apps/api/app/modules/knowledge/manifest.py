@@ -33,6 +33,11 @@ class SourceIn(BaseModel):
     # Question numbers whose section has no unit in the current syllabus (old papers' Media option): their items
     # are saved with no objectives, whatever the extractor tagged, so they never stand for a current topic.
     untagged_questions: list[str] = Field(default_factory=list)
+    # Which syllabus unit each question number of this paper belongs to ("3": "6" = Q3 is unit 6). A paper's
+    # structure is fixed and printed on it, so this is declared, never inferred. Objective codes the extractor
+    # puts outside a question's own unit are dropped at import (27 Oct 2026: it had tagged Paper 2 Crime
+    # questions onto Research Methods and Identity topics). Empty means the paper claims no structure.
+    question_units: dict[str, str] = Field(default_factory=dict)
     # LLM role used to OCR scanned pages (app/llm/roles.yaml); chosen per source from app.jobs.ocr_eval results.
     ocr_role: str = "page_ocr"
     ocr_prompt: str = "page_ocr"  # prompt name in app/llm/prompts/

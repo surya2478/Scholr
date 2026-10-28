@@ -20,3 +20,9 @@ pedagogy:
   # unit (mol, g, dm^3, mol/dm^3). A descriptive topic may keep no example rather than an unchecked one.
   worked_example_check: sympy
   answer_units: true
+  # Drawn by app.modules.learn.diagrams from the element table (22 Sep 2026, after she asked for labelled pictures):
+  # an atom or ion's particles and shells, boxes of particles for element / compound / mixture, the Periodic Table.
+  diagrams:
+    atom_structure: ["2.2", "2.3", "2.4", "2.5"]           # atoms, isotopes, ions, the atoms that share electrons
+    particle_boxes: ["2.1", "2.5"]                         # elements, compounds and mixtures; simple molecules
+    periodic_table: ["2.2", "8.1", "8.2", "8.3", "8.4", "8.5"]   # groups and periods

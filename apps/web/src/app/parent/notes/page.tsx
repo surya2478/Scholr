@@ -20,7 +20,7 @@ export default function Notes() {
 
   const kindMeta: Record<string, { icon: string; label: string; tone: "good" | "warn" | "alert" | "brand" | "neutral"; bg: string }> = {
     strength: { icon: "💪", label: "Strength", tone: "good", bg: "bg-emerald-50/70 border-emerald-200/60" },
-    difficulty: { icon: "🧗", label: "Challenge Area", tone: "warn", bg: "bg-amber-50/70 border-amber-200/60" },
+    difficulty: { icon: "🧗", label: "Challenge Area", tone: "warn", bg: "bg-amber-50/70 border-slate-200/80" },
     misconception: { icon: "🔍", label: "Misconception", tone: "alert", bg: "bg-rose-50/70 border-rose-200/60" },
     preference: { icon: "🎨", label: "Preference", tone: "brand", bg: "bg-purple-50/70 border-purple-200/60" },
     note: { icon: "📝", label: "Observation", tone: "neutral", bg: "bg-stone-50/70 border-stone-200/60" },
@@ -42,7 +42,7 @@ export default function Notes() {
               Scholr continuously distils what helps your child learn best: core strengths, recurring misconceptions, and study preferences. Each note is grounded in actual practice evidence.
             </p>
           </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-amber-200/60 bg-white/90 p-4 shadow-xs">
+          <div className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-xs">
             <div className="text-3xl">🔍</div>
             <div>
               <div className="text-xs font-bold text-muted uppercase tracking-wider">Evidence Grounded</div>

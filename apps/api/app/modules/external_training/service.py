@@ -13,7 +13,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError, not_found
@@ -306,6 +306,16 @@ def _standings(s: Session, student_id: UUID, objective_ids: Sequence[UUID]) -> d
         )
         for objective_id in wanted
     }
+
+
+def minutes_on(s: Session, *, student_id: UUID, day: date) -> int:
+    """Minutes of external classes and homework she recorded for ``day`` (sessions with no duration add nothing)."""
+    total = s.scalar(
+        select(func.coalesce(func.sum(ExternalTrainingLog.duration_min), 0)).where(
+            ExternalTrainingLog.student_id == student_id, ExternalTrainingLog.occurred_on == day
+        )
+    )
+    return int(total or 0)
 
 
 def _recent_rows(s: Session, student_id: UUID, today: date) -> list[ExternalTrainingLog]:

@@ -45,9 +45,19 @@ export function WorkedExample({
 
       <MathText text={example.problem} className="text-sm font-medium text-slate-900" />
 
+      {example.strategy && (
+        <div className="rounded-xl border border-blue-200 bg-blue-50/80 p-3 text-xs text-slate-800">
+          <div className="flex items-center gap-1.5 font-fun font-bold text-blue-950 mb-1">
+            <span className="text-sm">💡</span>
+            <span>Coaching Strategy · How to Think:</span>
+          </div>
+          <MathText text={example.strategy} className="leading-relaxed text-slate-700 font-medium" />
+        </div>
+      )}
+
       {total > 0 && (
         <>
-          {shown === 0 && (
+          {shown === 0 && !example.strategy && (
             <div className="rounded-xl border border-dashed border-emerald-300 bg-white/80 p-3 text-xs text-slate-700">
               <span className="font-bold text-emerald-900">🤔 Pause &amp; Predict:</span> Before revealing the working, what would be your first move? What formula, identity, or rearrangement will you use?
             </div>
@@ -83,6 +93,16 @@ export function WorkedExample({
             {example.unit ? ` ${example.unit}` : null}
           </div>
 
+          {example.coaching_takeaway && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50/90 p-3 text-xs text-amber-950">
+              <div className="flex items-center gap-1.5 font-fun font-bold text-amber-900 mb-1">
+                <span className="text-sm">⚠️</span>
+                <span>Coaching Takeaway &amp; Trap Buster:</span>
+              </div>
+              <MathText text={example.coaching_takeaway} className="leading-relaxed text-slate-800" />
+            </div>
+          )}
+
           <div className="mt-1 flex flex-col gap-1.5 rounded-xl border border-emerald-200 bg-emerald-100/60 p-3 text-xs text-slate-800">
             <div className="flex items-center justify-between">
               <span className="font-fun font-bold text-emerald-900">🎯 Now Try One Like This:</span>
@@ -105,7 +125,7 @@ export function WorkedExample({
       {askHref && (
         <Link
           href={askHref(example.problem)}
-          className="self-start text-xs font-fun font-bold text-orange-600 hover:underline"
+          className="self-start text-xs font-fun font-bold text-blue-600 hover:underline"
         >
           🦉 Don&apos;t follow a step? Ask the Tutor
         </Link>

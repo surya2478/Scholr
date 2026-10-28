@@ -24,6 +24,7 @@ papacambridge: &papacambridge
 
 sources:
   - key: 0495-mj24-qp11
+    question_units: {"1": "1", "2": "2", "3": "3"}  # Research methods, Identity, Inequality
     <<: *cambridge
     title: "0495/11 Paper 1 Question Paper, May/June 2024"
     file: IGCSE/sociology/570132-june-2024-question-paper-11_Sociology.pdf
@@ -45,6 +46,7 @@ sources:
     exam_series: MJ24
     component: "11"
   - key: 0495-mj24-qp21
+    question_units: {"1": "4", "2": "5", "3": "6"}  # Family, Education, Crime
     <<: *cambridge
     title: "0495/21 Paper 2 Question Paper, May/June 2024"
     file: IGCSE/sociology/570133-june-2024-question-paper-21-Sociology.pdf
@@ -129,6 +131,7 @@ sources:
     exam_series: MJ23
     component: "22"
   - key: 0495-mj23-qp11
+    question_units: {"1": "1", "2": "2", "3": "3"}  # Research methods, Identity, Inequality
     <<: *papacambridge
     title: "0495/11 Paper 1 Question Paper, May/June 2023"
     file: IGCSE/sociology/papacambridge/0495_s23_qp_11.pdf
@@ -138,6 +141,9 @@ sources:
     component: "11"
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
   - key: 0495-mj23-qp12
+    # Q1(f) is named in full because it is a theory question: this paper's Section A was "theory and methods",
+    # and consensus/conflict sits in unit 2 in the 2025-27 syllabus (the user's decision, 28 Oct 2026).
+    question_units: {"1": "1", "2": "2", "3": "3", "1(f)": "2"}  # Research methods, Identity, Inequality
     <<: *papacambridge
     title: "0495/12 Paper 1 Question Paper, May/June 2023"
     file: IGCSE/sociology/papacambridge/0495_s23_qp_12.pdf
@@ -147,6 +153,7 @@ sources:
     component: "12"
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
   - key: 0495-mj23-qp21
+    question_units: {"1": "4", "2": "5", "3": "6"}  # Family, Education, Crime
     <<: *papacambridge
     title: "0495/21 Paper 2 Question Paper, May/June 2023"
     file: IGCSE/sociology/papacambridge/0495_s23_qp_21.pdf
@@ -157,6 +164,7 @@ sources:
     untagged_questions: ["4"]  # the old Media option: no current unit
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
   - key: 0495-mj23-qp22
+    question_units: {"1": "4", "2": "5", "3": "6"}  # Family, Education, Crime
     <<: *papacambridge
     title: "0495/22 Paper 2 Question Paper, May/June 2023"
     file: IGCSE/sociology/papacambridge/0495_s23_qp_22.pdf
@@ -206,6 +214,7 @@ sources:
     exam_series: MJ25
     component: "22"
   - key: 0495-mj25-qp11
+    question_units: {"1": "1", "2": "2", "3": "3"}  # Research methods, Identity, Inequality
     <<: *papacambridge
     title: "0495/11 Paper 1 Question Paper, May/June 2025"
     file: IGCSE/sociology/papacambridge/0495_s25_qp_11.pdf
@@ -215,6 +224,7 @@ sources:
     component: "11"
     notes: "2025–2027 syllabus structure (80 marks per paper)."
   - key: 0495-mj25-qp12
+    question_units: {"1": "1", "2": "2", "3": "3"}  # Research methods, Identity, Inequality
     <<: *papacambridge
     title: "0495/12 Paper 1 Question Paper, May/June 2025"
     file: IGCSE/sociology/papacambridge/0495_s25_qp_12.pdf
@@ -224,6 +234,7 @@ sources:
     component: "12"
     notes: "2025–2027 syllabus structure (80 marks per paper)."
   - key: 0495-mj25-qp21
+    question_units: {"1": "4", "2": "5", "3": "6"}  # Family, Education, Crime
     <<: *papacambridge
     title: "0495/21 Paper 2 Question Paper, May/June 2025"
     file: IGCSE/sociology/papacambridge/0495_s25_qp_21.pdf
@@ -233,6 +244,7 @@ sources:
     component: "21"
     notes: "2025–2027 syllabus structure (80 marks per paper)."
   - key: 0495-mj25-qp22
+    question_units: {"1": "4", "2": "5", "3": "6"}  # Family, Education, Crime
     <<: *papacambridge
     title: "0495/22 Paper 2 Question Paper, May/June 2025"
     file: IGCSE/sociology/papacambridge/0495_s25_qp_22.pdf
@@ -274,6 +286,7 @@ sources:
     exam_series: ON24
     component: "22"
   - key: 0495-on24-qp11
+    question_units: {"1": "1", "2": "2", "3": "3"}  # Research methods, Identity, Inequality
     <<: *papacambridge
     title: "0495/11 Paper 1 Question Paper, October/November 2024"
     file: IGCSE/sociology/papacambridge/0495_w24_qp_11.pdf
@@ -283,6 +296,7 @@ sources:
     component: "11"
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
   - key: 0495-on24-qp12
+    question_units: {"1": "1", "2": "2", "3": "3"}  # Research methods, Identity, Inequality
     <<: *papacambridge
     title: "0495/12 Paper 1 Question Paper, October/November 2024"
     file: IGCSE/sociology/papacambridge/0495_w24_qp_12.pdf
@@ -292,6 +306,7 @@ sources:
     component: "12"
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
   - key: 0495-on24-qp21
+    question_units: {"1": "4", "2": "5", "3": "6"}  # Family, Education, Crime
     <<: *papacambridge
     title: "0495/21 Paper 2 Question Paper, October/November 2024"
     file: IGCSE/sociology/papacambridge/0495_w24_qp_21.pdf
@@ -302,6 +317,7 @@ sources:
     untagged_questions: ["4"]  # the old Media option: no current unit
     notes: "Previous syllabus structure (Media option; Paper 2 70 marks). Practice only."
   - key: 0495-on24-qp22
+    question_units: {"1": "4", "2": "5", "3": "6"}  # Family, Education, Crime
     <<: *papacambridge
     title: "0495/22 Paper 2 Question Paper, October/November 2024"
     file: IGCSE/sociology/papacambridge/0495_w24_qp_22.pdf

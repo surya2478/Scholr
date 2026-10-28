@@ -2,128 +2,158 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { LessonDiagram } from "@/components/learn/diagrams/LessonDiagram";
-import { ExploreWithAI } from "@/components/learn/ExploreWithAI";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ActiveRecallDeck } from "@/components/learn/ActiveRecallDeck";
+import { DialecticalCrucible } from "@/components/learn/DialecticalCrucible";
+import { DualLensView } from "@/components/learn/DualLensView";
+import { ExamLevel } from "@/components/learn/ExamLevel";
 import { ExternalLessonView } from "@/components/learn/ExternalLessonView";
 import { FormulaDrawer } from "@/components/learn/FormulaDrawer";
-import { LessonAudioPlayer } from "@/components/learn/LessonAudioPlayer";
-import { Sources } from "@/components/learn/Sources";
-import { MasteryBadge } from "@/components/learn/Streams";
-import { DualLensView } from "@/components/learn/DualLensView";
-import { DialecticalCrucible } from "@/components/learn/DialecticalCrucible";
 import { InventingToLearn } from "@/components/learn/InventingToLearn";
-import { ExamLevel } from "@/components/learn/ExamLevel";
-import { TopicSteps } from "@/components/learn/TopicSteps";
-import { TryQuestion } from "@/components/learn/TryQuestion";
-import { WorkedExample } from "@/components/learn/WorkedExample";
+import { LessonAudioPlayer } from "@/components/learn/LessonAudioPlayer";
+import { LessonNotes } from "@/components/learn/LessonNotes";
+import { TopicQuestions } from "@/components/learn/TopicQuestions";
+import { MasteryBadge } from "@/components/learn/Streams";
 import { MathText } from "@/components/MathText";
 import { Button, Card, Chip, Empty, ErrorNote } from "@/components/ui";
-import { api, type Lesson, type Topic } from "@/lib/api";
+import { api, type Chapter, type Lesson, type ObjectiveCard, type SubjectLearn, type Topic } from "@/lib/api";
 import { tutorHref } from "@/lib/tutor";
 import { useApi } from "@/lib/useApi";
 
 // Seconds on the page before the lesson counts as read (AC-U7: moves a topic to Introduced at most).
 const READ_AFTER_S = 20;
 
+type StudyTab = "notes" | "questions" | "flashcards" | "walkthrough" | "all";
+
+type Neighbour = { id: string; code: string; statement: string };
+type Place = { chapter: string; index: number; count: number; prev: Neighbour | null; next: Neighbour | null };
+
+function chapterObjectives(chapter: Chapter): ObjectiveCard[] {
+  return [...chapter.objectives, ...chapter.chapters.flatMap(chapterObjectives)];
+}
+
+// Where this topic sits in its subject, in the order the subject page lists topics: its chapter, its number in
+// that chapter, and the topics either side (which may be in the next or previous chapter).
+function placeOf(view: SubjectLearn | null | undefined, objectiveId: string): Place | null {
+  if (!view) return null;
+  const order: { o: ObjectiveCard; chapter: Chapter }[] = view.chapters.flatMap((chapter) =>
+    chapterObjectives(chapter).map((o) => ({ o, chapter })),
+  );
+  const at = order.findIndex((x) => x.o.id === objectiveId);
+  if (at < 0) return null;
+  const chapter = order[at].chapter;
+  const inChapter = order.filter((x) => x.chapter.id === chapter.id);
+  const near = (x: { o: ObjectiveCard } | undefined): Neighbour | null =>
+    x ? { id: x.o.id, code: x.o.code, statement: x.o.statement } : null;
+  return {
+    chapter: chapter.code ? `${chapter.code} ${chapter.name}` : chapter.name,
+    index: inChapter.findIndex((x) => x.o.id === objectiveId) + 1,
+    count: inChapter.length,
+    prev: near(order[at - 1]),
+    next: near(order[at + 1]),
+  };
+}
+
 function LessonView({
   objectiveId,
   lesson,
   askHref,
-  read,
   explore,
+  onStartQuestions,
+  hasQuestions,
+  next,
 }: {
   objectiveId: string;
   lesson: Lesson;
   askHref: ((q: string) => string) | null;
-  read: boolean;
-  // Present only where the Tutor can answer: it opens the Tutor on this section, in place.
   explore: { subjectId: string; objectiveId: string } | null;
+  onStartQuestions?: () => void;
+  hasQuestions?: boolean;
+  next: Neighbour | null;
 }) {
-  // A lesson she has already read opens as its summary, so the practice below it is a screen away rather than
-  // three. The whole lesson is one tap back (docs/STUDENT-APP.md AC-U13).
-  const [open, setOpen] = useState(!read);
   const [activeSectionIndex, setActiveSectionIndex] = useState<number | null>(null);
+  const [listening, setListening] = useState(false);
+  const [readCount, setReadCount] = useState({ read: 0, total: lesson.sections.length });
+  const onReadCountChange = useCallback((read: number, total: number) => setReadCount({ read, total }), []);
 
   return (
     <div className="flex flex-col gap-4">
-      <LessonAudioPlayer
-        objectiveId={objectiveId}
-        lesson={lesson}
-        onSectionActive={(idx) => setActiveSectionIndex(idx)}
-      />
-
       {lesson.summary && (
-        <div className="rounded-2xl border border-orange-200 bg-orange-50/60 p-4 text-sm font-medium text-slate-800">
+        <div className="max-w-prose rounded-xl border-l-4 border-l-blue-600 bg-blue-50/50 px-4 py-3 text-[15px] font-medium leading-relaxed text-slate-800">
+          <div className="mb-0.5 text-[11px] font-bold uppercase tracking-wider text-blue-900">📌 In one line</div>
           <MathText text={lesson.summary} />
         </div>
       )}
-      {!open && (
+
+      {/* The voice and podcast stay one tap away instead of sitting above the notes */}
+      <div>
         <button
-          onClick={() => setOpen(true)}
-          className="self-start rounded-xl border border-orange-200 bg-white px-3 py-1.5 text-xs font-fun font-bold text-orange-700 hover:bg-orange-50"
-        >
-          You&apos;ve read this before — read it again
-        </button>
-      )}
-      {open && (
-        <>
-      {lesson.sections.map((section, i) => (
-        <div
-          key={i}
-          className={`flex flex-col gap-1.5 transition-colors duration-300 rounded-xl p-2.5 ${
-            activeSectionIndex === i ? "bg-orange-100/70 border border-orange-300 shadow-2xs" : ""
+          type="button"
+          onClick={() => setListening((v) => !v)}
+          className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+            listening ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
           }`}
         >
-          <h3 className="font-fun font-bold text-slate-900">{section.heading}</h3>
-          <MathText text={section.body} className="text-sm leading-relaxed text-slate-700" />
-          <Sources sources={section.sources} />
-          {explore && (
-            <ExploreWithAI
-              subjectId={explore.subjectId}
-              objectiveId={explore.objectiveId}
-              heading={section.heading}
-              question={`Tell me more about "${section.heading}" in this topic, with an example.`}
+          🎧 {listening ? "Hide audio" : "Listen to this lesson"}
+        </button>
+        {listening && (
+          <div className="mt-3">
+            <LessonAudioPlayer
+              objectiveId={objectiveId}
+              lesson={lesson}
+              onSectionActive={(idx) => setActiveSectionIndex(idx)}
             />
+          </div>
+        )}
+      </div>
+
+      <LessonNotes
+        objectiveId={objectiveId}
+        lesson={lesson}
+        askHref={askHref}
+        explore={explore}
+        activeSectionIndex={activeSectionIndex}
+        onReadCountChange={onReadCountChange}
+      />
+
+      {/* One clear next step at the end of the notes */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="space-y-0.5">
+          <p className="text-sm font-bold text-slate-900">
+            {readCount.total > 0 && readCount.read >= readCount.total
+              ? "All sections read — now check you can use it."
+              : `You've ticked ${readCount.read} of ${readCount.total} sections as read.`}
+          </p>
+          <p className="text-xs text-slate-600">
+            {hasQuestions
+              ? "Start with the Easy questions; they are marked as soon as you answer."
+              : next
+              ? "No questions are set on this topic yet — carry on to the next topic."
+              : "That's the last topic in this subject."}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {hasQuestions && onStartQuestions && (
+            <button
+              type="button"
+              onClick={onStartQuestions}
+              className="rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-blue-500 cursor-pointer transition"
+            >
+              ✍️ Try the Easy questions →
+            </button>
+          )}
+          {next && (
+            <Link
+              href={`/student/learn/topic/${next.id}`}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-800 hover:bg-slate-100 transition"
+            >
+              Next topic: {next.code} →
+            </Link>
           )}
         </div>
-      ))}
-      {lesson.diagrams.map((diagram, i) => (
-        <LessonDiagram key={i} diagram={diagram} />
-      ))}
-      {lesson.key_terms.length > 0 && (
-        <div className="rounded-2xl border border-blue-200 bg-blue-50/50 p-4">
-          <h3 className="mb-2 font-fun font-bold text-blue-900">Key terms</h3>
-          <dl className="flex flex-col gap-1.5 text-sm">
-            {lesson.key_terms.map((t, i) => (
-              <div key={i}>
-                <dt className="inline font-semibold text-slate-900">{t.term}: </dt>
-                <dd className="inline text-slate-700">
-                  <MathText text={t.meaning} />
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      )}
-      {lesson.worked_examples.map((ex, i) => (
-        <WorkedExample key={i} example={ex} index={i} askHref={askHref} />
-      ))}
-      {lesson.pitfalls.length > 0 && (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
-          <h3 className="mb-2 font-fun font-bold text-amber-900">Watch out for</h3>
-          <ul className="ml-5 list-disc space-y-1 text-sm text-slate-700">
-            {lesson.pitfalls.map((p, i) => (
-              <li key={i}>
-                <MathText text={p} />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      </div>
+
       <p className="text-[11px] text-slate-400">{lesson.note}</p>
-        </>
-      )}
     </div>
   );
 }
@@ -133,11 +163,41 @@ export default function TopicPage() {
   const topic = useApi<Topic>(`/learn/objectives/${id}`);
   const [writing, setWriting] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const [activeTab, setActiveTab] = useState<StudyTab>("notes");
+
   const data = topic.data;
   const lesson = data?.lesson ?? null;
+  const subjectView = useApi<SubjectLearn>(data ? `/learn/subjects/${data.subject.id}` : null);
+  const place = useMemo(() => placeOf(subjectView.data, id), [subjectView.data, id]);
 
   const askHref = (q: string) =>
     tutorHref({ subjectId: data?.subject.id ?? "", objectiveId: id, about: data?.objective.statement, ask: q });
+
+  // Detect the URL hash (#easy-1, #easy-2, #medium-1, #hard-1, #questions, #flashcards) to switch tabs
+  useEffect(() => {
+    function checkHash() {
+      const hash = window.location.hash.replace(/^#/, "").toLowerCase();
+      if (
+        hash.startsWith("easy-") ||
+        hash.startsWith("medium-") ||
+        hash.startsWith("hard-") ||
+        hash === "questions" ||
+        hash === "part-exam" ||
+        hash === "part-check"
+      ) {
+        setActiveTab("questions");
+      } else if (hash === "flashcards" || hash === "part-recall") {
+        setActiveTab("flashcards");
+      } else if (hash === "walkthrough" || hash === "part-exam-level") {
+        setActiveTab("walkthrough");
+      } else {
+        setActiveTab("notes");
+      }
+    }
+    checkHash();
+    window.addEventListener("hashchange", checkHash);
+    return () => window.removeEventListener("hashchange", checkHash);
+  }, [id]);
 
   useEffect(() => {
     if (lesson?.status !== "ready") return;
@@ -160,46 +220,208 @@ export default function TopicPage() {
     }
   }
 
+  function openTab(tab: StudyTab, hash: string) {
+    setActiveTab(tab);
+    window.history.replaceState(null, "", `#${hash}`);
+  }
+
+  function startQuestions() {
+    openTab("questions", "easy-1");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  const bankIds = new Set<string>();
+  if (data) {
+    for (const c of [...data.check_yourself, ...data.exam_questions]) {
+      bankIds.add(c.id);
+    }
+  }
+  const totalQuestionCount =
+    bankIds.size +
+    (lesson?.worked_examples?.length ?? 0) +
+    (lesson?.exam_answers?.length ?? 0);
+
+  const tabClass = (active: boolean) =>
+    `flex flex-none items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition cursor-pointer ${
+      active ? "bg-slate-900 text-white shadow-2xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200/80"
+    }`;
+
+  // The server's own breakdown of this page: Learn → Check yourself → Exam questions, with minutes and done.
+  const STEP_TAB: Record<string, { tab: StudyTab; hash: string }> = {
+    lesson: { tab: "notes", hash: "notes" },
+    check: { tab: "questions", hash: "easy-1" },
+    exam: { tab: "questions", hash: "questions" },
+  };
+
   return (
     <div className="space-y-5">
-      {data && (
-        <Link href={`/student/learn/subject/${data.subject.id}`} className="text-xs font-bold text-orange-600 hover:underline">
-          ← {data.subject.name}
-        </Link>
-      )}
       {topic.error ? <ErrorNote error={topic.error} /> : null}
-      {topic.loading && <p className="text-sm text-slate-500">Loading the topic…</p>}
+      {topic.loading && <p className="text-sm text-slate-500">Loading topic…</p>}
       {data && (
         <>
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold text-slate-500">{data.path.join(" › ")}</p>
-            <h1 className="text-2xl font-fun font-bold text-slate-900">
-              <span className="mr-2 text-slate-400">{data.objective.code}</span>
-              {data.objective.statement}
-            </h1>
-            <div className="flex flex-wrap items-center gap-2">
-              {data.subject.stage !== "external" && (
-                <MasteryBadge level={data.objective.mastery_level} name={data.objective.mastery_name} />
-              )}
-              {data.tutor_available && (
-                <Link
-                  href={askHref("I have a doubt about this topic.")}
-                  className="rounded-xl border border-orange-200 bg-white px-3 py-1 text-xs font-fun font-bold text-orange-700 hover:bg-orange-50"
-                >
-                  🦉 Ask a doubt
+          {/* Breadcrumb and topic header */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 md:p-6 shadow-2xs space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-slate-500">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Link href="/student/learn" className="text-blue-700 hover:underline font-bold">
+                  IGCSE
                 </Link>
-              )}
-            </div>
-          </div>
+                <span>›</span>
+                <Link href={`/student/learn/subject/${data.subject.id}`} className="text-blue-700 hover:underline font-bold">
+                  {data.subject.name}
+                </Link>
+                {data.subject.syllabus_code && (
+                  <>
+                    <span>›</span>
+                    <span className="text-slate-600">CIE ({data.subject.syllabus_code})</span>
+                  </>
+                )}
+                {data.path.map((segment, i) => (
+                  <span key={i} className="flex items-center gap-1.5">
+                    <span>›</span>
+                    <span>{segment}</span>
+                  </span>
+                ))}
+              </div>
 
-          <TopicSteps
-            steps={data.steps}
-            minutes={data.minutes}
-            links={[
-              ...(data.exam_level ? [{ key: "exam-level", label: "🎯 Exam level" }] : []),
-              ...(data.tutor_available ? [{ key: "mistakes", label: "🔁 Your mistakes" }] : []),
-            ]}
-          />
+              <div className="flex items-center gap-2">
+                {place && (
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-[11px] font-bold text-slate-700">
+                    Topic {place.index} of {place.count} in this chapter
+                  </span>
+                )}
+                {data.tutor_available && (
+                  <Link
+                    href={askHref("I have a doubt about this topic.")}
+                    className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-800 hover:bg-blue-100 transition"
+                  >
+                    🤖 Ask the AI Mentor
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="space-y-1.5">
+                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
+                  <span className="mr-2.5 rounded-lg bg-slate-900 px-2.5 py-1 align-middle font-mono text-base text-white">
+                    {data.objective.code}
+                  </span>
+                  {data.objective.statement}
+                </h1>
+                <p className="text-xs font-medium text-slate-500">
+                  Cambridge (CIE) IGCSE {data.subject.name}
+                  {data.subject.syllabus_code ? ` · Syllabus ${data.subject.syllabus_code}` : ""}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {data.subject.stage !== "external" && (
+                  <MasteryBadge level={data.objective.mastery_level} name={data.objective.mastery_name} />
+                )}
+                {data.minutes > 0 && (
+                  <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                    ⏱️ ~{data.minutes} min
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Path through this topic, from the server's steps */}
+            {data.subject.stage !== "external" && data.steps.length > 0 && (
+              <ol className="flex flex-wrap items-stretch gap-2">
+                {data.steps.map((step, i) => {
+                  const target = STEP_TAB[step.key];
+                  return (
+                    <li key={step.key} className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={!target}
+                        onClick={() => target && openTab(target.tab, target.hash)}
+                        className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs transition cursor-pointer disabled:cursor-default ${
+                          step.done
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-900"
+                            : "border-slate-200 bg-white text-slate-800 hover:border-blue-400"
+                        }`}
+                      >
+                        <span
+                          className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                            step.done ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-700"
+                          }`}
+                        >
+                          {step.done ? "✓" : i + 1}
+                        </span>
+                        <span className="font-bold">{step.label}</span>
+                        <span className="font-mono text-[11px] text-slate-500">{step.minutes} min</span>
+                      </button>
+                      {i < data.steps.length - 1 && <span className="text-slate-300">→</span>}
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+
+            {/* Study-mode tabs: one row that scrolls sideways on a phone */}
+            {data.subject.stage !== "external" && (
+              <div className="-mx-1 flex items-center gap-2 overflow-x-auto border-t border-slate-100 px-1 pt-3.5">
+                <button type="button" onClick={() => openTab("notes", "notes")} className={tabClass(activeTab === "notes")}>
+                  📖 Revision Notes
+                </button>
+
+                {data.subject.stage === "taught" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("questions");
+                      if (!window.location.hash.match(/^#(easy|medium|hard)-\d+$/)) {
+                        window.history.replaceState(null, "", "#easy-1");
+                      }
+                    }}
+                    className={tabClass(activeTab === "questions")}
+                  >
+                    ✍️ Topic Questions
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] ${
+                        activeTab === "questions" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-800"
+                      }`}
+                    >
+                      {totalQuestionCount}
+                    </span>
+                  </button>
+                )}
+
+                {lesson?.status === "ready" && (
+                  <button
+                    type="button"
+                    onClick={() => openTab("flashcards", "flashcards")}
+                    className={tabClass(activeTab === "flashcards")}
+                  >
+                    🗂️ Flashcards
+                  </button>
+                )}
+
+                {(data.exam_level || data.crucible) && (
+                  <button
+                    type="button"
+                    onClick={() => openTab("walkthrough", "walkthrough")}
+                    className={tabClass(activeTab === "walkthrough")}
+                  >
+                    🎯 Exam Walkthrough{data.crucible ? " & Crucible" : ""}
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => openTab("all", "all")}
+                  className={`ml-auto flex flex-none items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition cursor-pointer ${
+                    activeTab === "all" ? "bg-slate-800 text-white" : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                  }`}
+                >
+                  📋 Everything on one page
+                </button>
+              </div>
+            )}
+          </div>
 
           {data.notice && <Empty>{data.notice}</Empty>}
 
@@ -213,108 +435,111 @@ export default function TopicPage() {
             />
           )}
 
-          {data.lesson_available && (
-            <section id="part-lesson" className="scroll-mt-24">
-            <Card title="📘 Learn" subtitle="Scholr's lesson, written from your course books" tone="orange">
-              {error ? <ErrorNote error={error} /> : null}
-              {!lesson && (
-                <div className="flex flex-col items-start gap-2">
-                  <p className="text-sm text-slate-600">No lesson has been written for this topic yet.</p>
-                  <Button onClick={writeLesson} disabled={writing}>
-                    {writing ? "Writing from your books… (about 20 s)" : "Write this lesson"}
-                  </Button>
-                </div>
-              )}
-              {lesson?.status === "not_enough_material" && (
-                <Empty>
-                  Your course books don&apos;t cover this topic well enough for Scholr to write a lesson it can stand behind.
-                  Try the questions below, or ask the Tutor.
-                </Empty>
-              )}
-              {lesson?.status === "ready" && (
-                <LessonView
-                  objectiveId={id}
-                  lesson={lesson}
-                  askHref={data.tutor_available ? askHref : null}
-                  read={data.steps.some((s) => s.key === "lesson" && s.done)}
-                  explore={
-                    data.tutor_available ? { subjectId: data.subject.id, objectiveId: data.objective.id } : null
-                  }
-                />
-              )}
-            </Card>
-            </section>
-          )}
-
-          {data.exam_level && (
-            <section id="part-exam-level" className="scroll-mt-24">
-              <Card
-                title="🎯 Exam level"
-                subtitle="How the exam asks about this topic, and a real question solved to full marks"
-                tone="purple"
-              >
-                <ExamLevel data={data.exam_level} askHref={data.tutor_available ? askHref : null} />
-              </Card>
-            </section>
-          )}
-
-          {/* Every part of a taught topic is always on the page, empty or not: a part that hides itself when it
-              has nothing reads as a feature that does not exist. */}
-          {data.tutor_available && (
-            <section id="part-check" className="scroll-mt-24">
-              <Card title="✅ Check yourself" subtitle="Short questions, marked straight away" tone="emerald">
-                {data.check_yourself.length === 0 && <Empty>No questions for this topic in the bank yet.</Empty>}
-                {data.check_yourself.map((item, idx) => (
-                  <TryQuestion key={item.id} item={item} askHref={askHref} startOpen={idx === 0} />
-                ))}
-              </Card>
-            </section>
-          )}
-
-          {data.tutor_available && (
-            <section id="part-exam" className="scroll-mt-24">
-              <Card
-                title="📝 Exam questions"
-                subtitle="Real Cambridge past-paper questions on this topic. After marking you'll see what examiners said."
-                tone="blue"
-              >
-                {data.exam_questions.length === 0 && (
-                  <Empty>No past-paper question on this topic has been added to the bank yet.</Empty>
+          {/* TAB 1: REVISION NOTES */}
+          {(activeTab === "notes" || activeTab === "all") && data.lesson_available && (
+            <section id="part-lesson" className="scroll-mt-24 space-y-5">
+              <Card>
+                {error ? <ErrorNote error={error} /> : null}
+                {!lesson && (
+                  <div className="flex flex-col items-start gap-2">
+                    <p className="text-sm text-slate-600">No lesson has been written for this topic yet.</p>
+                    <Button onClick={writeLesson} disabled={writing}>
+                      {writing ? "Writing from your books… (about 20 s)" : "Write this lesson"}
+                    </Button>
+                  </div>
                 )}
-                {data.exam_questions.map((item) => (
-                  <TryQuestion key={item.id} item={item} askHref={askHref} />
-                ))}
-              </Card>
-            </section>
-          )}
-
-          {data.tutor_available && (
-            <section id="part-mistakes" className="scroll-mt-24">
-              <Card title="🔁 Your mistakes here" subtitle="Patterns from your own marked answers" tone="amber">
-                {data.mistakes.length === 0 && (
-                  <Empty>Nothing recorded on this topic yet — mistakes appear here after your answers are marked.</Empty>
+                {lesson?.status === "not_enough_material" && (
+                  <Empty>
+                    Your course books don&apos;t cover this topic well enough for Scholr to write a lesson it can stand behind.
+                    Try the Topic Questions tab above, or ask the AI Mentor.
+                  </Empty>
                 )}
-                <ul className="flex flex-col gap-2">
-                  {data.mistakes.map((m, i) => (
-                    <li key={i} className="flex items-start justify-between gap-3 text-sm text-slate-700">
-                      <MathText text={m.description} />
-                      <Chip tone={m.status === "open" ? "warn" : "good"}>
-                        {m.occurrences}× · {m.status}
-                      </Chip>
-                    </li>
-                  ))}
-                </ul>
+                {lesson?.status === "ready" && (
+                  <LessonView
+                    objectiveId={id}
+                    lesson={lesson}
+                    askHref={data.tutor_available ? askHref : null}
+                    explore={
+                      data.tutor_available ? { subjectId: data.subject.id, objectiveId: data.objective.id } : null
+                    }
+                    hasQuestions={data.subject.stage === "taught" && totalQuestionCount > 0}
+                    onStartQuestions={startQuestions}
+                    next={place?.next ?? null}
+                  />
+                )}
               </Card>
+
+              <DualLensView
+                subject={data.subject}
+                objective={data.objective}
+                connections={data.connections}
+                lesson={lesson}
+                examLevel={data.exam_level}
+              />
             </section>
           )}
 
-          <DualLensView subject={data.subject} objective={data.objective} connections={data.connections} />
+          {/* TAB 2: TOPIC QUESTIONS (Easy / Medium / Hard + #easy-1, #easy-2...) */}
+          {(activeTab === "questions" || activeTab === "all") && data.subject.stage === "taught" && (
+            <section id="part-questions" className="scroll-mt-24 space-y-5">
+              <TopicQuestions
+                topicName={data.objective.statement}
+                topicCode={data.objective.code}
+                subjectName={data.subject.name}
+                subjectCode={data.subject.code}
+                syllabusCode={data.subject.syllabus_code}
+                checkYourself={data.check_yourself}
+                examQuestions={data.exam_questions}
+                lesson={lesson}
+                askHref={askHref}
+                onQuestionAnswered={() => void topic.reload()}
+              />
 
-          {/* Present when the subject's config has debates and a parent approved one (no subject-name check). */}
-          {data.crucible && <DialecticalCrucible crucible={data.crucible} />}
+              {data.mistakes.length > 0 && (
+                <Card title="🔁 Your Recorded Mistakes on This Topic" subtitle="Patterns from your marked answers" tone="amber">
+                  <ul className="flex flex-col gap-2">
+                    {data.mistakes.map((m, i) => (
+                      <li key={i} className="flex items-start justify-between gap-3 text-sm text-slate-700">
+                        <MathText text={m.description} />
+                        <Chip tone={m.status === "open" ? "warn" : "good"}>
+                          {m.occurrences}× · {m.status}
+                        </Chip>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
+            </section>
+          )}
+
+          {/* TAB 3: FLASHCARDS & ACTIVE RECALL */}
+          {(activeTab === "flashcards" || activeTab === "all") && lesson?.status === "ready" && (
+            <section id="part-recall" className="scroll-mt-24">
+              <ActiveRecallDeck lesson={lesson} />
+            </section>
+          )}
+
+          {/* TAB 4: EXAM WALKTHROUGH & CRUCIBLE */}
+          {(activeTab === "walkthrough" || activeTab === "all") && (
+            <section id="part-exam-level" className="scroll-mt-24 space-y-5">
+              {data.exam_level && (
+                <Card
+                  title="🎯 Exam Level & Official Past-Paper Walkthrough"
+                  subtitle="How Cambridge examines this topic, and a real past-paper question solved step-by-step"
+                  tone="purple"
+                >
+                  <ExamLevel data={data.exam_level} askHref={data.tutor_available ? askHref : null} />
+                </Card>
+              )}
+
+              {data.crucible && <DialecticalCrucible crucible={data.crucible} />}
+
+              <InventingToLearn statement={data.objective.statement} />
+            </section>
+          )}
 
           {data.connections.length > 0 && !data.connections.some((c) => c.subject_name.toLowerCase().includes("iit")) && (
-            <Card title="🔗 Connections" subtitle="The same idea in your other subjects" tone="purple">
+            <Card title="🔗 Cross-Subject Connections" subtitle="The same concept in your other subjects" tone="purple">
               <ul className="flex flex-col gap-2">
                 {data.connections.map((c) => (
                   <li key={c.objective_id}>
@@ -333,7 +558,35 @@ export default function TopicPage() {
             </Card>
           )}
 
-          <InventingToLearn />
+          {/* Previous / next topic, in the subject's own order */}
+          {place && (place.prev || place.next) && (
+            <nav className="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Topic navigation">
+              {place.prev ? (
+                <Link
+                  href={`/student/learn/topic/${place.prev.id}`}
+                  className="group rounded-2xl border border-slate-200 bg-white p-4 hover:border-blue-400 transition"
+                >
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">← Previous topic</div>
+                  <div className="mt-1 text-sm font-bold text-slate-900 group-hover:text-blue-700">
+                    <span className="font-mono">{place.prev.code}</span> {place.prev.statement}
+                  </div>
+                </Link>
+              ) : (
+                <span />
+              )}
+              {place.next && (
+                <Link
+                  href={`/student/learn/topic/${place.next.id}`}
+                  className="group rounded-2xl border border-slate-200 bg-white p-4 text-right hover:border-blue-400 transition"
+                >
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Next topic →</div>
+                  <div className="mt-1 text-sm font-bold text-slate-900 group-hover:text-blue-700">
+                    <span className="font-mono">{place.next.code}</span> {place.next.statement}
+                  </div>
+                </Link>
+              )}
+            </nav>
+          )}
 
           <FormulaDrawer lesson={lesson} />
         </>

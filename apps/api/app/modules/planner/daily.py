@@ -25,6 +25,7 @@ RULE_VERSION = "daily_set_v1"
 SET_SIZE = 6
 RECENT_DAYS = 14
 SHORT_MARKS = 4
+PREVIEW_SIZE = 3  # topics named in tomorrow's preview, once today's set is finished
 
 
 @dataclass(frozen=True)

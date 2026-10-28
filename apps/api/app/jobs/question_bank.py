@@ -91,6 +91,33 @@ def without_off_syllabus_tags[T](
     ]
 
 
+def without_cross_unit_tags[T](
+    merged: list[tuple[ExtractedItem, T]], question_units: dict[str, str]
+) -> list[tuple[ExtractedItem, T]]:
+    """Keep only the objective codes that sit in the unit this paper gives that question number.
+
+    The extractor tags by theme, so a Crime question that mentions official statistics collects Research Methods
+    codes as well (27 Oct 2026: 67 such tags on Paper 2 Q3 alone, one of which put a crime essay under "the
+    positivist approach"). A paper's structure is printed on the paper, so the manifest states it and this drops
+    anything outside it. A question number the manifest does not mention is left alone, and a manifest may name
+    one question in full to give it a different unit from the rest of its section.
+    """
+    if not question_units:
+        return merged
+    out = []
+    for item, pages in merged:
+        # A full ref ("1(f)") wins over its question number ("1"), for the one-off a syllabus change leaves
+        # behind: MJ23's Paper 1 Section A was "theory and methods", so its Q1(f) is a theory question and
+        # belongs to unit 2, where consensus and conflict now live (the user's decision, 28 Oct 2026).
+        unit = question_units.get(item.ref) or question_units.get(re.match(r"\d*", item.ref)[0])
+        if unit is None:
+            out.append((item, pages))
+            continue
+        kept = [code for code in item.objective_codes if code.split(".")[0] == unit]
+        out.append((item.model_copy(update={"objective_codes": kept}) if kept != item.objective_codes else item, pages))
+    return out
+
+
 # Papers where every question is compulsory, so marks must add up to the printed total.
 ALL_COMPULSORY = {"igcse-maths"}
 # Subjects whose mark schemes are Question/Answer/Marks/Partial Marks tables (Sociology's are prose level descriptors).
@@ -184,6 +211,7 @@ def run_job(job: PaperJob, *, role: str = EXTRACTOR_ROLE, model: str | None = No
     ctx = CallContext(request_id=f"qbank:{job.qp.key}", tenant_id=tenant_id)
     extraction = extract_paper(gateway, ctx, paper, role=role, models=[model] if model else None, table=table)
     merged = without_off_syllabus_tags(merge_pages(extraction.pages), job.qp.untagged_questions)
+    merged = without_cross_unit_tags(merged, job.qp.question_units)
     items = [m[0] for m in merged]
     if table is not None:
         check = check_paper_against_table(

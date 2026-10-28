@@ -221,7 +221,7 @@ export default function Schedule() {
               Set available study time and block out coaching, school, or sports so Scholr builds realistic daily plans with a guaranteed 15% rest buffer.
             </p>
           </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-amber-200/60 bg-white/80 p-4 shadow-xs">
+          <div className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-xs">
             <div className="text-3xl">⏰</div>
             <div>
               <div className="text-xs font-bold text-muted uppercase tracking-wider">Weekly Target</div>

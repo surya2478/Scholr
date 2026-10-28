@@ -21,7 +21,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, IdMixin, StudentScoped, TenantScoped, TimestampMixin
 
-ASSESSMENT_KINDS = ("practice", "quiz", "baseline", "post", "retention", "exam_style")
+ASSESSMENT_KINDS = ("practice", "quiz", "baseline", "post", "retention", "exam_style", "topic_exam")
 
 
 class QuestionItem(IdMixin, TimestampMixin, TenantScoped, Base):
@@ -67,7 +67,9 @@ class QuestionItem(IdMixin, TimestampMixin, TenantScoped, Base):
 class Assessment(IdMixin, TimestampMixin, StudentScoped, Base):
     __tablename__ = "assessment"
     __table_args__ = (
-        CheckConstraint("kind in ('practice','quiz','baseline','post','retention','exam_style')", name="kind"),
+        CheckConstraint(
+            "kind in ('practice','quiz','baseline','post','retention','exam_style','topic_exam')", name="kind"
+        ),
         CheckConstraint("status in ('draft','in_progress','submitted','evaluated','abandoned')", name="status"),
     )
     subject_id: Mapped[UUID] = mapped_column(ForeignKey("subject.id"))
@@ -137,3 +139,43 @@ class ExaminerInsight(IdMixin, TimestampMixin, TenantScoped, Base):
     segmenter_version: Mapped[str] = mapped_column(String(16))
     prompt_version: Mapped[str] = mapped_column(String(32))
     model: Mapped[str] = mapped_column(String(100))
+
+
+BOOKMARK_TAGS = ("examiner_trap", "calc_heavy", "must_revise")
+
+
+class QuestionBookmark(IdMixin, TimestampMixin, StudentScoped, Base):
+    """A question she saved to revise, with her own tag and note. Kept on the server so it follows her across
+    devices; it is her own marker, not learning evidence, so no event is emitted."""
+
+    __tablename__ = "question_bookmark"
+    __table_args__ = (
+        UniqueConstraint("student_id", "question_item_id"),
+        CheckConstraint("tag in ('examiner_trap','calc_heavy','must_revise')", name="tag"),
+    )
+    question_item_id: Mapped[UUID] = mapped_column(ForeignKey("question_item.id", ondelete="CASCADE"))
+    tag: Mapped[str] = mapped_column(String(16))
+    note: Mapped[str | None] = mapped_column(String(500))
+
+
+class Notebook(IdMixin, TimestampMixin, StudentScoped, Base):
+    """A custom digital revision notebook curated by the student (e.g. 'Traps', 'Circle Theorems')."""
+
+    __tablename__ = "notebook"
+    title: Mapped[str] = mapped_column(String(120))
+    description: Mapped[str | None] = mapped_column(Text)
+    icon: Mapped[str] = mapped_column(String(16), default="📓")
+    color: Mapped[str] = mapped_column(String(32), default="amber")
+    subject_id: Mapped[UUID | None] = mapped_column(ForeignKey("subject.id", ondelete="SET NULL"))
+
+
+class NotebookItem(IdMixin, StudentScoped, Base):
+    """A question pinned inside a digital notebook, with the student's personal notes."""
+
+    __tablename__ = "notebook_item"
+    __table_args__ = (UniqueConstraint("notebook_id", "question_item_id"),)
+
+    notebook_id: Mapped[UUID] = mapped_column(ForeignKey("notebook.id", ondelete="CASCADE"), index=True)
+    question_item_id: Mapped[UUID] = mapped_column(ForeignKey("question_item.id", ondelete="CASCADE"))
+    student_notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

@@ -20,6 +20,7 @@ class EnrollmentOut(BaseModel):
     tier: str | None
     exam_session: str | None
     answer_input: str = "text"  # from the subject config: "expression" offers the maths keyboard
+    stage: str = "taught"  # from the subject config: only "taught" subjects have questions to set
 
 
 class StudentOut(BaseModel):

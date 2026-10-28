@@ -20,10 +20,22 @@ from app.modules.assessment.schemas import (
     AssessmentBriefOut,
     AssessmentCreate,
     AssessmentOut,
+    AssessmentReportOut,
     AttemptCreate,
     AttemptMeta,
     AttemptOut,
+    BookmarkIn,
+    BookmarkOut,
+    ExamFromMistakesIn,
+    ExamFromNotebookIn,
+    ExamFromTopicsIn,
+    NotebookCreate,
+    NotebookItemCreate,
+    NotebookItemOut,
+    NotebookOut,
+    NotebookUpdate,
     QuestionOut,
+    QuestionsByObjectivesIn,
     TranscriptionConfirm,
 )
 from app.modules.evaluation import service as evaluation
@@ -72,6 +84,119 @@ def submit_assessment(assessment_id: UUID, principal: PrincipalDep, s: DbDep) ->
 @router.get("/questions/{item_id}", response_model=QuestionOut)
 def get_question(item_id: UUID, s: DbDep) -> QuestionOut:
     return service.question_out(service.servable_item(s, item_id))
+
+
+@router.post("/practice/questions/by-objectives", response_model=list[QuestionOut])
+def post_questions_by_objectives(body: QuestionsByObjectivesIn, principal: PrincipalDep, s: DbDep) -> list[QuestionOut]:
+    ids = service.items_for_objectives(
+        s,
+        subject_id=body.subject_id,
+        objective_ids=body.objective_ids,
+        student_id=principal.student_id,
+        limit=body.limit,
+    )
+    return [service.question_out(service.servable_item(s, item_id)) for item_id in ids]
+
+
+@router.get("/bookmarks", response_model=list[BookmarkOut])
+def get_bookmarks(principal: PrincipalDep, s: DbDep, student_id: UUID | None = None) -> list[BookmarkOut]:
+    sid = resolve_student_id(principal, student_id, scope="assessments")
+    return service.list_bookmarks(s, principal, student_id=sid)
+
+
+@router.put("/bookmarks/{item_id}", status_code=204)
+def put_bookmark(item_id: UUID, body: BookmarkIn, principal: PrincipalDep, s: DbDep) -> Response:
+    service.save_bookmark(s, principal, item_id, body)
+    return Response(status_code=204)
+
+
+@router.delete("/bookmarks/{item_id}", status_code=204)
+def delete_bookmark(item_id: UUID, principal: PrincipalDep, s: DbDep) -> Response:
+    service.remove_bookmark(s, principal, item_id)
+    return Response(status_code=204)
+
+
+# --- Digital Notebooks ---
+
+
+@router.get("/notebooks", response_model=list[NotebookOut])
+def get_notebooks(principal: PrincipalDep, s: DbDep, student_id: UUID | None = None) -> list[NotebookOut]:
+    sid = resolve_student_id(principal, student_id, scope="assessments")
+    return service.list_notebooks(s, principal, student_id=sid)
+
+
+@router.post("/notebooks", response_model=NotebookOut, status_code=201)
+def post_notebook(
+    body: NotebookCreate, principal: PrincipalDep, s: DbDep, student_id: UUID | None = None
+) -> NotebookOut:
+    sid = resolve_student_id(principal, student_id, scope="assessments")
+    return service.create_notebook(s, principal, body, student_id=sid, now=datetime.now(UTC))
+
+
+@router.get("/notebooks/{notebook_id}", response_model=NotebookOut)
+def get_notebook(notebook_id: UUID, principal: PrincipalDep, s: DbDep) -> NotebookOut:
+    return service.get_notebook(s, principal, notebook_id)
+
+
+@router.patch("/notebooks/{notebook_id}", response_model=NotebookOut)
+def patch_notebook(notebook_id: UUID, body: NotebookUpdate, principal: PrincipalDep, s: DbDep) -> NotebookOut:
+    return service.update_notebook(s, principal, notebook_id, body, now=datetime.now(UTC))
+
+
+@router.delete("/notebooks/{notebook_id}", status_code=204)
+def delete_notebook(notebook_id: UUID, principal: PrincipalDep, s: DbDep) -> Response:
+    service.delete_notebook(s, principal, notebook_id)
+    return Response(status_code=204)
+
+
+@router.get("/notebooks/{notebook_id}/items", response_model=list[NotebookItemOut])
+def get_notebook_items(notebook_id: UUID, principal: PrincipalDep, s: DbDep) -> list[NotebookItemOut]:
+    return service.list_notebook_items(s, principal, notebook_id)
+
+
+@router.post("/notebooks/{notebook_id}/items", response_model=NotebookItemOut, status_code=201)
+def post_notebook_item(
+    notebook_id: UUID, body: NotebookItemCreate, principal: PrincipalDep, s: DbDep
+) -> NotebookItemOut:
+    return service.add_notebook_item(s, principal, notebook_id, body, now=datetime.now(UTC))
+
+
+@router.delete("/notebooks/{notebook_id}/items/{question_id}", status_code=204)
+def delete_notebook_item(notebook_id: UUID, question_id: UUID, principal: PrincipalDep, s: DbDep) -> Response:
+    service.remove_notebook_item(s, principal, notebook_id, question_id)
+    return Response(status_code=204)
+
+
+@router.post("/assessments/from-notebook", response_model=AssessmentOut, status_code=201)
+def post_assessment_from_notebook(
+    body: ExamFromNotebookIn, principal: PrincipalDep, s: DbDep, student_id: UUID | None = None
+) -> AssessmentOut:
+    sid = resolve_student_id(principal, student_id, scope="assessments")
+    assessment_id = service.create_exam_from_notebook(s, principal, body, student_id=sid, now=datetime.now(UTC))
+    return _assessment_out(s, principal, assessment_id)
+
+
+@router.post("/assessments/from-mistakes", response_model=AssessmentOut, status_code=201)
+def post_assessment_from_mistakes(
+    body: ExamFromMistakesIn, principal: PrincipalDep, s: DbDep, student_id: UUID | None = None
+) -> AssessmentOut:
+    sid = resolve_student_id(principal, student_id, scope="assessments")
+    assessment_id = service.create_exam_from_mistakes(s, principal, body, student_id=sid, now=datetime.now(UTC))
+    return _assessment_out(s, principal, assessment_id)
+
+
+@router.get("/assessments/{assessment_id}/report", response_model=AssessmentReportOut)
+def get_assessment_report(assessment_id: UUID, principal: PrincipalDep, s: DbDep) -> AssessmentReportOut:
+    return service.get_assessment_report(s, principal, assessment_id)
+
+
+@router.post("/assessments/from-topics", response_model=AssessmentOut, status_code=201)
+def post_assessment_from_topics(
+    body: ExamFromTopicsIn, principal: PrincipalDep, s: DbDep, student_id: UUID | None = None
+) -> AssessmentOut:
+    sid = resolve_student_id(principal, student_id, scope="assessments")
+    assessment_id = service.create_exam_from_topics(s, principal, body, student_id=sid, now=datetime.now(UTC))
+    return _assessment_out(s, principal, assessment_id)
 
 
 @router.post("/attempts", response_model=AttemptOut, status_code=201)

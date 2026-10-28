@@ -6,6 +6,8 @@ from __future__ import annotations
 from pathlib import Path
 from uuid import UUID
 
+from app.tools.images import sniff_image  # one implementation, shared with homework photos
+
 MAX_BYTES = 8 * 1024 * 1024
 MAX_PHOTOS = 4
 URI_PREFIX = "private://uploads/"
@@ -18,15 +20,7 @@ class UploadError(ValueError):
         self.message = message
 
 
-def sniff_image(data: bytes) -> tuple[str, str] | None:
-    """(media type, extension) from magic bytes; the client's declared type is never trusted."""
-    if data.startswith(b"\x89PNG\r\n\x1a\n"):
-        return "image/png", "png"
-    if data.startswith(b"\xff\xd8\xff"):
-        return "image/jpeg", "jpg"
-    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
-        return "image/webp", "webp"
-    return None
+__all__ = ["MAX_BYTES", "MAX_PHOTOS", "UploadError", "delete_photos", "load_photo", "save_photo", "sniff_image"]
 
 
 def save_photo(uploads_dir: Path, student_id: UUID, attempt_id: UUID, index: int, data: bytes) -> str:

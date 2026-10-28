@@ -163,5 +163,45 @@ def test_rated_but_not_yet_marked_attempts_do_not_break_the_profile(monkeypatch)
     attempt = assessment.ConfidenceAttempt(uuid4(), uuid4(), uuid4(), "stem", 4, 0, datetime.now(UTC))
     monkeypatch.setattr(assessment, "attempts_with_confidence", lambda *a, **k: [attempt])
     monkeypatch.setattr(evaluation, "evaluation_summaries_for_attempts", lambda *a, **k: {})
+    monkeypatch.setattr(metacognition.curriculum, "exam_seconds_per_mark", lambda *a, **k: {})
     profile = metacognition.get_metacognitive_profile(None, student_id=uuid4())  # type: ignore[arg-type]
     assert profile.total_evaluated_with_confidence == 0 and profile.independence.total == 1
+    assert profile.velocity is not None
+    assert profile.velocity.speed_trap_count == 0
+
+
+def test_velocity_is_judged_against_her_own_papers_pace() -> None:
+    from app.modules.progress.metacognition import classify_velocity
+
+    pace = 72.0  # Maths 0580: 120 minutes for 100 marks
+    assert classify_velocity(None, 4, 5, pace) == "untracked"
+    assert classify_velocity(0, 4, 5, pace) == "untracked"
+    assert classify_velocity(300, 4, 5, None) == "untracked"  # no timed paper for the subject: nothing guessed
+    # 5 marks allow 360 s.
+    assert classify_velocity(300, 4, 5, pace) == "optimal_flow"
+    assert classify_velocity(400, 4, 5, pace) == "hesitant_success"
+    assert classify_velocity(150, 1, 5, pace) == "speed_trap"  # marks lost in under half the time
+    assert classify_velocity(300, 1, 5, pace) == "time_sink"
+
+
+def test_derive_velocity_stats() -> None:
+    from app.modules.progress.metacognition import derive_velocity_stats
+    from app.modules.progress.schemas import MetacognitionItem
+
+    now = datetime.now(UTC)
+
+    def item(marks: int, awarded: int, seconds: int, category: str) -> MetacognitionItem:
+        return MetacognitionItem(
+            attempt_id=uuid4(), subject_id=uuid4(), question_stem="Q", pre_confidence=4, confidence_label="Very sure",
+            marks_awarded=awarded, marks_available=marks, percentage=awarded * 100 // marks, quadrant="true_mastery",
+            mistakes=[], submitted_at=now, time_spent_s=seconds, velocity_category=category,  # type: ignore[arg-type]
+        )  # fmt: skip
+
+    stats = derive_velocity_stats([item(4, 4, 120, "optimal_flow"), item(4, 0, 40, "speed_trap")], [288.0, 288.0])
+    assert (stats.optimal_flow_count, stats.speed_trap_count, stats.time_sink_count) == (1, 1, 0)
+    assert stats.average_seconds_per_mark == 20.0
+    assert stats.exam_time_used_percent == 28  # 160 s of the 576 s her papers allow
+    assert stats.quadrants["optimal_flow"].percentage == 50.0
+    assert "trick" not in stats.diagnosis
+    empty = derive_velocity_stats([], [])
+    assert empty.exam_time_used_percent is None and empty.speed_trap_count == 0

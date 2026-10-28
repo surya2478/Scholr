@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { ItemCard, Question } from "@/lib/api";
-import { getCommandWordInfo } from "@/lib/commandWords";
 import { useApi } from "@/lib/useApi";
 import { AnswerBox } from "../AnswerBox";
 import { MathText } from "../MathText";
@@ -25,37 +24,17 @@ export function TryQuestion({
   onAnswered?: () => void;
 }) {
   const [open, setOpen] = useState(startOpen);
-  const [showCmdTip, setShowCmdTip] = useState(false);
   const question = useApi<Question>(open ? `/questions/${item.id}` : null);
   const label = labelOverride ?? item.label;
-
-  const targetMins = Math.max(1, Math.round(item.marks * 1.2));
-  const cmdInfo = getCommandWordInfo(item.command_word);
 
   const contextText = question.data?.context ?? item.context;
   const stemText = question.data?.stem ?? item.stem;
 
   return (
-    <div className="rounded-2xl border border-amber-200/80 bg-white p-3.5 shadow-2xs transition">
+    <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-2xs transition">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-slate-600">
           <span>{label} · {item.marks} mark{item.marks === 1 ? "" : "s"}</span>
-          <span
-            className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600"
-            title="Cambridge Extended pacing target (~1.2 min per mark)"
-          >
-            ⏱ ~{targetMins} min
-          </span>
-          {item.command_word && (
-            <button
-              onClick={() => setShowCmdTip(!showCmdTip)}
-              className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-200 hover:bg-amber-100 transition"
-              title="Click to view Cambridge examiner expectations for this command word"
-            >
-              <span>🎯 {item.command_word}</span>
-              <span className="text-[9px] text-amber-600 font-normal">info</span>
-            </button>
-          )}
         </div>
         <Button
           variant={open ? "ghost" : "secondary"}
@@ -65,21 +44,6 @@ export function TryQuestion({
           {open ? "Collapse ▲" : "Solve ✍️"}
         </Button>
       </div>
-
-      {showCmdTip && cmdInfo && (
-        <div className="mt-2.5 rounded-xl border border-amber-300 bg-amber-50/90 p-2.5 text-xs text-amber-950">
-          <div className="flex items-center justify-between">
-            <span className="font-bold font-fun text-amber-900">
-              Examiner Expectation: &ldquo;{item.command_word}&rdquo;
-            </span>
-            <button onClick={() => setShowCmdTip(false)} className="text-[10px] text-amber-700 hover:underline">
-              ✕
-            </button>
-          </div>
-          <p className="mt-0.5 text-slate-700">{cmdInfo.meaning}</p>
-          <p className="mt-1 font-medium text-amber-900">💡 Tip: {cmdInfo.examinerTip}</p>
-        </div>
-      )}
 
       {/* Question context & stem: ALWAYS displayed so the student immediately sees what is asked */}
       {(stemText || contextText) && (
@@ -112,7 +76,7 @@ export function TryQuestion({
           <div className="flex items-center justify-between pt-1">
             <Link
               href={askHref(question.data.stem, question.data.subject_id)}
-              className="self-start text-xs font-fun font-bold text-orange-600 hover:underline"
+              className="self-start text-xs font-fun font-bold text-blue-600 hover:underline"
             >
               🦉 Ask the Tutor about this question
             </Link>

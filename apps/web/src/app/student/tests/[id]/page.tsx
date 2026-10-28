@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { AnswerBox } from "@/components/AnswerBox";
-import { SittingClock } from "@/components/SittingClock";
+import { ExamClock, SittingClock } from "@/components/SittingClock";
 import { Button, Card, Chip, ErrorNote } from "@/components/ui";
 import { api, type Assessment, type Evaluation } from "@/lib/api";
 import { KIND_LABELS } from "@/lib/format";
@@ -55,18 +55,18 @@ export default function TestDetail() {
   return (
     <div className="space-y-6">
       {/* Test Header Banner */}
-      <div className="rounded-3xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-[#FFF4E8] to-orange-50 p-6 md:p-8 shadow-sm">
+      <div className="rounded-3xl border-2 border-slate-200 bg-gradient-to-br from-slate-50 via-white to-blue-50/50 p-6 md:p-8 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <Link
-              href="/student/tests"
-              className="inline-flex items-center gap-1 text-xs font-fun font-bold text-orange-600 hover:text-orange-700 bg-white/80 border border-orange-200 px-3 py-1 rounded-xl mb-2"
+              href={a.kind === "topic_exam" ? "/student/examinations" : "/student/tests"}
+              className="inline-flex items-center gap-1 text-xs font-fun font-bold text-blue-600 hover:text-blue-700 bg-white/80 border border-blue-200 px-3 py-1 rounded-xl mb-2"
             >
-              ← Back to tests
+              ← Back to {a.kind === "topic_exam" ? "examinations" : "tests"}
             </Link>
             <h1 className="text-2xl md:text-3xl font-fun font-bold text-slate-900">
-              {KIND_LABELS[a.kind] ?? a.kind}
-              {a.form_code ? ` · Form ${a.form_code}` : ""}
+              {a.config?.title || (KIND_LABELS[a.kind] ?? a.kind)}
+              {!a.config?.title && a.form_code ? ` · Form ${a.form_code}` : ""}
             </h1>
             <p className="text-xs md:text-sm text-slate-600 font-medium">
               {a.items.length} questions · {a.total_marks} marks total
@@ -75,6 +75,9 @@ export default function TestDetail() {
 
           <div className="flex flex-wrap items-center gap-3">
             {a.kind === "exam_style" && inProgress && <SittingClock assessmentId={a.id} />}
+            {a.kind === "topic_exam" && inProgress && a.started_at && a.config?.duration_min ? (
+              <ExamClock startedAt={a.started_at} durationMin={a.config.duration_min} />
+            ) : null}
             {a.no_help && (
               <span className="px-3 py-1 rounded-xl bg-amber-100 text-amber-900 text-xs font-bold border border-amber-300">
                 🔒 Exam conditions (no hints or Tutor until you submit)
@@ -94,6 +97,14 @@ export default function TestDetail() {
               <Button disabled={Boolean(marking)} onClick={markAll}>
                 {marking ?? "Mark my answers 🪄"}
               </Button>
+            )}
+            {submitted && (
+              <Link
+                href={`/student/tests/${a.id}/report`}
+                className="px-4 py-2 rounded-2xl font-fun font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-colors"
+              >
+                In-Depth Report 📊
+              </Link>
             )}
             {a.score && (
               <div className="bg-white border-2 border-emerald-200 px-4 py-2 rounded-2xl shadow-2xs">
@@ -118,7 +129,7 @@ export default function TestDetail() {
             subtitle={`${item.marks} marks`}
           >
             {!item.question ? (
-              <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 text-xs text-slate-600 font-medium">
+              <div className="p-4 rounded-2xl bg-amber-50/60 border border-slate-200 text-xs text-slate-600 font-medium">
                 Tap &ldquo;Start test&rdquo; above to reveal this question.
               </div>
             ) : item.attempt_id ? (

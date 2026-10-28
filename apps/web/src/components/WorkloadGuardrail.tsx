@@ -18,7 +18,7 @@ export function WorkloadGuardrail({
           <span>⚖️</span>
           <span>Workload Balance Guardrail</span>
         </h4>
-        <span className="text-xs font-fun font-bold text-orange-600 bg-orange-50 border border-orange-200 px-3 py-1 rounded-full">
+        <span className="text-xs font-fun font-bold text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
           {status}
         </span>
       </div>

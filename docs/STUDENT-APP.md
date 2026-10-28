@@ -621,3 +621,24 @@ is too thin get no debate. The subject-name check on the page is gone; the page 
 has an approved one. Prompt v1 copied the book in most drafts (2 of 13 kept); v2 asks harder for her own words and
 the job retries a failed debate once.
 
+
+## 21. Decision — 22 Sep 2026: lessons as revision notes, with tables and drawn pictures
+
+She found the v4 lessons read as prose: no exam definitions, no tables, no pictures ("reading just text is so
+inconvenient"). She pointed to revision-note sites as the model: short sub-headings, bullet points, bold
+definitions, worked examples placed under the idea they use, tables and labelled diagrams, exam tips.
+
+- **lesson_write/v5.** An everyday introduction; four to eight sections, each with the exam `definition`, three to
+  eight bullet `points` and an `exam_tip`; one to three `tables`; two to four model `exam_answers` ("State two
+  differences…" answered as the points a mark scheme credits); up to ten key terms; worked examples placed under
+  their `section`. The writer's output cap went to 9,000 tokens and retrieval to ten excerpts.
+- **The book's own tables** on the objective are always given to the writer (`knowledge.objective_tables`):
+  Chemistry 2.2's particle table was tagged to the topic but ranked outside the top passages.
+- **Guard v9.** A definition or tip that copies the book or names someone unsupported goes on its own; the section
+  stays. A table is kept whole or not at all: cited, rectangular, not copied, every number in it present in the
+  pages it cites, and an element's configuration and group checked against `app/tools/elements.py`.
+- **Chemistry pictures**, drawn by code from the element table: `atom_structure` (nucleus and shells from the
+  element, mass number and charge; proton numbers 1–20), `particle_boxes` (element, compound or mixture worked out
+  from the particles and checked against the label), `periodic_table` (periods 1–4, groups I–VIII lit). The book's
+  own figures are copyrighted and are not reproduced. A person still approves each picture (`app.jobs.illustrate`).
+- Piloted on Chemistry chapter 2 (`app.jobs.lessons --only`); other subjects move to v5 when they are rewritten.

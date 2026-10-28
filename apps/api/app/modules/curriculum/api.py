@@ -8,6 +8,7 @@ from app.core.deps import DbDep, PrincipalDep
 from app.core.errors import not_found
 from app.modules.curriculum import service
 from app.modules.curriculum.schemas import (
+    CommandWordsOut,
     ObjectiveDetailOut,
     RelatedObjectiveOut,
     SubjectOut,
@@ -30,6 +31,19 @@ def get_subject_tree(subject_id: UUID, s: DbDep) -> SubjectTreeOut:
     if tree is None:
         raise not_found("subject")
     return tree
+
+
+@router.get("/subjects/{subject_id}/command-words", response_model=CommandWordsOut)
+def get_command_words(subject_id: UUID, s: DbDep) -> CommandWordsOut:
+    summary = service.subject_summaries(s, [subject_id]).get(subject_id)
+    if summary is None:
+        raise not_found("subject")
+    try:
+        config = subjects.taught_config_for(summary.code)
+    except subjects.SubjectConfigError:
+        return CommandWordsOut(source=None, definitions={})
+    words = config.command_words
+    return CommandWordsOut(source=words.source if words else None, definitions=words.definitions if words else {})
 
 
 @router.get("/objectives/{objective_id}", response_model=ObjectiveDetailOut)

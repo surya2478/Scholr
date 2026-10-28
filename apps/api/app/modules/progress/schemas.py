@@ -175,11 +175,30 @@ class MetacognitionItem(BaseModel):
     quadrant: Literal["true_mastery", "dangerous_blindspot", "hesitant_mastery", "known_gap"]
     mistakes: list[str]
     submitted_at: datetime
+    time_spent_s: int | None = None
+    velocity_category: Literal["optimal_flow", "speed_trap", "time_sink", "hesitant_success", "untracked"] = "untracked"
 
 
 class QuadrantCount(BaseModel):
     count: int
     percentage: float
+
+
+class VelocityQuadrant(BaseModel):
+    count: int
+    percentage: float
+
+
+class VelocityStats(BaseModel):
+    speed_trap_count: int
+    time_sink_count: int
+    optimal_flow_count: int
+    hesitant_count: int
+    average_seconds_per_mark: float
+    # Her time against the time her papers allow for the same marks (100 = exactly exam pace); None if untimed.
+    exam_time_used_percent: int | None = None
+    quadrants: dict[str, VelocityQuadrant]
+    diagnosis: str
 
 
 class IndependenceStats(BaseModel):
@@ -202,3 +221,4 @@ class MetacognitionOut(BaseModel):
     recent_items: list[MetacognitionItem]
     advice: str
     independence: IndependenceStats
+    velocity: VelocityStats | None = None

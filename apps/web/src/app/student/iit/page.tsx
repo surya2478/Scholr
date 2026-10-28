@@ -17,27 +17,27 @@ export default function StudentIit() {
 
   return (
     <div className="space-y-6">
-      {/* Friendly IIT Bridge Header — Warm Purple & Gold Horizon */}
-      <div className="relative overflow-hidden rounded-3xl border-2 border-purple-200 bg-gradient-to-br from-[#FAF5FF] via-[#FFF9F2] to-[#F3E8FF] p-6 md:p-8 shadow-sm">
+      {/* IIT Foundation bridge header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0B1528] via-[#1E1B4B] to-[#312E81] p-6 md:p-8 text-white shadow-xl">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
           <div className="space-y-2 text-center sm:text-left">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-fun font-bold border border-purple-200 shadow-2xs">
-                <span>🚀</span> IIT Foundation Bridge
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-emerald-300 font-mono text-xs font-bold border border-white/15">
+                <span>🏛️</span> IIT FOUNDATION BRIDGE
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-fun font-bold border border-amber-200">
-                <span>⚡</span> Dual Curriculum
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-200 font-mono text-[11px] font-bold border border-blue-400/30">
+                <span>⚡</span> CAMBRIDGE CIE ↔ JEE FOUNDATION
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-fun font-bold text-slate-900">
-              External IIT Classes & Groundwork
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              IIT Foundation Standing &amp; IGCSE Groundwork
             </h1>
-            <p className="text-xs md:text-sm text-slate-600 font-medium max-w-2xl leading-relaxed">
-              Scholr does not duplicate your coaching classes — you already do 6 hours a week. Instead, it uncovers the Cambridge IGCSE foundation topics underneath so your next coaching session feels effortless!
+            <p className="text-xs md:text-sm text-slate-300 font-medium max-w-2xl leading-relaxed">
+              Maps your external IIT Foundation classes and test scores directly to the Cambridge IGCSE Extended prerequisites underneath them.
             </p>
           </div>
-          <div className="h-16 w-16 rounded-3xl bg-gradient-to-tr from-purple-500 via-indigo-500 to-amber-500 flex items-center justify-center text-3xl text-white shadow-lg shadow-purple-500/25 select-none animate-float flex-none">
-            🚀
+          <div className="h-16 w-16 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center font-mono text-xl font-extrabold text-emerald-300 flex-none">
+            IIT
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@ export default function StudentIit() {
           {logs.map((log) => (
             <li
               key={log.id}
-              className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200/70 bg-white p-3.5 shadow-2xs transition hover:border-purple-300"
+              className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-2xs transition hover:border-purple-300"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-lg">
                 🚀

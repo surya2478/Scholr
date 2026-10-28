@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-from sqlalchemy import delete, or_, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError, not_found
@@ -17,16 +17,37 @@ from app.core.ids import uuid7
 from app.core.rbac import Principal, require_role, require_student_access
 from app.llm.gateway import CallContext, ImageInput, LLMGateway, LLMResult
 from app.modules.assessment import examiner_reports
-from app.modules.assessment.models import Assessment, AssessmentItem, Attempt, ExaminerInsight, QuestionItem
+from app.modules.assessment.analytics import generate_diagnostic_report
+from app.modules.assessment.models import (
+    Assessment,
+    AssessmentItem,
+    Attempt,
+    ExaminerInsight,
+    Notebook,
+    NotebookItem,
+    QuestionBookmark,
+    QuestionItem,
+)
 from app.modules.assessment.schemas import (
     AssessmentBriefOut,
     AssessmentCreate,
     AssessmentItemOut,
     AssessmentOut,
+    AssessmentReportOut,
     AttemptMeta,
     AttemptOut,
+    BookmarkIn,
+    BookmarkOut,
+    ExamFromMistakesIn,
+    ExamFromNotebookIn,
+    ExamFromTopicsIn,
     ExaminerInsightOut,
     ExaminerInsightsOut,
+    NotebookCreate,
+    NotebookItemCreate,
+    NotebookItemOut,
+    NotebookOut,
+    NotebookUpdate,
     QuestionOut,
     ScoreOut,
     TranscriptionConfirm,
@@ -36,10 +57,16 @@ from app.modules.audit import service as audit
 from app.modules.events import service as events
 
 STUDY_KINDS = frozenset({"baseline", "post", "retention"})
-# Everything sat under exam conditions: the study tests and timed past-paper sittings (AC-L5, AC-R3). While one is
-# in progress there is no tutoring and no outside practice, and its marks are shown only after it is submitted.
+# A test she (or a parent) sets from chosen topics. Sat under exam conditions, but it is not a real paper: mastery
+# does not weigh it as exam evidence and the readiness view does not count it as a past-paper sitting.
+TOPIC_EXAM = "topic_exam"
+# Evidence mastery weighs as exam performance: the study tests and timed past-paper sittings.
 EXAM_STYLE_KINDS = frozenset({"exam_style", *STUDY_KINDS})
+# Everything sat under exam conditions (AC-L5, AC-R3). While one is in progress there is no tutoring and no outside
+# practice, and its marks are shown only after it is submitted.
+EXAM_CONDITION_KINDS = frozenset({TOPIC_EXAM, *EXAM_STYLE_KINDS})
 SELECTION_RULE = "manual_v1"  # forms are chosen by a person (PHASE-1 §5), not generated
+TOPIC_SELECTION = "topics_v1"  # order_for_topics + fill_to_marks
 TRANSCRIBE_ROLE = "vision_transcriber"
 TRANSCRIBE_PROMPT = "answer_transcribe"
 
@@ -252,6 +279,81 @@ def items_for_objective(s: Session, objective_id: UUID) -> list[ItemBrief]:
     return sorted(items, key=lambda i: (i.marks, i.difficulty or 3, i.source_ref or ""))
 
 
+@dataclass(frozen=True)
+class TopicItem:
+    id: UUID
+    marks: int
+    objective_ids: tuple[UUID, ...]
+
+
+def order_for_topics(
+    items: Sequence[TopicItem], objective_ids: Sequence[UUID], *, attempted: Collection[UUID]
+) -> list[UUID]:
+    """The order questions on chosen topics are offered in (rule ``TOPIC_SELECTION``), pure and deterministic.
+
+    Topics take turns in the order chosen, so one well-stocked topic cannot fill the set. Within a topic, questions
+    she has not answered before come first, then the higher-mark ones, then by source; a question on several chosen
+    topics is offered once, under the first of them."""
+    queues: dict[UUID, list[TopicItem]] = {o: [] for o in objective_ids}
+    for item in items:
+        home = next((o for o in objective_ids if o in item.objective_ids), None)
+        if home is not None:
+            queues[home].append(item)
+    for queue in queues.values():
+        queue.sort(key=lambda i: (i.id in attempted, -i.marks, str(i.id)))
+    out: list[UUID] = []
+    while any(queues.values()):
+        for queue in queues.values():
+            if queue:
+                out.append(queue.pop(0).id)
+    return out
+
+
+def fill_to_marks(order: Sequence[UUID], marks: Mapping[UUID, int], target: int) -> list[UUID]:
+    """Take questions in order while they fit under the target; stop once it is reached. Never goes over."""
+    chosen: list[UUID] = []
+    total = 0
+    for item_id in order:
+        if total >= target:
+            break
+        if total + marks[item_id] <= target:
+            chosen.append(item_id)
+            total += marks[item_id]
+    return chosen
+
+
+def _topic_items(s: Session, subject_id: UUID, objective_ids: Sequence[UUID]) -> list[TopicItem]:
+    rows = s.execute(
+        select(QuestionItem.id, QuestionItem.marks, QuestionItem.objective_ids).where(
+            QuestionItem.subject_id == subject_id,
+            QuestionItem.objective_ids.overlap(list(objective_ids)),
+            QuestionItem.verification_status == "verified",
+            QuestionItem.reserved_for_study.is_(False),
+        )
+    ).all()
+    return [TopicItem(r[0], r[1], tuple(r[2] or ())) for r in rows]
+
+
+def items_for_objectives(
+    s: Session, *, subject_id: UUID, objective_ids: Sequence[UUID], student_id: UUID | None, limit: int
+) -> list[UUID]:
+    """Practice questions on the chosen topics of one subject, in ``order_for_topics`` order."""
+    items = _topic_items(s, subject_id, objective_ids)
+    attempted = latest_attempts(s, student_id=student_id, item_ids=[i.id for i in items]) if student_id else {}
+    return order_for_topics(items, list(dict.fromkeys(objective_ids)), attempted=attempted.keys())[:limit]
+
+
+def seconds_answering_since(s: Session, *, student_id: UUID, since: datetime) -> int:
+    """Time she spent on the questions she submitted since ``since``, as measured by the answer box. Answers with no
+    timing (older ones) add nothing, so this never overstates."""
+    total = s.scalar(
+        select(func.coalesce(func.sum(Attempt.time_spent_s), 0)).where(
+            Attempt.student_id == student_id, Attempt.submitted_at >= since
+        )
+    )
+    return int(total or 0)
+
+
 def latest_attempts(
     s: Session, *, student_id: UUID, item_ids: Sequence[UUID], since: datetime | None = None
 ) -> dict[UUID, UUID]:
@@ -278,6 +380,7 @@ class ConfidenceAttempt:
     pre_confidence: int
     max_assistance_level: int
     submitted_at: datetime
+    time_spent_s: int | None = None
 
 
 def attempts_with_confidence(
@@ -297,6 +400,7 @@ def attempts_with_confidence(
             Attempt.pre_confidence,
             Attempt.max_assistance_level,
             Attempt.submitted_at,
+            Attempt.time_spent_s,
         )
         .join(QuestionItem, QuestionItem.id == Attempt.question_item_id)
         .where(Attempt.student_id == student_id, Attempt.pre_confidence.is_not(None))
@@ -314,6 +418,7 @@ def attempts_with_confidence(
             pre_confidence=r[4],
             max_assistance_level=r[5],
             submitted_at=r[6],
+            time_spent_s=r[7],
         )
         for r in rows
     ]
@@ -458,7 +563,7 @@ def create_attempt(
         if answered is not None:
             raise ApiError(409, "already_answered", "this question has already been answered in the test")
         kind = found.kind
-        if kind in EXAM_STYLE_KINDS and meta.session_id is not None:
+        if kind in EXAM_CONDITION_KINDS and meta.session_id is not None:
             raise ApiError(422, "no_session_in_test", "test answers cannot be part of a tutoring session")
     elif active_exam_assessment(s, student_id=principal.student_id) is not None:
         raise ApiError(409, "assessment_in_progress", "finish and submit your test first")
@@ -483,7 +588,9 @@ def create_attempt(
         final_answer=final_answer,
         answer_image_uris=list(photo_uris),
         pre_confidence=meta.pre_confidence,
-        max_assistance_level=0 if kind in EXAM_STYLE_KINDS else _help_level(s, principal.student_id, meta.session_id),
+        max_assistance_level=0
+        if kind in EXAM_CONDITION_KINDS
+        else _help_level(s, principal.student_id, meta.session_id),
         time_spent_s=meta.time_spent_s,
         submitted_at=now,
     )
@@ -539,7 +646,7 @@ def active_exam_assessment(s: Session, *, student_id: UUID, now: datetime | None
             Assessment.status == "in_progress",
             or_(
                 Assessment.kind.in_(STUDY_KINDS),
-                (Assessment.kind == "exam_style") & (Assessment.started_at >= since),
+                Assessment.kind.in_(("exam_style", TOPIC_EXAM)) & (Assessment.started_at >= since),
             ),
         )
         .limit(1)
@@ -714,6 +821,65 @@ def create_assessment(
     return assessment.id
 
 
+def create_exam_from_topics(
+    s: Session,
+    principal: Principal,
+    body: ExamFromTopicsIn,
+    *,
+    student_id: UUID,
+    now: datetime,
+) -> UUID:
+    """A topic exam: questions on the chosen topics, up to the target marks, sat under exam conditions."""
+    require_student_access(principal, student_id, "assessments")
+    objective_ids = list(dict.fromkeys(body.objective_ids))
+    items = _topic_items(s, body.subject_id, objective_ids)
+    attempted = latest_attempts(s, student_id=student_id, item_ids=[i.id for i in items])
+    order = order_for_topics(items, objective_ids, attempted=attempted.keys())
+    selected_ids = fill_to_marks(order, {i.id: i.marks for i in items}, body.target_marks)
+    if not selected_ids:
+        # Never a paper on other topics in their place: she chose these, so say there is nothing to set.
+        raise ApiError(
+            422, "no_questions_for_topics", "there are no practice questions on the chosen topics yet — choose others"
+        )
+    marks = {i.id: i.marks for i in items}
+    total = sum(marks[i] for i in selected_ids)
+    assessment = Assessment(
+        id=uuid7(),
+        tenant_id=principal.tenant_id,
+        student_id=student_id,
+        subject_id=body.subject_id,
+        kind=TOPIC_EXAM,
+        form_code=None,
+        status="draft",
+        selection_rule_version=TOPIC_SELECTION,
+        config={
+            "title": body.title,
+            "exam_category": body.exam_category,
+            "duration_min": body.duration_minutes,
+            "target_marks": body.target_marks,
+            "total_marks": total,
+            "objective_ids": [str(o) for o in objective_ids],
+        },
+    )
+    s.add(assessment)
+    s.flush()
+    for position, item_id in enumerate(selected_ids):
+        s.add(AssessmentItem(assessment_id=assessment.id, position=position, question_item_id=item_id))
+    audit.record(
+        s,
+        tenant_id=principal.tenant_id,
+        actor_user_id=principal.user_id,
+        actor_role=principal.role,
+        action="assessment.created",
+        entity_type="assessment",
+        entity_id=assessment.id,
+        student_id=student_id,
+        meta={"kind": TOPIC_EXAM, "category": body.exam_category, "items": len(selected_ids), "total_marks": total},
+    )
+    s.flush()
+    return assessment.id
+
+
 def list_assessments(s: Session, principal: Principal, *, student_id: UUID) -> list[AssessmentBriefOut]:
     require_student_access(principal, student_id, "assessments")
     rows = s.scalars(
@@ -729,6 +895,7 @@ def list_assessments(s: Session, principal: Principal, *, student_id: UUID) -> l
             total_marks=int((r.config or {}).get("total_marks", 0)),
             created_at=r.created_at,
             submitted_at=r.submitted_at,
+            config=r.config,
         )
         for r in rows
     ]
@@ -741,7 +908,7 @@ def start_assessment(s: Session, principal: Principal, assessment_id: UUID, *, n
         return
     if row.status != "draft":
         raise ApiError(409, "assessment_closed", "this assessment is no longer open")
-    if row.kind in EXAM_STYLE_KINDS and active_exam_assessment(s, student_id=row.student_id) is not None:
+    if row.kind in EXAM_CONDITION_KINDS and active_exam_assessment(s, student_id=row.student_id) is not None:
         raise ApiError(409, "assessment_in_progress", "finish and submit your other test first")
     row.status = "in_progress"
     row.started_at = now
@@ -775,7 +942,7 @@ def assessment_detail(
     is_student = principal.role == "student"
     submitted = row.status in ("submitted", "evaluated")
     show_questions = not (is_student and row.status == "draft")
-    show_marks = not (is_student and row.kind in EXAM_STYLE_KINDS and not submitted)
+    show_marks = not (is_student and row.kind in EXAM_CONDITION_KINDS and not submitted)
     positions = s.execute(
         select(AssessmentItem.position, AssessmentItem.question_item_id)
         .where(AssessmentItem.assessment_id == row.id)
@@ -813,13 +980,14 @@ def assessment_detail(
         kind=row.kind,
         form_code=row.form_code,
         status=row.status,
-        no_help=row.kind in EXAM_STYLE_KINDS,
+        no_help=row.kind in EXAM_CONDITION_KINDS,
         total_marks=int((row.config or {}).get("total_marks", 0)),
         created_at=row.created_at,
         started_at=row.started_at,
         submitted_at=row.submitted_at,
         items=out_items,
         score=score_form(entries, submitted=submitted) if show_marks else None,
+        config=row.config,
     )
 
 
@@ -1004,3 +1172,404 @@ def replace_segment_insights(
             )
         )
     return len(points)
+
+
+# --- bookmarks: questions she saved to revise ---------------------------------------------------------------------
+
+
+def list_bookmarks(s: Session, principal: Principal, *, student_id: UUID) -> list[BookmarkOut]:
+    require_student_access(principal, student_id, "assessments")
+    rows = s.execute(
+        select(QuestionBookmark, QuestionItem)
+        .join(QuestionItem, QuestionItem.id == QuestionBookmark.question_item_id)
+        .where(QuestionBookmark.student_id == student_id)
+        .order_by(QuestionBookmark.created_at.desc())
+    ).all()
+    return [
+        BookmarkOut(
+            question_item_id=item.id,
+            subject_id=item.subject_id,
+            source_ref=item.source_ref,
+            stem=item.stem,
+            marks=item.marks,
+            tag=mark.tag,  # type: ignore[arg-type]
+            note=mark.note,
+            saved_at=mark.created_at,
+        )
+        for mark, item in rows
+        if item.verification_status == "verified" and not item.reserved_for_study  # withdrawn since, or a study item
+    ]
+
+
+def save_bookmark(s: Session, principal: Principal, item_id: UUID, body: BookmarkIn) -> None:
+    """Save (or retag) a question she can see. Study-reserved questions cannot be saved, as they cannot be served."""
+    require_role(principal, "student")
+    assert principal.student_id is not None
+    item = servable_item(s, item_id)
+    row = s.scalar(
+        select(QuestionBookmark).where(
+            QuestionBookmark.student_id == principal.student_id, QuestionBookmark.question_item_id == item.id
+        )
+    )
+    if row is None:
+        row = QuestionBookmark(
+            tenant_id=principal.tenant_id, student_id=principal.student_id, question_item_id=item.id, tag=body.tag
+        )
+        s.add(row)
+    row.tag = body.tag
+    row.note = (body.note or "").strip() or None
+    s.flush()
+
+
+def remove_bookmark(s: Session, principal: Principal, item_id: UUID) -> None:
+    require_role(principal, "student")
+    s.execute(
+        delete(QuestionBookmark).where(
+            QuestionBookmark.student_id == principal.student_id, QuestionBookmark.question_item_id == item_id
+        )
+    )
+
+
+# ---------------------------------------------------------------------------
+# Digital Notebooks
+# ---------------------------------------------------------------------------
+
+
+def list_notebooks(s: Session, principal: Principal, *, student_id: UUID) -> list[NotebookOut]:
+    require_student_access(principal, student_id, "assessments")
+    # Subquery to count items in each notebook
+    item_counts = dict(
+        s.execute(
+            select(NotebookItem.notebook_id, func.count(NotebookItem.id))
+            .where(NotebookItem.student_id == student_id)
+            .group_by(NotebookItem.notebook_id)
+        ).all()
+    )
+    rows = s.scalars(
+        select(Notebook).where(Notebook.student_id == student_id).order_by(Notebook.updated_at.desc())
+    ).all()
+    return [
+        NotebookOut(
+            id=r.id,
+            student_id=r.student_id,
+            title=r.title,
+            description=r.description,
+            icon=r.icon,
+            color=r.color,
+            subject_id=r.subject_id,
+            item_count=item_counts.get(r.id, 0),
+            created_at=r.created_at,
+            updated_at=r.updated_at,
+        )
+        for r in rows
+    ]
+
+
+def get_notebook(s: Session, principal: Principal, notebook_id: UUID) -> NotebookOut:
+    nb = s.get(Notebook, notebook_id)
+    if nb is None:
+        raise not_found("notebook")
+    require_student_access(principal, nb.student_id, "assessments")
+    count = s.scalar(select(func.count(NotebookItem.id)).where(NotebookItem.notebook_id == notebook_id)) or 0
+    return NotebookOut(
+        id=nb.id,
+        student_id=nb.student_id,
+        title=nb.title,
+        description=nb.description,
+        icon=nb.icon,
+        color=nb.color,
+        subject_id=nb.subject_id,
+        item_count=count,
+        created_at=nb.created_at,
+        updated_at=nb.updated_at,
+    )
+
+
+def create_notebook(
+    s: Session, principal: Principal, body: NotebookCreate, *, student_id: UUID, now: datetime
+) -> NotebookOut:
+    require_student_access(principal, student_id, "assessments")
+    nb = Notebook(
+        id=uuid7(),
+        tenant_id=principal.tenant_id,
+        student_id=student_id,
+        title=body.title.strip(),
+        description=body.description.strip() if body.description else None,
+        icon=body.icon or "📓",
+        color=body.color or "amber",
+        subject_id=body.subject_id,
+        created_at=now,
+        updated_at=now,
+    )
+    s.add(nb)
+    s.flush()
+    return NotebookOut(
+        id=nb.id,
+        student_id=nb.student_id,
+        title=nb.title,
+        description=nb.description,
+        icon=nb.icon,
+        color=nb.color,
+        subject_id=nb.subject_id,
+        item_count=0,
+        created_at=nb.created_at,
+        updated_at=nb.updated_at,
+    )
+
+
+def update_notebook(
+    s: Session, principal: Principal, notebook_id: UUID, body: NotebookUpdate, *, now: datetime
+) -> NotebookOut:
+    nb = s.get(Notebook, notebook_id)
+    if nb is None:
+        raise not_found("notebook")
+    require_student_access(principal, nb.student_id, "assessments")
+    if body.title is not None:
+        nb.title = body.title.strip()
+    if body.description is not None:
+        nb.description = body.description.strip() or None
+    if body.icon is not None:
+        nb.icon = body.icon
+    if body.color is not None:
+        nb.color = body.color
+    nb.updated_at = now
+    s.flush()
+    return get_notebook(s, principal, notebook_id)
+
+
+def delete_notebook(s: Session, principal: Principal, notebook_id: UUID) -> None:
+    nb = s.get(Notebook, notebook_id)
+    if nb is None:
+        raise not_found("notebook")
+    require_student_access(principal, nb.student_id, "assessments")
+    s.delete(nb)
+    s.flush()
+
+
+def list_notebook_items(s: Session, principal: Principal, notebook_id: UUID) -> list[NotebookItemOut]:
+    nb = s.get(Notebook, notebook_id)
+    if nb is None:
+        raise not_found("notebook")
+    require_student_access(principal, nb.student_id, "assessments")
+    rows = s.execute(
+        select(NotebookItem, QuestionItem)
+        .join(QuestionItem, QuestionItem.id == NotebookItem.question_item_id)
+        .where(NotebookItem.notebook_id == notebook_id)
+        .order_by(NotebookItem.created_at.desc())
+    ).all()
+    return [
+        NotebookItemOut(
+            id=item.id,
+            notebook_id=item.notebook_id,
+            question_item_id=item.question_item_id,
+            student_notes=item.student_notes,
+            created_at=item.created_at,
+            question=question_out(q),
+        )
+        for item, q in rows
+    ]
+
+
+def add_notebook_item(
+    s: Session, principal: Principal, notebook_id: UUID, body: NotebookItemCreate, *, now: datetime
+) -> NotebookItemOut:
+    nb = s.get(Notebook, notebook_id)
+    if nb is None:
+        raise not_found("notebook")
+    require_student_access(principal, nb.student_id, "assessments")
+    q = servable_item(s, body.question_item_id)
+    existing = s.scalar(
+        select(NotebookItem).where(
+            NotebookItem.notebook_id == notebook_id,
+            NotebookItem.question_item_id == q.id,
+        )
+    )
+    if existing is not None:
+        existing.student_notes = body.student_notes
+        s.flush()
+        return NotebookItemOut(
+            id=existing.id,
+            notebook_id=existing.notebook_id,
+            question_item_id=existing.question_item_id,
+            student_notes=existing.student_notes,
+            created_at=existing.created_at,
+            question=question_out(q),
+        )
+    item = NotebookItem(
+        id=uuid7(),
+        tenant_id=principal.tenant_id,
+        student_id=nb.student_id,
+        notebook_id=nb.id,
+        question_item_id=q.id,
+        student_notes=body.student_notes,
+        created_at=now,
+    )
+    s.add(item)
+    nb.updated_at = now
+    s.flush()
+    return NotebookItemOut(
+        id=item.id,
+        notebook_id=item.notebook_id,
+        question_item_id=item.question_item_id,
+        student_notes=item.student_notes,
+        created_at=item.created_at,
+        question=question_out(q),
+    )
+
+
+def remove_notebook_item(s: Session, principal: Principal, notebook_id: UUID, question_item_id: UUID) -> None:
+    nb = s.get(Notebook, notebook_id)
+    if nb is None:
+        raise not_found("notebook")
+    require_student_access(principal, nb.student_id, "assessments")
+    s.execute(
+        delete(NotebookItem).where(
+            NotebookItem.notebook_id == notebook_id,
+            NotebookItem.question_item_id == question_item_id,
+        )
+    )
+    s.flush()
+
+
+def create_exam_from_notebook(
+    s: Session,
+    principal: Principal,
+    body: ExamFromNotebookIn,
+    *,
+    student_id: UUID,
+    now: datetime,
+) -> UUID:
+    """Create a timed custom practice assessment directly from questions saved in a notebook."""
+    require_student_access(principal, student_id, "assessments")
+    nb = s.get(Notebook, body.notebook_id)
+    if nb is None:
+        raise not_found("notebook")
+    items = s.scalars(
+        select(NotebookItem).where(NotebookItem.notebook_id == body.notebook_id).order_by(NotebookItem.created_at.asc())
+    ).all()
+    if not items:
+        raise ApiError(422, "empty_notebook", "This notebook contains no questions yet — add questions first.")
+
+    q_ids = [it.question_item_id for it in items]
+    questions = s.scalars(select(QuestionItem).where(QuestionItem.id.in_(q_ids))).all()
+    q_map = {q.id: q for q in questions}
+    total_marks = sum(q_map[qid].marks for qid in q_ids if qid in q_map)
+
+    # Pick subject: from notebook if set, or from the first question
+    subject_id = nb.subject_id or (questions[0].subject_id if questions else None)
+    if subject_id is None:
+        raise ApiError(422, "unknown_subject", "Cannot determine subject for notebook exam.")
+
+    assessment = Assessment(
+        id=uuid7(),
+        tenant_id=principal.tenant_id,
+        student_id=student_id,
+        subject_id=subject_id,
+        kind="topic_exam",
+        form_code=None,
+        status="draft",
+        selection_rule_version="notebook_v1",
+        config={
+            "title": body.title,
+            "notebook_id": str(body.notebook_id),
+            "duration_min": body.duration_minutes,
+            "total_marks": total_marks,
+        },
+    )
+    s.add(assessment)
+    s.flush()
+    for position, qid in enumerate(q_ids):
+        if qid in q_map:
+            s.add(AssessmentItem(assessment_id=assessment.id, position=position, question_item_id=qid))
+    s.flush()
+    return assessment.id
+
+
+def create_exam_from_mistakes(
+    s: Session,
+    principal: Principal,
+    body: ExamFromMistakesIn,
+    *,
+    student_id: UUID,
+    now: datetime,
+) -> UUID:
+    """Generate a targeted 'Kill the Mistake' retry drill on unresolved mistake objectives."""
+    require_student_access(principal, student_id, "assessments")
+    from app.modules.mistakes import service as mistakes_service
+
+    open_mistakes = mistakes_service.list_mistakes(s, student_id=student_id, subject_id=body.subject_id, status="open")
+    if not open_mistakes:
+        open_mistakes = mistakes_service.list_mistakes(
+            s, student_id=student_id, subject_id=body.subject_id, status="improving"
+        )
+    if not open_mistakes:
+        raise ApiError(422, "no_open_mistakes", "Great news! You have no open or recurring mistakes in this subject.")
+
+    objective_ids = [m.objective_id for m in open_mistakes if m.objective_id is not None]
+    if not objective_ids:
+        raise ApiError(422, "no_mistake_objectives", "Open mistakes do not have linked curriculum objectives.")
+
+    selected_ids = items_for_objectives(
+        s,
+        subject_id=body.subject_id,
+        objective_ids=objective_ids,
+        student_id=student_id,
+        limit=body.limit,
+    )
+    if not selected_ids:
+        raise ApiError(422, "no_practice_items", "No fresh practice items found for your open mistake objectives.")
+
+    questions = [servable_item(s, qid) for qid in selected_ids]
+    total_marks = sum(q.marks for q in questions)
+
+    assessment = Assessment(
+        id=uuid7(),
+        tenant_id=principal.tenant_id,
+        student_id=student_id,
+        subject_id=body.subject_id,
+        kind="topic_exam",
+        form_code=None,
+        status="draft",
+        selection_rule_version="mistakes_drill_v1",
+        config={
+            "title": body.title,
+            "duration_min": body.duration_minutes,
+            "total_marks": total_marks,
+            "drill_type": "mistakes_killer",
+        },
+    )
+    s.add(assessment)
+    s.flush()
+    for position, qid in enumerate(selected_ids):
+        s.add(AssessmentItem(assessment_id=assessment.id, position=position, question_item_id=qid))
+    s.flush()
+    return assessment.id
+
+
+def get_assessment_report(
+    s: Session,
+    principal: Principal,
+    assessment_id: UUID,
+) -> AssessmentReportOut:
+    """Generate the full deterministic performance diagnostic report for an assessment."""
+    assessment = s.get(Assessment, assessment_id)
+    if assessment is None:
+        raise not_found("assessment")
+    require_student_access(principal, assessment.student_id, "assessments")
+    report = generate_diagnostic_report(s, assessment_id, assessment.student_id)
+    return AssessmentReportOut(
+        assessment_id=report.assessment_id,
+        title=report.title,
+        kind=report.kind,
+        total_questions=report.total_questions,
+        total_marks_available=report.total_marks_available,
+        total_marks_awarded=report.total_marks_awarded,
+        score_percentage=report.score_percentage,
+        projected_grade=report.projected_grade,
+        pacing=report.pacing,  # type: ignore[arg-type]
+        time_sinks=report.time_sinks,  # type: ignore[arg-type]
+        topic_breakdown=report.topic_breakdown,  # type: ignore[arg-type]
+        difficulty_breakdown=report.difficulty_breakdown,  # type: ignore[arg-type]
+        mistake_types_summary=report.mistake_types_summary,
+        action_plan=report.action_plan,
+    )

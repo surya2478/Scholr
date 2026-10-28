@@ -13,84 +13,90 @@ import { Icon, type IconName } from "./icons";
 const MeContext = createContext<Me | null>(null);
 export const useMe = () => useContext(MeContext);
 
-type NavItem = { href: string; label: string; icon: IconName };
+type ThemeMode = "light" | "dark";
+const THEME_STORAGE_KEY = "scholr:theme-mode:v1";
+
+type NavItem = { href: string; label: string; icon: IconName; badge?: string };
 type NavGroup = { section?: string; items: NavItem[] };
 
-// Grouped like design/home: a home link, then sections. Learn opens the streams (docs/STUDENT-APP.md): subject →
-// chapter → topic. The Tutor is the one assistant; it clears doubts where she is stuck.
+// The student and guardian menus. Labels are ours; no other product is named here.
 const STUDENT_NAV: NavGroup[] = [
-  { items: [{ href: "/student", label: "Home", icon: "home" }] },
+  { items: [{ href: "/student", label: "Today", icon: "home" }] },
   {
-    section: "LEARN",
+    section: "Study",
     items: [
-      { href: "/student/learn", label: "Subjects & topics", icon: "learn" },
-      { href: "/student/practice/daily", label: "Today's practice", icon: "check" },
-      { href: "/student/practice", label: "Practice", icon: "practice" },
-      { href: "/student/tutor", label: "Ask the Tutor", icon: "tutor" },
-      { href: "/student/iit", label: "IIT Foundation", icon: "external" },
+      { href: "/student/learn", label: "Subjects", icon: "learn" },
+      { href: "/student/practice/daily", label: "Today's set", icon: "check" },
+      { href: "/student/homework", label: "My homework", icon: "notes" },
+      { href: "/student/practice", label: "Question bank", icon: "practice" },
+      { href: "/student/notebooks", label: "My notebooks", icon: "notes" },
+      { href: "/student/tutor", label: "Tutor", icon: "tutor" },
+      { href: "/student/iit", label: "IIT classes", icon: "external" },
     ],
   },
   {
-    section: "PROGRESS",
+    section: "How I'm doing",
     items: [
-      { href: "/student/progress", label: "My Progress", icon: "progress" },
-      { href: "/student/mistakes", label: "My Mistakes", icon: "mistakes" },
+      { href: "/student/progress", label: "My progress", icon: "progress" },
+      { href: "/student/mistakes", label: "My mistakes", icon: "mistakes" },
     ],
   },
   {
-    section: "ASSESSMENTS",
+    section: "Exams and papers",
     items: [
-      { href: "/student/papers", label: "Timed past papers", icon: "clock" },
-      { href: "/student/tests", label: "Tests", icon: "tests" },
+      { href: "/student/examinations", label: "Mock exams", icon: "tests" },
+      { href: "/student/papers", label: "Past papers", icon: "clock" },
+      { href: "/student/tests", label: "Tests set for me", icon: "tests" },
     ],
   },
   {
-    section: "PRIVACY",
+    section: "Privacy",
     items: [
-      { href: "/student/visibility", label: "What my parent sees", icon: "visibility" },
-      { href: "/consent", label: "Privacy & consent", icon: "privacy" },
+      { href: "/student/visibility", label: "What my parents see", icon: "visibility" },
+      { href: "/consent", label: "Privacy", icon: "privacy" },
     ],
   },
 ];
 
 const PARENT_NAV: NavGroup[] = [
-  { items: [{ href: "/parent", label: "Overview", icon: "home" }] },
+  { items: [{ href: "/parent", label: "Executive Overview", icon: "home" }] },
   {
-    section: "PROGRESS",
+    section: "Progress",
     items: [
-      { href: "/parent/summary", label: "Monthly summary", icon: "progress" },
-      { href: "/parent/review", label: "Review marks", icon: "check" },
-      { href: "/parent/tests", label: "Tests & study", icon: "tests" },
-      { href: "/parent/schedule", label: "Schedule", icon: "schedule" },
-      { href: "/parent/iit", label: "IIT Foundation", icon: "external" },
-      { href: "/parent/notes", label: "Learning notes", icon: "notes" },
+      { href: "/parent/summary", label: "Monthly Analytics", icon: "progress" },
+      { href: "/parent/review", label: "Mark Verification", icon: "check" },
+      { href: "/parent/examinations", label: "Mock Examinations", icon: "tests" },
+      { href: "/parent/tests", label: "Test Series & Study", icon: "tests" },
+      { href: "/parent/schedule", label: "Timetable & Rhythm", icon: "schedule" },
+      { href: "/parent/iit", label: "IIT Foundation Standing", icon: "external" },
+      { href: "/parent/notes", label: "Learning Notes", icon: "notes" },
     ],
   },
   {
-    section: "SAFETY & PRIVACY",
+    section: "Safety",
     items: [
-      { href: "/parent/safety", label: "Safety alerts", icon: "shield" },
-      { href: "/consent", label: "Privacy & consent", icon: "privacy" },
+      { href: "/parent/safety", label: "Safety Telemetry", icon: "shield" },
+      { href: "/consent", label: "Privacy", icon: "privacy" },
     ],
   },
 ];
 
 function Logo({ portal, isStudent }: { portal: string; isStudent: boolean }) {
   return (
-    <div className="flex items-center gap-3 px-2 py-2">
-      <div className="h-11 w-11 flex-none rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-orange-500/20 text-2xl font-fun font-bold transform -rotate-2 hover:rotate-0 transition-transform">
+    <div className="flex items-center gap-3 px-2 py-1.5">
+      <div className="h-10 w-10 flex-none rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-blue-600/25 font-mono text-lg font-extrabold">
         S
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="font-fun text-xl font-bold tracking-tight text-slate-900">
-            Scholr<span className="text-orange-500">{isStudent ? "Jr" : "Family"}</span>
+          <span className="text-base font-extrabold tracking-tight text-white">
+            SCHOLR
           </span>
-          <span className="hidden xl:inline-block px-2 py-0.5 text-[10px] font-bold rounded-full bg-orange-100 text-orange-700 border border-orange-200">
-            {isStudent ? "Year 10" : "Guardian"}
+          <span className="inline-block px-1.5 py-0.5 font-mono text-[10px] font-bold rounded bg-blue-500/20 text-blue-300 border border-blue-400/30">
+            {isStudent ? "PRO · Y10" : "GUARDIAN"}
           </span>
         </div>
-        <div className="text-[10.5px] text-slate-500 font-medium truncate">
+        <div className="text-[11px] text-slate-400 font-medium truncate">
           {portal}
         </div>
       </div>
@@ -104,9 +110,33 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
   const [me, setMe] = useState<Me | null>(null);
   const [open, setOpen] = useState(false);
   const [switchable, setSwitchable] = useState(true);
+  const [theme, setTheme] = useState<ThemeMode>("light");
 
-  // The Student/Parent switch opens a seeded account, which exists in development mode only: with real
-  // accounts (docs/STUDENT-APP.md D7) each person signs in as themselves.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
+      if (saved === "dark" || saved === "light") {
+        setTheme(saved);
+        document.documentElement.dataset.theme = saved;
+      } else {
+        document.documentElement.dataset.theme = "light";
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  function selectTheme(next: ThemeMode) {
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch {
+      // ignore
+    }
+  }
+
+  // The Student/Parent switch opens a seeded account, which exists in development mode only.
   useEffect(() => {
     localSignInEnabled()
       .then((local) => setSwitchable(!local))
@@ -133,7 +163,6 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
   }, [audience, router]);
 
   const nav = audience === "student" ? STUDENT_NAV : PARENT_NAV;
-  // The most specific entry wins: /student/practice/daily lights "Today's practice", not "Practice" as well.
   const activeHref = nav
     .flatMap((g) => g.items.map((i) => i.href))
     .filter((href) => href === pathname || (href !== `/${audience}` && pathname.startsWith(`${href}/`)))
@@ -141,40 +170,42 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
   const name = me?.user.display_name ?? "";
   const isStudent = audience === "student";
 
-  // Top header quick navigation shortcuts
   const topShortcuts = isStudent
     ? [
-        { href: "/student", label: "Adventure", icon: "🌟" },
-        { href: "/student/learn", label: "Learn", icon: "📚" },
-        { href: "/student/practice", label: "Practice", icon: "📐" },
-        { href: "/student/tutor", label: "Tutor", icon: "🦉" },
-        { href: "/student/iit", label: "IIT Bridge", icon: "⚡" },
-        { href: "/student/progress", label: "Progress", icon: "🏆" },
+        { href: "/student", label: "Today", icon: "◫" },
+        { href: "/student/learn", label: "Subjects", icon: "📖" },
+        { href: "/student/practice", label: "Questions", icon: "✍️" },
+        { href: "/student/tutor", label: "Tutor", icon: "⚡" },
+        { href: "/student/iit", label: "IIT", icon: "🏛️" },
+        { href: "/student/progress", label: "Progress", icon: "📈" },
       ]
     : [
-        { href: "/parent", label: "Overview", icon: "☀️" },
-        { href: "/parent/summary", label: "Monthly", icon: "📅" },
-        { href: "/parent/review", label: "Review Marks", icon: "✏️" },
-        { href: "/parent/schedule", label: "Schedule", icon: "🕒" },
+        { href: "/parent", label: "Overview", icon: "◫" },
+        { href: "/parent/summary", label: "Monthly", icon: "📈" },
+        { href: "/parent/review", label: "Verify Marks", icon: "✓" },
+        { href: "/parent/schedule", label: "Timetable", icon: "🕒" },
         { href: "/parent/safety", label: "Safety", icon: "🛡️" },
       ];
 
   return (
     <MeContext.Provider value={me}>
-      <div className="flex min-h-screen bg-[#FBF9F5]">
-        {/* Warm Friendly Sidebar */}
+      <div className="flex min-h-screen bg-[var(--color-ground)] text-[var(--color-ink)]">
+        {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 flex w-68 flex-col border-r-2 border-amber-100 bg-white p-4 transition-transform md:static md:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-40 flex w-68 flex-col border-r border-slate-800/80 bg-[#0B1528] text-slate-100 p-4 transition-transform md:static md:translate-x-0 ${
             open ? "translate-x-0 shadow-2xl" : "-translate-x-full"
           }`}
         >
-          <Logo portal={isStudent ? "Smart, Fun & Cambridge Verified! 🚀" : "Family Co-Pilot & Oversight"} isStudent={isStudent} />
-          
+          <Logo
+            portal={isStudent ? "Cambridge CIE & IIT Studio" : "Academic Telemetry & Oversight"}
+            isStudent={isStudent}
+          />
+
           <nav className="mt-5 flex flex-1 flex-col gap-1 overflow-y-auto pr-1">
             {nav.map((group) => (
               <div key={group.section ?? "top"} className="flex flex-col gap-1">
                 {group.section && (
-                  <div className="mt-4 px-3.5 text-[11px] font-bold tracking-wider text-amber-900/60 uppercase">
+                  <div className="mt-4 px-3 font-mono text-[10px] font-bold tracking-widest text-slate-400 uppercase">
                     {group.section}
                   </div>
                 )}
@@ -185,17 +216,30 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
                       key={item.href}
                       href={item.href}
                       onClick={() => setOpen(false)}
-                      className={`flex h-10 items-center gap-3 rounded-2xl px-3.5 text-sm font-semibold transition-all ${
+                      className={`flex h-9.5 items-center justify-between gap-2.5 rounded-xl px-3 text-xs font-semibold transition-all ${
                         active
-                          ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm shadow-orange-500/20"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/70"
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/25 font-bold"
+                          : "text-slate-300 hover:text-white hover:bg-white/5"
                       }`}
                     >
-                      <Icon
-                        name={item.icon}
-                        className={`h-[19px] w-[19px] ${active ? "text-white" : "text-amber-600/70"}`}
-                      />
-                      <span className="truncate">{item.label}</span>
+                      <span className="flex items-center gap-2.5 min-w-0">
+                        <Icon
+                          name={item.icon}
+                          className={`h-[17px] w-[17px] shrink-0 ${active ? "text-white" : "text-blue-400/80"}`}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </span>
+                      {item.badge && (
+                        <span
+                          className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-bold ${
+                            active
+                              ? "bg-blue-800 text-blue-100"
+                              : "bg-emerald-500/15 text-emerald-300 border border-emerald-400/25"
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}
@@ -203,17 +247,22 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
             ))}
           </nav>
 
-          {/* Cheerful Mascot Motivation Card at Sidebar Bottom */}
+          {/* Bottom Academic Telemetry Status Card */}
           <div className="mt-auto pt-3">
-            <div className="rounded-2xl border-2 border-amber-200/80 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-50 p-3 text-center">
-              <span className="text-xl inline-block mb-1">
-                {isStudent ? "🦉" : "👨‍👩‍👧"}
-              </span>
-              <p className="text-xs font-fun font-bold text-slate-800 leading-snug">
-                {isStudent ? "Small steps. Real progress." : "Guide gently. Grow independence."}
-              </p>
-              <p className="text-[10px] text-amber-700/80 mt-0.5 font-medium">
-                {isStudent ? "Cambridge IGCSE + IIT Bridge" : "Oversight without micromanagement"}
+            <div className="rounded-2xl border border-blue-500/25 bg-gradient-to-br from-blue-950/90 via-slate-900 to-indigo-950/90 p-3.5 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-[11px] font-bold text-white">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{isStudent ? "Dual-Engine Verified" : "Guardian Co-Pilot"}</span>
+                </span>
+                <span className="font-mono text-[10px] font-bold text-blue-300">
+                  {isStudent ? "v6.0" : "LIVE"}
+                </span>
+              </div>
+              <p className="text-[10.5px] text-slate-300 leading-relaxed">
+                {isStudent
+                  ? "Cambridge 0495 / 0580 / 0625 Mark Schemes + SymPy Symbolic Verification"
+                  : "Real-time syllabus mastery & independent attempt telemetry"}
               </p>
             </div>
           </div>
@@ -222,62 +271,101 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
         {open && (
           <button
             aria-label="Close menu"
-            className="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-xs md:hidden"
+            className="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-xs md:hidden"
             onClick={() => setOpen(false)}
           />
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          {/* Top Sticky Header */}
-          <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-amber-100 bg-white/95 backdrop-blur px-4 md:px-6 shadow-2xs">
+          {/* Top Sticky Command Bar */}
+          <header
+            className={`sticky top-0 z-30 flex h-15 items-center gap-3 border-b px-4 md:px-6 backdrop-blur-md transition-colors ${
+              theme === "dark"
+                ? "border-slate-800 bg-[#090D16]/90"
+                : "border-slate-200/90 bg-white/95 shadow-2xs"
+            }`}
+          >
             <button
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-orange-600 font-bold md:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-300 bg-slate-100 text-slate-800 font-bold md:hidden"
               onClick={() => setOpen(true)}
               aria-label="Open navigation menu"
             >
               ☰
             </button>
 
-            {/* Quick Navigation Chips (CuriousJr style) on desktop */}
-            <div className="hidden lg:flex items-center gap-1.5 bg-amber-50/80 p-1.5 rounded-2xl border border-amber-200/60 text-xs font-semibold">
+            {/* Quick Navigation Chips on desktop */}
+            <div className="hidden xl:flex items-center gap-1 rounded-xl border border-slate-200/80 bg-slate-100/80 p-1 text-xs font-semibold">
               {topShortcuts.map((chip) => {
-                const active = chip.href === pathname || (chip.href !== `/${audience}` && pathname.startsWith(chip.href));
+                const active =
+                  chip.href === pathname || (chip.href !== `/${audience}` && pathname.startsWith(chip.href));
                 return (
                   <Link
                     key={chip.href}
                     href={chip.href}
-                    className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
+                    className={`px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
                       active
-                        ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-xs font-bold"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-white/70"
+                        ? "bg-blue-600 text-white shadow-2xs font-bold"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/80"
                     }`}
                   >
-                    <span>{chip.icon}</span>
+                    <span className="text-xs">{chip.icon}</span>
                     <span>{chip.label}</span>
                   </Link>
                 );
               })}
             </div>
 
-            {/* Student Search / Ask bar */}
+            {/* Student Search / Master Router Ask Bar */}
             {isStudent && me && (
               <div className="hidden flex-1 max-w-xs md:block">
                 <AskBox />
               </div>
             )}
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex items-center gap-2.5">
+              {/* Theme switcher: light or dark */}
+              <div
+                className="flex items-center gap-1 rounded-xl border border-slate-200/90 bg-slate-100/90 p-1 text-[11px] font-bold"
+                role="group"
+                aria-label="Visual theme"
+              >
+                <button
+                  type="button"
+                  onClick={() => selectTheme("light")}
+                  className={`rounded-lg px-2.5 py-1 transition cursor-pointer ${
+                    theme === "light"
+                      ? "bg-blue-600 text-white shadow-2xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                  title="Light theme"
+                >
+                  ☀️ Light
+                </button>
+                <button
+                  type="button"
+                  onClick={() => selectTheme("dark")}
+                  className={`rounded-lg px-2.5 py-1 transition cursor-pointer ${
+                    theme === "dark"
+                      ? "bg-blue-600 text-white shadow-2xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                  title="Dark Focus Studio Theme"
+                >
+                  🌙 Dark
+                </button>
+              </div>
+
               {/* User Avatar & Name */}
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 pl-1.5 pr-3 py-1 rounded-full">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-inner">
-                  {isStudent ? "👩‍🎓" : "👨‍👩‍👧"}
+              <div className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200/90 bg-slate-50 pl-1.5 pr-3 py-1">
+                <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-mono font-bold text-xs shadow-inner">
+                  {isStudent ? "Y10" : "GD"}
                 </div>
-                <div className="hidden sm:block text-left">
-                  <div className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[120px]">
-                    {name || (isStudent ? "Student" : "Parent")}
+                <div className="text-left">
+                  <div className="text-xs font-bold text-slate-900 leading-tight truncate max-w-[115px]">
+                    {name || (isStudent ? "Student" : "Guardian")}
                   </div>
-                  <div className="text-[10px] text-slate-400 font-medium leading-none">
-                    {isStudent ? (me?.student?.year_group ?? "Year 10") : "Parent account"}
+                  <div className="font-mono text-[10px] text-slate-400 font-semibold leading-none">
+                    {isStudent ? (me?.student?.year_group ?? "Year 10") : "Guardian"}
                   </div>
                 </div>
               </div>
@@ -288,7 +376,7 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
                     clearToken();
                     router.replace("/sign-in");
                   }}
-                  className="rounded-full border border-amber-200 px-3 py-1 text-[11px] font-fun font-bold text-slate-600 transition-all hover:text-slate-900"
+                  className="rounded-xl border border-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600 transition-all hover:text-slate-900 cursor-pointer"
                 >
                   Sign out
                 </button>
@@ -296,11 +384,15 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
 
               {/* Role Switcher */}
               {switchable && (
-                <div className="flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50/60 p-1" role="group" aria-label="View as">
+                <div
+                  className="flex items-center gap-1 rounded-xl border border-slate-200/90 bg-slate-100/90 p-1"
+                  role="group"
+                  aria-label="View as"
+                >
                   {(
                     [
                       { role: "student", label: "Student", href: "/student" },
-                      { role: "guardian", label: "Parent", href: "/parent" },
+                      { role: "guardian", label: "Guardian", href: "/parent" },
                     ] as { role: DevRole; label: string; href: string }[]
                   ).map((option) => {
                     const active = (audience === "student") === (option.role === "student");
@@ -317,9 +409,9 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
                             setSwitchable(false);
                           }
                         }}
-                        className={`rounded-full px-3 py-1 text-[11px] font-fun font-bold transition-all ${
+                        className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all cursor-pointer ${
                           active
-                            ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-xs"
+                            ? "bg-slate-900 text-white shadow-2xs"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
@@ -334,13 +426,17 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
 
           {/* Main Content Area */}
           <main className="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto">
-            {me ? children : (
+            {me ? (
+              children
+            ) : (
               <div className="flex h-64 items-center justify-center">
-                <div className="flex items-center gap-3 bg-white p-6 rounded-3xl border-2 border-amber-200 shadow-sm">
-                  <div className="text-3xl animate-bounce">🦉</div>
+                <div className="flex items-center gap-3.5 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 font-mono text-base font-extrabold text-white animate-pulse">
+                    S
+                  </div>
                   <div>
-                    <div className="text-sm font-fun font-bold text-slate-800">Opening your learning space…</div>
-                    <div className="text-xs text-slate-400">Loading your adventure</div>
+                    <div className="text-sm font-bold text-slate-900">Initialising Scholr Pro Workspace…</div>
+                    <div className="text-xs text-slate-500">Loading Cambridge CIE &amp; IIT Foundation telemetry</div>
                   </div>
                 </div>
               </div>

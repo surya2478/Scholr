@@ -346,6 +346,137 @@ def search(
     return RetrievalResult(state=state, chunks=chunks, log_id=log.id)
 
 
+_TABLE_RULE = "%| :%"  # the separator row of a Markdown table, as the OCR writes one ("| :--- | :--- |")
+
+
+@dataclass(frozen=True)
+class TopicMatch:
+    objective_id: UUID
+    subject_id: UUID
+    similarity: float
+
+
+@dataclass(frozen=True)
+class TopicMatchResult:
+    """Which topics a piece of text looks like, and how much the corpus actually supports saying so."""
+
+    state: str  # HIGH | MEDIUM | LOW, by the subject's own retrieval thresholds
+    matches: list[TopicMatch]
+
+
+def topics_for_text(
+    s: Session,
+    gateway: LLMGateway,
+    ctx: CallContext,
+    *,
+    text: str,
+    subject_ids: Sequence[UUID],
+    limit: int = 3,
+) -> TopicMatchResult:
+    """The topics whose own pages are nearest to a piece of text — her homework photo, read out (F3).
+
+    One embedding of the text is compared with the chunks of the given subjects, and each chunk votes for the
+    objectives it is tagged to; a topic scores its nearest chunk, so a long chapter does not out-vote a short
+    section. The state is computed with the same thresholds and the same rule the Tutor and lessons use, so a
+    thin match says LOW here exactly as it would there — and the caller shows her nothing rather than guessing.
+
+    Nothing is written: no retrieval log, because the text is her own worksheet and Scholr keeps none of it.
+    """
+    if not text.strip() or not subject_ids:
+        return TopicMatchResult(state="LOW", matches=[])
+    tiers: set[str] = set()
+    thresholds: StateThresholds | None = None
+    for subject in curriculum.subject_summaries(s, list(subject_ids)).values():
+        try:
+            config = subjects.explained_config_for(subject.code).retrieval
+        except subjects.SubjectConfigError:
+            continue
+        tiers.update(config.allowed_authority_tiers)
+        if thresholds is None:  # the first explained subject's thresholds; they are the same across subjects today
+            thresholds = StateThresholds(
+                high=config.state_thresholds.high,
+                medium=config.state_thresholds.medium,
+                low=config.state_thresholds.low,
+            )
+    if thresholds is None:
+        return TopicMatchResult(state="LOW", matches=[])
+
+    vector = gateway.embed([text], ctx)[0]
+    distance = KnowledgeChunk.embedding.cosine_distance(vector)
+    rows = s.execute(
+        select(
+            KnowledgeChunk.subject_id,
+            KnowledgeChunk.objective_ids,
+            KnowledgeChunk.authority_tier,
+            distance.label("distance"),
+        )
+        .where(
+            KnowledgeChunk.subject_id.in_(list(subject_ids)),
+            KnowledgeChunk.authority_tier.in_(tiers),
+            KnowledgeChunk.content_kind.not_in(NOT_RETRIEVABLE_KINDS),
+            KnowledgeChunk.embedding.is_not(None),
+        )
+        .order_by(distance)
+        .limit(CANDIDATES_PER_RANKING)
+    ).all()
+
+    best: dict[UUID, TopicMatch] = {}
+    tier_of: dict[UUID, str] = {}
+    for row in rows:
+        similarity = 1.0 - float(row.distance)
+        for objective_id in row.objective_ids or []:
+            held = best.get(objective_id)
+            if held is None or similarity > held.similarity:
+                best[objective_id] = TopicMatch(objective_id, row.subject_id, round(similarity, 4))
+                tier_of[objective_id] = row.authority_tier
+    matches = sorted(best.values(), key=lambda m: m.similarity, reverse=True)[:limit]
+    state = retrieval_state(
+        [Candidate(m.similarity, False, True, tier_of[m.objective_id]) for m in matches],
+        objective_scoped=False,
+        thresholds=thresholds,
+    )
+    # The bar lessons already use: HIGH or MEDIUM, or her books do not support naming a topic at all.
+    return TopicMatchResult(state=state, matches=matches if state in ("HIGH", "MEDIUM") else [])
+
+
+def objective_tables(s: Session, *, subject_id: UUID, objective_id: UUID, limit: int = 4) -> list[RetrievedChunk]:
+    """The book's own tables on one objective, in page order. Similarity ranking can leave a table out of the top
+    passages (Chemistry 2.2's particle table, 22 Sep 2026), and a lesson's tables must be built from the book's."""
+    subject = curriculum.subject_summaries(s, [subject_id]).get(subject_id)
+    if subject is None:
+        raise ValueError("unknown subject")
+    config = subjects.explained_config_for(subject.code).retrieval
+    rows = s.execute(
+        select(KnowledgeChunk, Source.title)
+        .join(KnowledgeDocument, KnowledgeDocument.id == KnowledgeChunk.document_id)
+        .join(Source, Source.id == KnowledgeDocument.source_id)
+        .where(
+            KnowledgeChunk.subject_id == subject_id,
+            KnowledgeChunk.authority_tier.in_(config.allowed_authority_tiers),
+            KnowledgeChunk.content_kind.not_in(NOT_RETRIEVABLE_KINDS),
+            KnowledgeChunk.objective_ids.any(objective_id),
+            KnowledgeChunk.content.like(_TABLE_RULE),
+        )
+        .order_by(KnowledgeChunk.page_start)
+        .limit(limit)
+    ).all()
+    return [
+        RetrievedChunk(
+            id=row.KnowledgeChunk.id,
+            source_title=row.title,
+            printed_page=(row.KnowledgeChunk.meta or {}).get("printed_page_start"),
+            heading_path=row.KnowledgeChunk.heading_path,
+            content_kind=row.KnowledgeChunk.content_kind,
+            authority_tier=row.KnowledgeChunk.authority_tier,
+            content=row.KnowledgeChunk.content,
+            similarity=None,
+            aligned=True,
+            score=0.0,
+        )
+        for row in rows
+    ]
+
+
 def chunk_texts(s: Session, chunk_ids: Sequence[UUID]) -> dict[UUID, str]:
     """chunk_id -> content, for re-checking something written from those chunks (lessons, AC-U4)."""
     if not chunk_ids:

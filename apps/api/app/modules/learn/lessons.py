@@ -25,12 +25,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.llm.text_repair import repair_json_escapes
 from app.modules.learn import diagrams
-from app.tools import text_overlap, units
+from app.tools import elements, text_overlap, units
 from app.tools.math_sympy import MathParseError, NumericSpec, check_numeric, equivalent, parse_math
 
 # v3: repair LaTeX damaged by JSON; v4: list answers value by value; v5: drop parts still garbled;
 # v6: units checked with Pint where the subject's answers carry units (not repeated if the answer already names it)
-GUARD_VERSION = "lesson_guard_v8"
+# v9: revision-note lessons (lesson_write/v5): definitions, bullet points and exam tips per section; tables whose
+# every number is in the cited pages; model exam answers; parts placed under the section they belong to.
+GUARD_VERSION = "lesson_guard_v9"
 COPY_RUN = 12
 # A worked example may not reuse a past-paper question: she is meant to try those herself (lesson v4).
 PAST_PAPER_RUN = 8
@@ -46,30 +48,109 @@ _NAMED_WORK = re.compile(
 
 
 class DraftSection(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(
+        extra="ignore",
+        json_schema_extra={
+            "required": ["heading", "mental_model", "definition", "formula_notes", "points", "exam_tip", "sources"]
+        },
+    )
     heading: str
-    body: str
+    body: str = ""
+    # lesson v5, revision-note style: the exam definition, the idea as short bullet points, and one exam tip.
+    definition: str = ""
+    points: list[str] = Field(default_factory=list)
+    exam_tip: str = ""
+    # lesson v6: coaching mental model and formula anatomy notes
+    mental_model: str = ""
+    formula_notes: str = ""
+    sources: list[int] = Field(default_factory=list)
+
+    def text(self) -> str:
+        if self.body.strip():
+            return self.body
+        parts = [p.strip() for p in self.points if p.strip()]
+        if not parts:
+            if self.mental_model.strip():
+                parts.append(self.mental_model.strip())
+            if self.definition.strip():
+                parts.append(self.definition.strip())
+        return "\n".join(parts)
+
+
+class DraftTable(BaseModel):
+    """lesson v5: a table of facts (particles and their charges, differences between two things)."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        json_schema_extra={"required": ["title", "columns", "rows", "section", "sources"]},
+    )
+    title: str
+    columns: list[str] = Field(default_factory=list)
+    rows: list[list[str]] = Field(default_factory=list)
+    section: int = 0  # the section (from 1) it belongs under; 0 = after the sections
+    sources: list[int] = Field(default_factory=list)
+
+
+class DraftExamAnswer(BaseModel):
+    """lesson v5: how to write the answer to a typical question on this objective, as the points that earn marks."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        json_schema_extra={"required": ["question", "points", "sources"]},
+    )
+    question: str
+    points: list[str] = Field(default_factory=list)
     sources: list[int] = Field(default_factory=list)
 
 
 class DraftTerm(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(
+        extra="ignore",
+        json_schema_extra={"required": ["term", "meaning", "sources"]},
+    )
     term: str
     meaning: str
     sources: list[int] = Field(default_factory=list)
 
 
 class DraftExample(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(
+        extra="ignore",
+        json_schema_extra={
+            "required": [
+                "level",
+                "section",
+                "problem",
+                "strategy",
+                "steps",
+                "final_answer",
+                "answer_expression",
+                "unit",
+                "coaching_takeaway",
+                "sources",
+            ]
+        },
+    )
     problem: str
+    strategy: str = ""  # coaching game plan ("How to Think")
     steps: list[str] = Field(default_factory=list)
     final_answer: str
     # The answer written as one SymPy-readable expression from the problem's own numbers, e.g. "sqrt(5^2+12^2)".
     answer_expression: str = ""
     # The answer's unit, kept apart from the value so SymPy checks the number and Pint checks the unit.
     unit: str = ""
+    coaching_takeaway: str = ""  # trap warning / takeaway
     sources: list[int] = Field(default_factory=list)
     level: str = ""  # lesson v4: "basic", "standard" or "exam"
+    section: int = 0  # lesson v5: the section (from 1) it follows; 0 = after the sections
+
+
+class DraftPodcastTurn(BaseModel):
+    """Two-host conversational dialogue explaining the topic (NotebookLM Deep Dive style)."""
+
+    model_config = ConfigDict(extra="ignore")
+    speaker: str
+    text: str
 
 
 class DiagramDraft(BaseModel):
@@ -88,9 +169,29 @@ class DiagramDrafts(BaseModel):
 
 
 class LessonDraft(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(
+        extra="ignore",
+        json_schema_extra={
+            "required": [
+                "introduction",
+                "sections",
+                "tables",
+                "worked_examples",
+                "exam_answers",
+                "key_terms",
+                "pitfalls",
+                "summary",
+                "podcast_script",
+            ]
+        },
+    )
     summary: str
+    introduction: str = ""  # lesson v5: the idea in everyday words, before the definitions
+    podcast_audio_url: str = ""
+    podcast_script: list[DraftPodcastTurn] = Field(default_factory=list)
     sections: list[DraftSection] = Field(default_factory=list)
+    tables: list[DraftTable] = Field(default_factory=list)
+    exam_answers: list[DraftExamAnswer] = Field(default_factory=list)
     key_terms: list[DraftTerm] = Field(default_factory=list)
     worked_examples: list[DraftExample] = Field(default_factory=list)
     pitfalls: list[str] = Field(default_factory=list)
@@ -120,6 +221,12 @@ class GuardReport:
     dropped_examples_unit: int = 0
     dropped_examples_past_paper: int = 0
     dropped_past_paper: int = 0
+    dropped_definitions: int = 0
+    dropped_tips: int = 0
+    kept_tables: int = 0
+    dropped_tables: int = 0
+    kept_exam_answers: int = 0
+    dropped_exam_answers: int = 0
 
     def as_dict(self) -> dict[str, int]:
         return dict(self.__dict__)
@@ -128,7 +235,12 @@ class GuardReport:
 @dataclass
 class GuardedLesson:
     summary: str
+    introduction: str = ""
+    podcast_audio_url: str = ""
+    podcast_script: list[dict] = field(default_factory=list)
     sections: list[dict] = field(default_factory=list)
+    tables: list[dict] = field(default_factory=list)
+    exam_answers: list[dict] = field(default_factory=list)
     key_terms: list[dict] = field(default_factory=list)
     worked_examples: list[dict] = field(default_factory=list)
     pitfalls: list[str] = field(default_factory=list)
@@ -141,7 +253,12 @@ class GuardedLesson:
     def content(self) -> dict:
         return {
             "summary": self.summary,
+            "introduction": self.introduction,
+            "podcast_audio_url": self.podcast_audio_url,
+            "podcast_script": self.podcast_script,
             "sections": self.sections,
+            "tables": self.tables,
+            "exam_answers": self.exam_answers,
             "key_terms": self.key_terms,
             "worked_examples": self.worked_examples,
             "pitfalls": self.pitfalls,
@@ -383,34 +500,119 @@ def guard(
     def cited_text(numbers: Sequence[int]) -> str:
         return "\n".join(excerpts[n - 1].text for n in numbers)
 
-    for section in draft.sections:
+    placed: dict[int, int] = {}  # the draft's section number -> its number among the kept sections (both from 1)
+    for position, section in enumerate(draft.sections, start=1):
         numbers = _cited(section.sources, excerpts)
+        body = section.text().strip()
         if not numbers:
             report.dropped_uncited += 1
             continue
-        if garbled(section.heading, section.body):
+        if not body or garbled(section.heading, body):
             report.dropped_garbled += 1
             continue
         sources = cited_text(numbers)
-        if text_overlap.copies_source(section.body, text_overlap.source_ngrams(sources, COPY_RUN), COPY_RUN):
+        ngrams = text_overlap.source_ngrams(sources, COPY_RUN)
+        if section.points and not section.body.strip():
+            valid_points = [
+                p
+                for p in section.points
+                if p.strip() and not garbled(p) and not text_overlap.copies_source(p, ngrams, COPY_RUN)
+            ]
+            if names_need_citation and valid_points:
+                grounded_points = [p for p in valid_points if not unsupported_names(p, sources)]
+                if not grounded_points:
+                    report.dropped_unsupported_name += 1
+                    continue
+                valid_points = grounded_points
+            if not valid_points:
+                if section.mental_model.strip() and not text_overlap.copies_source(
+                    section.mental_model, ngrams, COPY_RUN
+                ):
+                    body = section.mental_model.strip()
+                    section.points = []
+                else:
+                    report.dropped_copied += 1
+                    continue
+            else:
+                section.points = valid_points
+                body = "\n".join(valid_points)
+        elif not section.body.strip() and section.mental_model.strip():
+            if text_overlap.copies_source(section.mental_model, ngrams, COPY_RUN):
+                report.dropped_copied += 1
+                continue
+            body = section.mental_model.strip()
+        elif text_overlap.copies_source(body, ngrams, COPY_RUN):
             report.dropped_copied += 1
             continue
-        if (
-            past_ngrams and text_overlap.copies_source(section.body, past_ngrams, PAST_PAPER_RUN)
-        ) or reuses_past_paper_maths(section.body, past_maths):
+        if (past_ngrams and text_overlap.copies_source(body, past_ngrams, PAST_PAPER_RUN)) or reuses_past_paper_maths(
+            body, past_maths
+        ):
             report.dropped_past_paper += 1
             continue
-        if names_need_citation and unsupported_names(section.body, sources):
+        if names_need_citation and unsupported_names(body, sources):
             report.dropped_unsupported_name += 1
             continue
+
+        def part(text: str, ngrams: set = ngrams, sources: str = sources) -> str:
+            """A definition or tip is kept only on the section's own terms; failing, it goes and the section stays."""
+            text = " ".join(text.split())
+            if not text:
+                return ""
+            if garbled(text) or text_overlap.copies_source(text, ngrams, COPY_RUN):
+                return ""
+            return "" if names_need_citation and unsupported_names(text, sources) else text
+
+        definition, tip = part(section.definition), part(section.exam_tip)
+        mental_model = part(section.mental_model)
+        formula_notes = part(section.formula_notes)
+        report.dropped_definitions += bool(section.definition.strip()) and not definition
+        report.dropped_tips += bool(section.exam_tip.strip()) and not tip
         out.sections.append(
             {
                 "heading": section.heading.strip(),
-                "body": section.body.strip(),
+                "body": body,
+                "points": [" ".join(x.split()) for x in section.points if x.strip()]
+                if not section.body.strip()
+                else [],
+                "definition": definition,
+                "exam_tip": tip,
+                "mental_model": mental_model,
+                "formula_notes": formula_notes,
                 "sources": _source_refs(numbers, excerpts),
             }
         )
+        placed[position] = len(out.sections)
         report.kept_sections += 1
+
+    for table in draft.tables[:MAX_TABLES]:
+        kept_table = guard_table(table, excerpts, names_need_citation=names_need_citation)
+        if kept_table is None:
+            report.dropped_tables += 1
+            continue
+        out.tables.append({**kept_table, "section": placed.get(table.section, 0)})
+        report.kept_tables += 1
+
+    for answer in draft.exam_answers[:MAX_EXAM_ANSWERS]:
+        numbers = _cited(answer.sources, excerpts)
+        question = " ".join(answer.question.split())
+        if not numbers or not question or garbled(question):
+            report.dropped_exam_answers += 1
+            continue
+        sources = cited_text(numbers)
+        ngrams = text_overlap.source_ngrams(sources, COPY_RUN)
+        points = [
+            " ".join(x.split())
+            for x in answer.points
+            if x.strip()
+            and not garbled(x)
+            and not text_overlap.copies_source(x, ngrams, COPY_RUN)
+            and not (names_need_citation and unsupported_names(x, sources))
+        ]
+        if not points or (past_ngrams and text_overlap.copies_source(question, past_ngrams, PAST_PAPER_RUN)):
+            report.dropped_exam_answers += 1
+            continue
+        out.exam_answers.append({"question": question, "points": points, "sources": _source_refs(numbers, excerpts)})
+        report.kept_exam_answers += 1
 
     for term in draft.key_terms:
         numbers = _cited(term.sources, excerpts)
@@ -467,15 +669,31 @@ def guard(
         ):
             report.dropped_unsupported_name += 1
             continue
+        ex_sources = cited_text(numbers)
+        ex_ngrams = text_overlap.source_ngrams(ex_sources, COPY_RUN)
+
+        def clean_ex_field(text: str, ngrams: set = ex_ngrams, sources: str = ex_sources) -> str:
+            text = " ".join(text.split())
+            if not text:
+                return ""
+            if garbled(text) or text_overlap.copies_source(text, ngrams, COPY_RUN):
+                return ""
+            return "" if names_need_citation and unsupported_names(text, sources) else text
+
+        strategy = clean_ex_field(example.strategy) if example.strategy else ""
+        coaching_takeaway = clean_ex_field(example.coaching_takeaway) if example.coaching_takeaway else ""
         out.worked_examples.append(
             {
                 "problem": example.problem.strip(),
+                "strategy": strategy,
                 "steps": [s.strip() for s in example.steps if s.strip()],
                 "final_answer": example.final_answer.strip(),
                 "unit": units.display(unit) if unit else "",
                 "checked": checked,
+                "coaching_takeaway": coaching_takeaway,
                 "sources": _source_refs(numbers, excerpts),
                 "level": example.level.strip().lower() if example.level.strip().lower() in LEVELS else None,
+                "section": placed.get(example.section, 0),
             }
         )
         report.kept_examples += 1
@@ -491,8 +709,95 @@ def guard(
 
     if not clean(out.summary):
         out.summary = ""
+    introduction = " ".join(draft.introduction.split())
+    out.introduction = introduction if introduction and clean(introduction) else ""
+    out.podcast_audio_url = draft.podcast_audio_url.strip()
+    for turn in draft.podcast_script:
+        if turn.text.strip() and not garbled(turn.text):
+            out.podcast_script.append(
+                {
+                    "speaker": turn.speaker.strip() or "Host",
+                    "text": " ".join(turn.text.split()),
+                }
+            )
     out.pitfalls = [p.strip() for p in draft.pitfalls if p.strip() and clean(p)][:5]
     return out
+
+
+MAX_TABLES = 3
+MAX_EXAM_ANSWERS = 4
+TABLE_MAX_ROWS = 12
+TABLE_MAX_COLUMNS = 5
+_TABLE_NUMBER = re.compile(r"\d+(?:\.\d+)?")
+
+
+def _numbers_of(text: str) -> set[str]:
+    """The numbers in a text: "12,000" read as one number, "2,8,1" as three, a fraction as its parts."""
+    return {_clean(n) for n in _TABLE_NUMBER.findall(_THOUSANDS.sub("", text))}
+
+
+_CONFIGURATION = re.compile(r"^\d{1,2}(?:\s*[,.]\s*\d{1,2})*$")
+_ROMAN_GROUP = re.compile(r"^(?:group\s+)?(I|II|III|IV|V|VI|VII|VIII|0)$", re.IGNORECASE)
+_ROMAN = {"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8, "0": 8}
+
+
+def chemistry_facts_hold(columns: Sequence[str], rows: Sequence[Sequence[str]]) -> bool:
+    """For a row that names an element in its first cell, a configuration column must give its true electron shells
+    and a group column its true group (elements with no group, like hydrogen, are not judged on it)."""
+    headers = [c.lower() for c in columns]
+    config_col = next((i for i, h in enumerate(headers) if "configuration" in h or "arrangement" in h), None)
+    group_col = next((i for i, h in enumerate(headers) if h.startswith("group")), None)
+    if config_col is None and group_col is None:
+        return True
+    for row in rows:
+        element = elements.find(re.sub(r"\(.*?\)", "", row[0]).strip())
+        if element is None:
+            continue
+        if config_col is not None and _CONFIGURATION.match(row[config_col].strip()):
+            written = [int(x) for x in re.split(r"\s*[,.]\s*", row[config_col].strip())]
+            if element.z > elements.MAX_CONFIGURED or written != elements.shells(element.z):
+                return False
+        if group_col is not None and element.group is not None:
+            match = _ROMAN_GROUP.match(row[group_col].strip())
+            if match and _ROMAN[match.group(1).upper()] != element.group:
+                return False
+    return True
+
+
+def guard_table(table: DraftTable, excerpts: Sequence[Excerpt], *, names_need_citation: bool) -> dict | None:
+    """A table is kept whole or not at all: it must cite its pages, be rectangular and not garbled, copy no run of
+    its sources, name no one they do not, and every number in it must appear in the pages it cites — a table of
+    charges and masses is where a wrong figure does the most harm, so the figures are held to the book."""
+    numbers = _cited(table.sources, excerpts)
+    columns = [" ".join(c.split()) for c in table.columns]
+    rows = [[" ".join(str(cell).split()) for cell in row] for row in table.rows]
+    title = " ".join(table.title.split())
+    if (
+        not numbers
+        or not title
+        or not 2 <= len(columns) <= TABLE_MAX_COLUMNS
+        or not 1 <= len(rows) <= TABLE_MAX_ROWS
+        or any(len(row) != len(columns) for row in rows)
+        or not all(columns)
+    ):
+        return None
+    cells = [title, *columns, *(cell for row in rows for cell in row)]
+    if garbled(*cells):
+        return None
+    sources = "\n".join(excerpts[n - 1].text for n in numbers)
+    flat = "\n".join(" ".join(row) for row in rows)
+    if text_overlap.copies_source(flat, text_overlap.source_ngrams(sources, COPY_RUN), COPY_RUN):
+        return None
+    # Cell by cell: every cell starts like a sentence, so a capital there ("Negligible") is not a name.
+    if names_need_citation and any(unsupported_names(cell, sources) for cell in cells):
+        return None
+    # The facts must hold as well as be on the page: an element's electron configuration and group are checked
+    # against the element table, so "Na 2,8,2" is caught even where the book has a 2,8,2 elsewhere.
+    if not chemistry_facts_hold(columns, rows):
+        return None
+    if not _numbers_of(" ".join([*columns, *(cell for row in rows for cell in row)])) <= _numbers_of(sources):
+        return None
+    return {"title": title, "columns": columns, "rows": rows, "sources": _source_refs(numbers, excerpts)}
 
 
 CAPTION_MAX = 140
@@ -609,7 +914,7 @@ def copies_caption(caption: str, lesson_text: str) -> bool:
     return text_overlap.copies_source(caption, text_overlap.source_ngrams(lesson_text, CAPTION_RUN), CAPTION_RUN)
 
 
-_CONTROL = re.compile(r"[\x00-\x09\x0b-\x1f\x7f]")
+_CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 
 def garbled(*texts: str) -> bool:
@@ -664,14 +969,49 @@ def repair_draft(draft: LessonDraft) -> LessonDraft:
 
     return LessonDraft(
         summary=fix(draft.summary),
-        sections=[s.model_copy(update={"heading": fix(s.heading), "body": fix(s.body)}) for s in draft.sections],
+        introduction=fix(draft.introduction),
+        podcast_audio_url=repair_json_escapes(draft.podcast_audio_url),
+        podcast_script=[
+            turn.model_copy(update={"speaker": fix(turn.speaker), "text": fix(turn.text)})
+            for turn in draft.podcast_script
+        ],
+        sections=[
+            s.model_copy(
+                update={
+                    "heading": fix(s.heading),
+                    "body": fix(s.body),
+                    "definition": fix(s.definition),
+                    "points": [fix(x) for x in s.points],
+                    "exam_tip": fix(s.exam_tip),
+                    "mental_model": fix(s.mental_model),
+                    "formula_notes": fix(s.formula_notes),
+                }
+            )
+            for s in draft.sections
+        ],
+        tables=[
+            x.model_copy(
+                update={
+                    "title": fix(x.title),
+                    "columns": [fix(c) for c in x.columns],
+                    "rows": [[fix(str(c)) for c in row] for row in x.rows],
+                }
+            )
+            for x in draft.tables
+        ],
+        exam_answers=[
+            x.model_copy(update={"question": fix(x.question), "points": [fix(p) for p in x.points]})
+            for x in draft.exam_answers
+        ],
         key_terms=[t.model_copy(update={"term": fix(t.term), "meaning": fix(t.meaning)}) for t in draft.key_terms],
         worked_examples=[
             e.model_copy(
                 update={
                     "problem": fix(e.problem),
+                    "strategy": fix(e.strategy),
                     "steps": [fix(x) for x in e.steps],
                     "final_answer": fix(e.final_answer),
+                    "coaching_takeaway": fix(e.coaching_takeaway),
                     # Machine-read fields: JSON repair only. Wrapping them in $...$ broke units ("kg/$m³").
                     "answer_expression": repair_json_escapes(e.answer_expression),
                     "unit": repair_json_escapes(e.unit),

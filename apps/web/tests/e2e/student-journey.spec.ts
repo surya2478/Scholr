@@ -14,7 +14,7 @@ test.describe('Student Core Journey', () => {
 
     // Verify key student dashboard navigation links
     await expect(page.getByRole('link', { name: /Practice/i }).first()).toBeVisible();
-    await expect(page.getByRole('link', { name: /AI Companion|AI Buddy/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /Tutor/i }).first()).toBeVisible();
   });
 
   test('student can navigate to practice and see session controls', async ({ page }) => {
@@ -31,13 +31,13 @@ test.describe('Student Core Journey', () => {
     await expect(practiceContainer).toBeVisible();
   });
 
-  test('student can open AI Companion tutor chat', async ({ page }) => {
+  test('student can open the Tutor', async ({ page }) => {
     await page.goto('/student/tutor');
 
     await expect(page).toHaveURL(/\/student\/tutor/);
     await expect(page.locator('text=ScholrJr')).toBeVisible({ timeout: 15000 });
 
-    // Verify AI tutor chat elements exist (input, controls)
+    // Verify the Tutor's chat elements exist (input, controls)
     const mainContent = page.locator('main');
     await expect(mainContent).toBeVisible();
   });

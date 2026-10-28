@@ -16,7 +16,7 @@ const weekLabel = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateStrin
 
 function Tile({ question, value, unit, note, tone = "muted" }: { question: string; value: string; unit?: string; note?: string; tone?: "good" | "muted" }) {
   return (
-    <div className="flex min-h-[96px] flex-col gap-1 rounded-2xl bg-[#FFFDF9] border border-amber-200/70 p-4 shadow-2xs hover:border-amber-300 transition-colors">
+    <div className="flex min-h-[96px] flex-col gap-1 rounded-2xl bg-white border border-slate-200/90 p-4 shadow-2xs hover:border-blue-400 transition-colors">
       <span className="text-xs font-semibold text-slate-500">{question}</span>
       <span className="flex items-baseline gap-1.5 my-0.5">
         <span className="text-2xl font-fun font-bold leading-tight text-slate-900">{value}</span>
@@ -110,29 +110,29 @@ export default function ParentOverview() {
 
   return (
     <div className="space-y-6">
-      {/* Warm Family Sunshine Header */}
-      <div className="rounded-3xl border-2 border-amber-200 bg-gradient-to-r from-amber-100 via-orange-50 to-amber-100 p-6 md:p-8 shadow-sm">
+      {/* Guardian Executive Overview Header */}
+      <div className="rounded-3xl bg-gradient-to-r from-[#0B1528] via-[#13294B] to-[#1E3A8A] p-6 md:p-8 text-white shadow-xl">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 text-xs font-fun font-bold text-orange-700">
-              <span>👨‍👩‍👧 Family Co-Pilot</span>
-              <span>•</span>
-              <span>Support Without Micromanagement</span>
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1 font-mono text-xs font-bold text-emerald-300">
+              <span>🏛️ GUARDIAN EXECUTIVE TELEMETRY</span>
+              <span>·</span>
+              <span>CAMBRIDGE CIE &amp; IIT FOUNDATION</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-fun font-bold text-slate-900">
-              {first}&apos;s Weekly Learning Sunshine ☀️
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              {first}&apos;s Academic Standing &amp; Weekly Digest
             </h1>
-            <p className="text-xs md:text-sm text-slate-600 font-medium max-w-2xl leading-relaxed">
-              Celebrating breakthroughs, tracking workload health, and giving you positive dinner conversation prompts.
+            <p className="text-xs md:text-sm text-slate-300 font-medium max-w-2xl leading-relaxed">
+              Syllabus mastery, independent problem-solving, workload balance and learning notes.
             </p>
           </div>
 
           <button
             onClick={shareWhatsApp}
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-fun font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer flex-none"
+            className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl font-extrabold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition cursor-pointer flex-none"
           >
             <span>💬</span>
-            <span>Send Weekly Digest to WhatsApp</span>
+            <span>Share Weekly Digest on WhatsApp</span>
           </button>
         </div>
       </div>

@@ -68,7 +68,7 @@ export default function ConsentPage() {
             <li className="flex items-start gap-2.5">
               <span className="text-base">🤖</span>
               <div>
-                <b className="font-bold text-ink">AI Study Companion:</b> The mascot buddy is an AI assistant, not a human. It quotes Cambridge textbooks and tells you when it uses general knowledge.
+                <b className="font-bold text-ink">Tutor:</b> The Tutor is an AI assistant, not a human. It quotes your own textbooks and tells you when it uses general knowledge.
               </div>
             </li>
             <li className="flex items-start gap-2.5">

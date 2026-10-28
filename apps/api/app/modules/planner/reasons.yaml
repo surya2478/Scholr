@@ -1,6 +1,6 @@
 # Student-facing reasons for plan items and plan notices (ARCHITECTURE §16 "reasons shown from templates").
 # Changing this file => bump `version`.
-version: planner_reasons_v2
+version: planner_reasons_v3
 reasons:
   assessment_soon: "You have an assessment on this soon — let's get ready."
   open_mistake_high: "Fix a mistake that keeps costing you marks."
@@ -19,3 +19,14 @@ notices:
   overload: "Today is full, so optional practice was left out. Anything that didn't fit comes back in the next few days."
   lighter_day: "Lighter day today — short and focused."
   no_capacity: "No study time is planned for today. Enjoy the break!"
+# The three doors into today's work (docs/GO-LIVE-ENGAGEMENT.md F2). Each door's minutes are computed from its
+# own content, never from these lines; these only say what the door is, and why it is closed when it is.
+doors:
+  quick: "A couple of questions on something you're starting to forget."
+  today: "Today's set: the questions your plan, your mistakes and your revision are asking for."
+  deep: "Carry on with one topic, a part at a time — read it up, or try its questions."
+closed:
+  nothing_due: "Nothing is due for revision today."
+  set_finished: "You've finished today's set."
+  nothing_today: "Today's set is empty, so there's nothing to open."
+  nothing_left: "You've already read and tried today's topics — what's left is the questions themselves."

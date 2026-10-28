@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { api, ApiError, type Attempt, type Evaluation, type Question } from "@/lib/api";
 import { tutorHref } from "@/lib/tutor";
+import { useWorkingTime } from "@/lib/workingTime";
 import { useMe } from "./AppShell";
+import { BookmarkButton } from "./BookmarkButton";
+import { CommandWordRubric } from "./CommandWordRubric";
 import { EvaluationCard } from "./EvaluationCard";
 import { MathField } from "./MathField";
 import { MathText } from "./MathText";
@@ -38,6 +41,7 @@ export function AnswerBox({
   const enrollments = me?.student?.enrollments ?? [];
   const maths = enrollments.find((e) => e.subject_id === question.subject_id)?.answer_input === "expression";
   const [confidence, setConfidence] = useState<number | null>(null);
+  const clock = useWorkingTime();
   const [strategy, setStrategy] = useState<string | null>(null);
   const [working, setWorking] = useState("");
   const [line, setLine] = useState("");
@@ -71,6 +75,7 @@ export function AnswerBox({
           pre_confidence: confidence,
           session_id: sessionId ?? null,
           assessment_id: assessmentId ?? null,
+          time_spent_s: clock.seconds(),
         },
       });
       setSubmitted(true);
@@ -92,20 +97,26 @@ export function AnswerBox({
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5" onPointerDownCapture={clock.begin} onFocusCapture={clock.begin}>
       {/* Friendly Question Stem Box */}
-      <div className="rounded-3xl border-2 border-orange-200/90 bg-[#FFFAF5] p-5 md:p-6 shadow-2xs space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-slate-500 border-b border-orange-100 pb-2.5">
-          <span className="font-fun font-bold uppercase tracking-wider text-orange-700">
-            Challenge Question
-          </span>
-          <span className="font-fun font-bold text-orange-600 bg-orange-100/90 px-3 py-0.5 rounded-full border border-orange-200">
-            {question.marks} Exam Mark{question.marks === 1 ? "" : "s"} ⭐
-          </span>
+      <div className="rounded-3xl border-2 border-blue-200/90 bg-slate-50/70 p-5 md:p-6 shadow-2xs space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-slate-500 border-b border-slate-200 pb-2.5">
+          <div className="flex items-center gap-2">
+            <span className="font-fun font-bold uppercase tracking-wider text-blue-700">
+              Challenge Question
+            </span>
+            <CommandWordRubric question={question} />
+          </div>
+          <div className="flex items-center gap-2">
+            <BookmarkButton question={question} />
+            <span className="font-fun font-bold text-blue-600 bg-blue-50 px-3 py-0.5 rounded-full border border-blue-200">
+              {question.marks} Exam Mark{question.marks === 1 ? "" : "s"} ⭐
+            </span>
+          </div>
         </div>
 
         {question.context && (
-          <div className="text-xs text-slate-600 leading-relaxed font-medium bg-white/70 p-3 rounded-xl border border-orange-100">
+          <div className="text-xs text-slate-600 leading-relaxed font-medium bg-white/70 p-3 rounded-xl border border-slate-200">
             <MathText text={question.context} />
           </div>
         )}
@@ -114,12 +125,12 @@ export function AnswerBox({
           <MathText text={question.stem} />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-orange-100/80 text-xs text-slate-500 font-medium">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/80 text-xs text-slate-500 font-medium">
           <span>
             {question.calculator_allowed === false ? "💡 Non-calculator exam question!" : "✓ Calculator allowed"}
           </span>
           {question.has_diagram && (
-            <span className="font-bold text-orange-700 bg-orange-100/80 px-2 py-0.5 rounded-md">
+            <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
               Original paper has diagram
             </span>
           )}
@@ -127,7 +138,7 @@ export function AnswerBox({
       </div>
 
       {!submitted && (
-        <div className="flex items-center gap-2 text-xs font-semibold bg-amber-50/80 p-1.5 rounded-2xl border border-amber-200/60 w-fit">
+        <div className="flex items-center gap-2 text-xs font-semibold bg-amber-50/80 p-1.5 rounded-2xl border border-slate-200/80 w-fit">
           {(["typed", "photo"] as const).map((m) => (
             <button
               key={m}
@@ -135,7 +146,7 @@ export function AnswerBox({
               onClick={() => setMode(m)}
               className={`rounded-xl px-4 py-2 transition-all cursor-pointer font-fun font-bold ${
                 mode === m
-                  ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-xs"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
               }`}
             >
@@ -158,7 +169,7 @@ export function AnswerBox({
       {!submitted && mode === "typed" && (
         <form onSubmit={submit} className="flex flex-col gap-4">
           {/* Confidence Selector */}
-          <fieldset className="flex flex-col gap-2 rounded-2xl border border-amber-200/70 bg-[#FFFDF9] p-4 text-xs">
+          <fieldset className="flex flex-col gap-2 rounded-2xl border border-slate-200/90 bg-white p-4 text-xs">
             <legend className="font-fun font-bold text-slate-800 text-xs px-1">
               How confident do you feel before solving this?
             </legend>
@@ -175,8 +186,8 @@ export function AnswerBox({
                   onClick={() => setConfidence(i + 1)}
                   className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 font-fun font-bold transition-all cursor-pointer ${
                     confidence === i + 1
-                      ? "border-orange-400 bg-orange-100 text-orange-800 shadow-2xs scale-105"
-                      : "border-amber-200 bg-white text-slate-600 hover:bg-amber-50"
+                      ? "border-orange-400 bg-blue-50 text-blue-800 shadow-2xs scale-105"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-amber-50"
                   }`}
                 >
                   <span>{item.emoji}</span>
@@ -229,7 +240,7 @@ export function AnswerBox({
               value={working}
               onChange={(e) => setWorking(e.target.value)}
               rows={4}
-              className="rounded-2xl border-2 border-amber-200 bg-white p-3.5 font-mono text-sm font-normal text-slate-800 focus:border-orange-400 outline-none transition-colors"
+              className="rounded-2xl border-2 border-slate-200 bg-white p-3.5 font-mono text-sm font-normal text-slate-800 focus:border-blue-500 outline-none transition-colors"
               placeholder={
                 maths
                   ? "Show your steps here. Build a math line below and tap 'Add to working', or type directly."
@@ -239,7 +250,7 @@ export function AnswerBox({
           </label>
 
           {maths && (
-            <div className="flex flex-col gap-1.5 text-xs font-fun font-bold text-slate-800 rounded-2xl bg-amber-50/60 border border-amber-200 p-3.5">
+            <div className="flex flex-col gap-1.5 text-xs font-fun font-bold text-slate-800 rounded-2xl bg-amber-50/60 border border-slate-200 p-3.5">
               <span>Maths Line Builder (with MathLive keyboard)</span>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <MathField value={line} onChange={setLine} label="Maths line for your working" className="flex-1" />
@@ -251,7 +262,7 @@ export function AnswerBox({
           )}
 
           {working.includes("$") && (
-            <div className="rounded-2xl border border-amber-200/80 bg-white p-3.5 text-sm shadow-2xs">
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 text-sm shadow-2xs">
               <span className="text-[11px] font-bold text-slate-400 block mb-1 uppercase tracking-wider">
                 Working Preview:
               </span>
@@ -260,8 +271,8 @@ export function AnswerBox({
           )}
 
           {/* Final Answer Input Box */}
-          <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 p-4 space-y-2">
-            <label className="block text-xs font-fun font-bold text-orange-900">
+          <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-blue-50/60 via-white to-indigo-50/40 p-4 space-y-2">
+            <label className="block text-xs font-fun font-bold text-blue-900">
               Final Answer:
             </label>
             {maths ? (
@@ -272,12 +283,12 @@ export function AnswerBox({
                 value={finalAnswer}
                 onChange={(e) => setFinal(e.target.value)}
                 placeholder="Type your final result or conclusion…"
-                className="h-11 w-full rounded-xl border border-amber-300 bg-white px-3.5 text-sm font-normal text-slate-900 outline-none focus:border-orange-500"
+                className="h-11 w-full rounded-xl border border-amber-300 bg-white px-3.5 text-sm font-normal text-slate-900 outline-none focus:border-blue-600"
               />
             )}
             {maths && (
               <span className="text-[11px] text-slate-500 font-medium block">
-                💡 Tip: Type <code className="font-mono bg-white px-1 py-0.5 rounded border border-amber-200">/</code> for fraction and <code className="font-mono bg-white px-1 py-0.5 rounded border border-amber-200">^</code> for power.
+                💡 Tip: Type <code className="font-mono bg-white px-1 py-0.5 rounded border border-slate-200">/</code> for fraction and <code className="font-mono bg-white px-1 py-0.5 rounded border border-slate-200">^</code> for power.
               </span>
             )}
           </div>
@@ -317,7 +328,7 @@ export function AnswerBox({
             objectiveId: question.objective_ids[0],
             ask: `I answered this and want to understand the marking: ${question.stem}`,
           })}
-          className="self-start text-xs font-fun font-bold text-orange-600 hover:underline"
+          className="self-start text-xs font-fun font-bold text-blue-600 hover:underline"
         >
           🦉 Ask the Tutor about this answer
         </Link>

@@ -20,12 +20,12 @@ export function FormulaDrawer({ lesson }: { lesson: Lesson | null }) {
       <aside aria-label="Quick reference drawer" className="fixed bottom-5 right-5 z-40">
         <button
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 rounded-full border border-orange-300 bg-white/95 px-4 py-2.5 text-xs font-fun font-bold text-orange-800 shadow-lg backdrop-blur-xs transition hover:bg-orange-50 active:scale-95"
+          className="flex items-center gap-2 rounded-full border border-orange-300 bg-white/95 px-4 py-2.5 text-xs font-fun font-bold text-blue-800 shadow-lg backdrop-blur-xs transition hover:bg-blue-50 active:scale-95"
           title="Open Formulas and Key Terms cheat-sheet"
         >
           <span className="text-sm">📐</span>
           <span>Formulas &amp; Terms</span>
-          <span className="rounded-full bg-orange-100 px-1.5 py-0.2 text-[10px] font-extrabold text-orange-700">
+          <span className="rounded-full bg-blue-50 px-1.5 py-0.2 text-[10px] font-extrabold text-blue-700">
             {termsCount + pitfallsCount}
           </span>
         </button>
@@ -84,7 +84,7 @@ export function FormulaDrawer({ lesson }: { lesson: Lesson | null }) {
                   <h3 className="font-fun text-xs font-bold uppercase tracking-wider text-amber-800">
                     Watch Out For ({pitfallsCount})
                   </h3>
-                  <ul className="space-y-1.5 rounded-xl border border-amber-200 bg-amber-50/50 p-3 text-xs text-slate-700">
+                  <ul className="space-y-1.5 rounded-xl border border-slate-200 bg-amber-50/50 p-3 text-xs text-slate-700">
                     {lesson.pitfalls.map((p, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-amber-600 font-bold shrink-0">⚠️</span>

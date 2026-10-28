@@ -42,6 +42,12 @@ export default function Tutor() {
   const recording = useRef<Recording | null>(null);
   const stopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    if (!subjectId && subjects.length > 0) {
+      setSubjectId(subjects[0].subject_id);
+    }
+  }, [subjectId, subjects]);
+
   async function toggleVoice() {
     if (voice === "transcribing") return;
     if (voice === "recording") {
@@ -190,31 +196,31 @@ export default function Tutor() {
   return (
     <div className="space-y-5">
       {scope.data && objectiveId && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-orange-200 bg-orange-50/70 px-4 py-2.5 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-blue-200 bg-blue-50/70 px-4 py-2.5 text-sm">
           <span className="font-medium text-slate-700">
             Asking about <b className="text-slate-900">{scope.data.code} {scope.data.statement}</b>
           </span>
-          <Link href={`/student/learn/topic/${objectiveId}`} className="text-xs font-fun font-bold text-orange-600 hover:underline">
+          <Link href={`/student/learn/topic/${objectiveId}`} className="text-xs font-fun font-bold text-blue-600 hover:underline">
             ← Back to the topic
           </Link>
         </div>
       )}
-      {/* Friendly Tutor Header */}
-      <div className="rounded-3xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-[#FFF4E8] to-orange-50 p-6 md:p-7 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Tutor header */}
+      <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-[#0B1528] via-[#122240] to-[#1E3A8A] p-6 md:p-7 text-white shadow-md">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-3xl bg-amber-100 border-2 border-amber-300 flex items-center justify-center text-4xl shadow-sm select-none animate-float">
-              🦉
+            <div className="h-13 w-13 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-3xl shadow-xs select-none shrink-0">
+              🤖
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 text-[11px] font-fun font-bold border border-orange-200 mb-1">
-                <span>🪄</span> Socratic Study Buddy
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-200 text-[10px] font-bold uppercase tracking-wider border border-blue-400/30 mb-1">
+                <span>⚡</span> Grounded in your own textbooks
               </div>
-              <h1 className="text-xl md:text-2xl font-fun font-bold text-slate-900">
-                Scholr Tutor
+              <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-white">
+                Tutor
               </h1>
-              <p className="text-xs text-slate-500 font-medium">
-                Grounded directly in your official Cambridge textbooks. I explain step-by-step!
+              <p className="text-xs text-slate-300 font-medium">
+                Grounded in your official Cambridge IGCSE coursebooks with step-by-step guidance and citations.
               </p>
             </div>
           </div>
@@ -224,18 +230,18 @@ export default function Tutor() {
               value={subjectId}
               disabled={Boolean(sessionId)}
               onChange={(e) => setSubjectId(e.target.value)}
-              className="h-11 flex-1 sm:flex-none rounded-2xl border-2 border-amber-200 bg-white px-4 text-xs font-bold text-slate-800 outline-none focus:border-orange-400"
+              className="h-10 flex-1 sm:flex-none rounded-xl border border-white/20 bg-white/10 px-3.5 text-xs font-bold text-white outline-none focus:border-blue-400"
             >
-              <option value="">Choose a subject…</option>
+              <option value="" className="text-slate-900">Choose a subject…</option>
               {subjects.map((s) => (
-                <option key={s.subject_id} value={s.subject_id}>
+                <option key={s.subject_id} value={s.subject_id} className="text-slate-900">
                   {s.subject_name}
                 </option>
               ))}
             </select>
             {sessionId && (
               <Button variant="secondary" onClick={end}>
-                New chat ↺
+                New session ↺
               </Button>
             )}
           </div>
@@ -243,29 +249,34 @@ export default function Tutor() {
       </div>
 
       {/* Chat Stream Card */}
-      <div className="rounded-3xl border-2 border-amber-200/80 bg-white p-5 md:p-6 shadow-sm flex flex-col gap-4 min-h-[480px]">
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-5 md:p-6 shadow-xs flex flex-col gap-4 min-h-[480px]">
         <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-1">
           {log.length === 0 && (
-            <div className="my-auto py-8 text-center space-y-3 max-w-md mx-auto">
-              <span className="text-5xl inline-block select-none animate-bounce">🦉</span>
-              <h3 className="text-base font-fun font-bold text-slate-800">
-                What are we exploring today?
-              </h3>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                Ask about any concept, equation, or exam skill. I will use your coursebooks to explain without just giving away answers!
-              </p>
+            <div className="my-auto py-8 text-center space-y-4 max-w-xl mx-auto">
+              <div className="mx-auto h-12 w-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-2xl select-none">
+                🤖
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-extrabold text-slate-900">
+                  What concept, derivation, or exam question are we solving?
+                </h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  Ask for a structured summary, step-by-step mathematical working, or Cambridge mark-scheme breakdown. Every answer cites the exact textbook page.
+                </p>
+              </div>
               {subjectId && (
                 <div className="pt-2 flex flex-wrap justify-center gap-2">
                   {[
-                    "How do I complete the square?",
-                    "What makes snowball sampling non-representative?",
-                    "Can you give me an easy example of indices?",
+                    "Summarise the key definitions and examiner traps for this topic in 5 bullet points.",
+                    "Walk me through completing the square step-by-step and explain how to find the turning point.",
+                    "What makes snowball sampling non-representative in Sociology Paper 1?",
+                    "Give me a medium-to-hard 4-mark exam question on this topic and test my working.",
                   ].map((sample) => (
                     <button
                       key={sample}
                       type="button"
                       onClick={() => setText(sample)}
-                      className="text-xs font-semibold text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl px-3 py-1.5 transition-all hover:scale-102 cursor-pointer"
+                      className="text-xs font-semibold text-blue-800 bg-blue-50/80 hover:bg-blue-100/80 border border-blue-200 rounded-xl px-3.5 py-2 transition-all cursor-pointer text-left"
                     >
                       “{sample}”
                     </button>
@@ -279,18 +290,18 @@ export default function Tutor() {
             entry.role === "you" ? (
               <div
                 key={i}
-                className="self-end max-w-[85%] rounded-3xl rounded-tr-xs bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 text-sm font-medium text-white shadow-md shadow-orange-500/20"
+                className="self-end max-w-[85%] rounded-3xl rounded-tr-xs bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-md shadow-blue-600/20"
               >
                 {entry.text}
               </div>
             ) : (
               <div
                 key={i}
-                className="self-start max-w-[90%] rounded-3xl rounded-tl-xs border-2 border-amber-200 bg-[#FFFDF9] p-4 md:p-5 text-sm text-slate-900 shadow-2xs space-y-2.5"
+                className="self-start max-w-[90%] rounded-3xl rounded-tl-xs border-2 border-slate-200 bg-white p-4 md:p-5 text-sm text-slate-900 shadow-2xs space-y-2.5"
               >
-                <div className="flex items-center gap-2 pb-2 border-b border-amber-100">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                   <span className="text-lg">🦉</span>
-                  <span className="text-xs font-fun font-bold text-orange-600">
+                  <span className="text-xs font-fun font-bold text-blue-600">
                     Scholr Tutor
                   </span>
                 </div>
@@ -300,8 +311,8 @@ export default function Tutor() {
                 </div>
 
                 {entry.turn?.check_question && (
-                  <div className="mt-2 rounded-2xl bg-amber-50 border border-amber-200 p-3 text-xs font-medium text-slate-800">
-                    <span className="font-fun font-bold text-orange-700 block mb-1">
+                  <div className="mt-2 rounded-2xl bg-amber-50 border border-slate-200 p-3 text-xs font-medium text-slate-800">
+                    <span className="font-fun font-bold text-blue-700 block mb-1">
                       Check your understanding:
                     </span>
                     <MathText text={entry.turn.check_question} />
@@ -318,7 +329,7 @@ export default function Tutor() {
                   {entry.turn?.reply.citations.map((c, j) => (
                     <span
                       key={j}
-                      className="bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full"
+                      className="bg-amber-50 text-amber-900 border border-slate-200 px-2.5 py-0.5 rounded-full"
                     >
                       📖 {c.source_title}
                       {c.printed_page ? ` p.${c.printed_page}` : ""}
@@ -330,7 +341,7 @@ export default function Tutor() {
           )}
 
           {busy && (
-            <div className="self-start flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-2xl text-xs text-amber-900 font-medium animate-pulse">
+            <div className="self-start flex items-center gap-2 bg-amber-50 border border-slate-200 px-4 py-2.5 rounded-2xl text-xs text-amber-900 font-medium animate-pulse">
               <span>🦉</span>
               <span>Thinking & checking Cambridge textbooks…</span>
             </div>
@@ -343,7 +354,7 @@ export default function Tutor() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={2000}
-            className="h-12 min-w-0 flex-1 rounded-2xl border-2 border-amber-200 bg-white px-4 text-sm font-normal text-slate-900 outline-none focus:border-orange-400 placeholder:text-slate-400"
+            className="h-12 min-w-0 flex-1 rounded-2xl border-2 border-slate-200 bg-white px-4 text-sm font-normal text-slate-900 outline-none focus:border-blue-500 placeholder:text-slate-400"
             placeholder={
               voice === "recording"
                 ? "🎙 Recording… tap ■ when you've finished"
@@ -361,7 +372,7 @@ export default function Tutor() {
             className={`flex h-12 w-12 items-center justify-center rounded-2xl border-2 transition disabled:opacity-50 ${
               voice === "recording"
                 ? "border-rose-400 bg-rose-50 text-rose-600 animate-pulse"
-                : "border-amber-200 bg-white text-slate-600 hover:bg-amber-50 hover:text-amber-800"
+                : "border-slate-200 bg-white text-slate-600 hover:bg-amber-50 hover:text-amber-800"
             }`}
             title={voice === "recording" ? "Stop recording" : "Ask with your voice"}
             aria-label={voice === "recording" ? "Stop recording" : "Ask with your voice"}

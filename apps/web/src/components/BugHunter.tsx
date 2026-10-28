@@ -72,7 +72,7 @@ export function BugHunter() {
             <button
               key={c.id}
               onClick={() => open(c)}
-              className="flex flex-col items-start rounded-2xl border border-amber-200 bg-white px-3.5 py-2.5 text-left hover:bg-amber-50"
+              className="flex flex-col items-start rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-left hover:bg-amber-50"
             >
               <span className="text-sm font-semibold text-slate-900">{c.title}</span>
               <span className="text-[11px] text-slate-500">
@@ -121,7 +121,7 @@ export function BugHunter() {
           </p>
 
           {!verdict && (
-            <div className="flex flex-col gap-2 rounded-2xl border border-amber-200 bg-amber-50/50 p-3">
+            <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-amber-50/50 p-3">
               <label className="text-xs font-bold text-slate-700">
                 What kind of error is it?{" "}
                 <select

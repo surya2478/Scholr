@@ -109,7 +109,7 @@ function StudyResults({ subjectId, subjectName, query }: { subjectId: string; su
         </div>
       )}
       {r.reasons.length > 0 && (
-        <div className="rounded-xl bg-amber-50/60 p-3 text-[11px] text-amber-900 border border-amber-200/50">
+        <div className="rounded-xl bg-amber-50/60 p-3 text-[11px] text-amber-900 border border-slate-200/50">
           <span className="font-bold">Evaluation Criteria Notes:</span> {r.reasons.map((x) => x.replaceAll("_", " ")).join("; ")}
         </div>
       )}

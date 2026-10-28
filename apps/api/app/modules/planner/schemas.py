@@ -77,6 +77,38 @@ class DailyItemOut(BaseModel):
     marks_awarded: float | None = None
 
 
+class TomorrowTopicOut(BaseModel):
+    """A topic tomorrow's set would start from, chosen by the same rule over her record as it stands now."""
+
+    subject_id: UUID
+    subject_name: str
+    objective_id: UUID
+    objective_code: str
+    objective_statement: str
+    reason_code: str
+    reason: str
+
+
+class SessionDoorOut(BaseModel):
+    """One way into today's work, sized to the time she has (docs/GO-LIVE-ENGAGEMENT.md F2).
+
+    `minutes` is computed from the door's own content — about a minute a mark for questions, and for `deep` the
+    topic page's own estimate of its next unfinished part — so it is what the work actually takes, not the size
+    the door aims at. A closed door carries `closed_reason` and nothing to do.
+    """
+
+    key: Literal["quick", "today", "deep"]
+    text: str  # what this door is, from reasons.yaml
+    minutes: int
+    questions: int
+    objective_id: UUID | None = None  # `deep`: the topic it opens
+    objective_code: str | None = None
+    objective_statement: str | None = None
+    parts: list[str] = []  # `deep`: the part this door starts with, then the parts after it on that page
+    open: bool = True
+    closed_reason: str | None = None
+
+
 class DailyPracticeOut(BaseModel):
     practice_date: date
     rule_version: str
@@ -84,3 +116,15 @@ class DailyPracticeOut(BaseModel):
     done: int
     total: int
     notice: str | None = None
+    # The topics tomorrow would start from: computed only once today's set is finished, since that is the only place
+    # it is shown. Empty while there is still something to do today, and empty when nothing is waiting.
+    tomorrow: list[TomorrowTopicOut] = []
+    # The three ways into today's work, always all three, each either open with its real minutes or closed with
+    # the reason why.
+    doors: list[SessionDoorOut] = []
+    # Time today, from her records: minutes spent answering in Scholr (timed by the answer box), the minutes today's
+    # plan has room for (from her availability in the household seed, less commitments), and the minutes of external
+    # classes and homework she recorded for today. Nothing is estimated.
+    answering_minutes: int = 0
+    planned_minutes: int | None = None
+    external_minutes: int = 0

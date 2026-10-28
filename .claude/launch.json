@@ -4,14 +4,14 @@
     {
       "name": "api",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "uv", "run", "--directory", "apps/api", "uvicorn", "app.main:create_app", "--factory", "--port", "8000"],
+      "runtimeArgs": ["-m", "uv", "run", "--directory", "apps/api", "uvicorn", "app.main:create_app", "--factory", "--reload", "--port", "8000"],
       "port": 8000
     },
     {
       "name": "web",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "apps/web", "run", "dev"],
-      "port": 3000
+      "port": 3001
     }
   ]
 }

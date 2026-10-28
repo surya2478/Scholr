@@ -35,7 +35,7 @@ export default function SignIn() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-ground px-4 py-10">
-      <div className="w-full max-w-md rounded-3xl border-2 border-amber-200/80 bg-white p-8 shadow-lg">
+      <div className="w-full max-w-md rounded-3xl border-2 border-slate-200/90 bg-white p-8 shadow-lg">
         <div className="flex flex-col items-center gap-2 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-tr from-[#FF7A00] to-[#FFA940] text-3xl text-white shadow-md">
             🦉
@@ -53,7 +53,7 @@ export default function SignIn() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-11 rounded-2xl border-2 border-amber-200 px-3 text-sm font-normal outline-none focus:border-orange-400"
+              className="h-11 rounded-2xl border-2 border-slate-200 px-3 text-sm font-normal outline-none focus:border-blue-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm font-semibold text-slate-700">
@@ -64,12 +64,12 @@ export default function SignIn() {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-11 rounded-2xl border-2 border-amber-200 px-3 text-sm font-normal outline-none focus:border-orange-400"
+              className="h-11 rounded-2xl border-2 border-slate-200 px-3 text-sm font-normal outline-none focus:border-blue-500"
             />
           </label>
 
           {waiting ? (
-            <div className="rounded-2xl border-2 border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900">
+            <div className="rounded-2xl border-2 border-slate-200 bg-amber-50/80 p-4 text-sm text-amber-900">
               Your account is waiting for the admin to approve it. You&apos;ll be able to sign in after that.
             </div>
           ) : error ? (
@@ -83,7 +83,7 @@ export default function SignIn() {
 
         <p className="mt-5 text-center text-xs text-muted">
           New here?{" "}
-          <Link href="/register" className="font-bold text-orange-600 hover:underline">
+          <Link href="/register" className="font-bold text-blue-600 hover:underline">
             Create an account
           </Link>
         </p>

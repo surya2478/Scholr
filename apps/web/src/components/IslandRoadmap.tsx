@@ -59,7 +59,7 @@ export function IslandRoadmap({
   const activeCount = currentSteps.filter((s) => s.status === "active").length;
 
   return (
-    <div className="bg-white rounded-3xl border-2 border-amber-200/80 p-6 shadow-sm hover:shadow-md transition-all">
+    <div className="bg-white rounded-3xl border-2 border-slate-200/90 p-6 shadow-sm hover:shadow-md transition-all">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
           <h3 className="text-lg font-fun font-bold text-slate-900 flex items-center gap-2">
@@ -116,10 +116,10 @@ export function IslandRoadmap({
                       ⭐
                     </div>
                   </Link>
-                  <span className="text-xs font-bold text-orange-600 mt-1 text-center max-w-[110px] truncate">
+                  <span className="text-xs font-bold text-blue-600 mt-1 text-center max-w-[110px] truncate">
                     {step.title}
                   </span>
-                  <span className="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-bold mt-0.5">
+                  <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold mt-0.5">
                     {step.tag ?? "Active!"}
                   </span>
                 </div>

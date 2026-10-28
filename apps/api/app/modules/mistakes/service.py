@@ -21,7 +21,15 @@ from app.modules.events import service as events
 from app.modules.mistakes.models import MISTAKE_TYPES, MistakeOccurrence, MistakePattern
 from app.modules.mistakes.schemas import MistakeOut
 
-__all__ = ["MISTAKE_TYPES", "derive_patterns", "list_mistakes", "open_high_severity_objectives", "project", "recompute"]
+__all__ = [
+    "MISTAKE_TYPES",
+    "derive_patterns",
+    "list_mistakes",
+    "list_mistakes_for_attempts",
+    "open_high_severity_objectives",
+    "project",
+    "recompute",
+]
 
 UNRESOLVED = ("open", "improving")
 PROJECTED_TYPES = ("attempt_evaluated", "mistake_diagnosed")
@@ -204,6 +212,38 @@ def list_mistakes(
     if status is not None:
         query = query.where(MistakePattern.status == status)
     rows = s.scalars(query.order_by(MistakePattern.last_seen.desc())).all()
+    objectives = curriculum.objective_summaries(s, [r.objective_id for r in rows if r.objective_id])
+    return [
+        MistakeOut(
+            id=r.id,
+            subject_id=r.subject_id,
+            objective_id=r.objective_id,
+            objective_code=objectives[r.objective_id].code if r.objective_id in objectives else None,
+            mistake_type=r.mistake_type,
+            fingerprint=r.fingerprint,
+            description=r.description,
+            severity=r.severity,
+            occurrences=r.occurrences,
+            status=r.status,
+            first_seen=r.first_seen,
+            last_seen=r.last_seen,
+            resolution=r.resolution,
+        )
+        for r in rows
+    ]
+
+
+def list_mistakes_for_attempts(s: Session, *, student_id: UUID, attempt_ids: Sequence[UUID]) -> list[MistakeOut]:
+    if not attempt_ids:
+        return []
+    pattern_ids = s.scalars(
+        select(MistakeOccurrence.pattern_id).where(MistakeOccurrence.attempt_id.in_(list(attempt_ids))).distinct()
+    ).all()
+    if not pattern_ids:
+        return []
+    rows = s.scalars(
+        select(MistakePattern).where(MistakePattern.id.in_(pattern_ids), MistakePattern.student_id == student_id)
+    ).all()
     objectives = curriculum.objective_summaries(s, [r.objective_id for r in rows if r.objective_id])
     return [
         MistakeOut(

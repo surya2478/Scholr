@@ -37,7 +37,7 @@ from app.llm.factory import build_gateway
 from app.llm.gateway import BatchItem, CallContext, LLMError
 from app.llm.models import LlmCall
 from app.modules.curriculum import service as curriculum
-from app.modules.curriculum.models import Subject
+from app.modules.curriculum.models import LearningObjective, Subject
 from app.modules.identity.models import Tenant
 from app.modules.learn import lessons
 from app.modules.learn import service as learn
@@ -82,6 +82,22 @@ def todo(subject_code: str, *, stale: bool, limit: int | None, missing: bool = T
     return pending[:limit] if limit else pending
 
 
+def by_code(subject_code: str, codes: set[str]) -> list[UUID]:
+    """The subject's objectives with these codes, in syllabus order."""
+    with session_scope(user_id=None, role="system") as s:
+        subject = s.scalar(select(Subject).where(Subject.code == subject_code))
+        if subject is None:
+            raise SystemExit(f"unknown subject {subject_code}")
+        tree = curriculum.subject_tree(s, subject.id)
+        wanted = learn.objective_ids(tree.topics) if tree else []
+        found = dict(
+            s.execute(
+                select(LearningObjective.id, LearningObjective.code).where(LearningObjective.id.in_(wanted))
+            ).all()
+        )
+    return [oid for oid in wanted if found.get(oid) in codes]
+
+
 def spent(request_id: str) -> float:
     """What every call under one request cost, schema-repair retries included (``llm_call`` is the record;
     a model result reports only its own final call)."""
@@ -100,6 +116,8 @@ def write_one(objective_id: UUID, tenant_id: UUID, *, rewrite: bool) -> dict:
             return {"status": prepared.status, "skipped": True}
     try:
         written = learn.write_lesson(gateway, ctx, prepared)
+        if written.status != "ready" and learn.needs_writing(prepared):
+            written = learn.write_lesson(gateway, ctx, prepared)
     except LLMError as exc:
         return {"status": "failed", "error": exc.code, "cost_usd": spent(ctx.request_id)}
     if rewrite and written.status != "ready":
@@ -227,6 +245,7 @@ def main(argv: list[str]) -> None:
         help="also rewrite lessons from an older prompt, guard or model (replaced in place)",
     )
     parser.add_argument("--stale-only", action="store_true", help="rewrite out-of-date lessons; write no new ones")
+    parser.add_argument("--only", help="objective codes to (re)write, comma separated, stored or not")
     parser.add_argument("--run", action="store_true", help="make the calls; without it, print the estimate only")
     parser.add_argument("--concurrency", type=int, default=3)
     parser.add_argument(
@@ -276,8 +295,13 @@ def main(argv: list[str]) -> None:
 
     with session_scope(user_id=None, role="system") as s:
         tenant_id = s.scalar(select(Tenant.id).order_by(Tenant.created_at))  # the household (product for one)
-    stale = args.stale or args.stale_only
-    pending = todo(args.subject, stale=stale, limit=args.limit, missing=not args.stale_only)
+    stale = args.stale or args.stale_only or bool(args.only)
+    if args.only:
+        # Chosen topics are rewritten whatever they hold; a failed rewrite keeps the old lesson (write_one).
+        wanted = {c.strip() for c in args.only.split(",") if c.strip()}
+        pending = by_code(args.subject, wanted)
+    else:
+        pending = todo(args.subject, stale=stale, limit=args.limit, missing=not args.stale_only)
     role = load_roles().role(learn.LESSON_ROLE)
     model = role.model if args.live else (role.batch_model or role.model)
     print(

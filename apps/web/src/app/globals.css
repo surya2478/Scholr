@@ -1,27 +1,33 @@
 @import "tailwindcss";
 
-/* Design tokens for Scholr Friendly Portal */
+/* ============================================================================
+   SCHOLR DESIGN SYSTEM — light (default) and dark focus themes
+   Cambridge IGCSE Extended and IIT Foundation
+   ============================================================================ */
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-fun: "Fredoka", cursive, sans-serif;
-  --font-hand: "Caveat", cursive;
+  --font-fun: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-hand: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
-  --color-ground: #FBF9F5;
-  --color-sidebar: #FFFFFF;
-  --color-line: #F3ECE2;
-  --color-line-soft: #F7F2EB;
-  --color-tile: #FFFDF9;
-  --color-ink: #1E293B;
+  /* Light workspace tokens */
+  --color-ground: #F4F7FB;
+  --color-sidebar: #0B1528;
+  --color-line: #E2E8F0;
+  --color-line-soft: #EDF2F7;
+  --color-tile: #F8FAFC;
+  --color-sand: #E2E8F0;
+  --color-ink: #0F172A;
   --color-ink-2: #334155;
   --color-muted: #64748B;
   --color-faint: #94A3B8;
 
-  /* Primary warm orange/amber brand */
-  --color-brand: #F97316;
-  --color-brand-strong: #EA580C;
-  --color-brand-soft: #FFF4E8;
+  /* Primary Electric Cobalt & Royal Navy Brand */
+  --color-brand: #2563EB;
+  --color-brand-strong: #1D4ED8;
+  --color-brand-soft: #EFF6FF;
 
-  /* Feedback tones */
+  /* Feedback & Telemetry Tones */
   --color-good: #10B981;
   --color-good-soft: #ECFDF5;
   --color-warn: #F59E0B;
@@ -30,70 +36,185 @@
   --color-alert-soft: #FEE2E2;
 }
 
+/* Dark Focus Studio Theme Variables */
+html[data-theme="dark"] {
+  --color-ground: #090D16;
+  --color-sidebar: #0B1120;
+  --color-line: #1E293B;
+  --color-line-soft: #162032;
+  --color-tile: #111827;
+  --color-sand: #1E293B;
+  --color-ink: #F1F5F9;
+  --color-ink-2: #CBD5E1;
+  --color-muted: #94A3B8;
+  --color-faint: #64748B;
+
+  --color-brand: #3B82F6;
+  --color-brand-strong: #2563EB;
+  --color-brand-soft: rgba(59, 130, 246, 0.15);
+
+  --color-good: #10B981;
+  --color-good-soft: rgba(16, 185, 129, 0.15);
+  --color-warn: #F59E0B;
+  --color-warn-soft: rgba(245, 158, 11, 0.15);
+  --color-alert: #F87171;
+  --color-alert-soft: rgba(239, 68, 68, 0.15);
+  color-scheme: dark;
+}
+
 html,
 body {
   background-color: var(--color-ground);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* Remap .font-fun and .font-hand to crisp Senior Geometric Sans */
 .font-fun {
-  font-family: var(--font-fun), 'Fredoka', cursive, sans-serif;
+  font-family: var(--font-sans);
+  letter-spacing: -0.015em;
 }
 
 .font-hand {
-  font-family: var(--font-hand), 'Caveat', cursive;
+  font-family: var(--font-sans);
 }
 
-/* Warm, friendly card */
+/* Senior Academic Bento Card */
 .card {
   background: #FFFFFF;
-  border: 2px solid rgba(254, 215, 170, 0.7);
-  border-radius: 24px;
-  box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
   transition: all 0.2s ease-in-out;
+}
+
+html[data-theme="dark"] .card {
+  background: #111827;
+  border-color: #1E293B;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 26px;
-  padding: 0 12px;
-  border-radius: 9999px;
-  font-size: 11.5px;
+  height: 25px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.01em;
   border-width: 1px;
 }
 
-/* Soft bouncing and floating animations from CuriousJr reference */
+/* ============================================================================
+   DARK FOCUS STUDIO AUTOMATIC SURFACE & TEXT ADAPTATION ACROSS ALL MODULES
+   Ensures every nested component in Learn, Practice, Exams, Tutor & Parent
+   renders with crisp dark slate surfaces and high-contrast typography.
+   ============================================================================ */
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-white\/95,
+html[data-theme="dark"] .bg-white\/90,
+html[data-theme="dark"] .bg-\[\#FFFDF9\],
+html[data-theme="dark"] .bg-\[\#FFFAF5\],
+html[data-theme="dark"] .bg-\[\#FBF9F5\],
+html[data-theme="dark"] .bg-\[\#F6FEF9\],
+html[data-theme="dark"] .bg-\[\#F5FAFF\],
+html[data-theme="dark"] .bg-\[\#FFFDF5\],
+html[data-theme="dark"] .bg-\[\#FAF7FF\],
+html[data-theme="dark"] .bg-\[\#fbfcfe\] {
+  background-color: #111827 !important;
+}
+
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-50\/90,
+html[data-theme="dark"] .bg-slate-50\/80,
+html[data-theme="dark"] .bg-slate-50\/70,
+html[data-theme="dark"] .bg-slate-50\/60,
+html[data-theme="dark"] .bg-slate-100,
+html[data-theme="dark"] .bg-slate-100\/80 {
+  background-color: #1E293B !important;
+}
+
+html[data-theme="dark"] .text-slate-950,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-800 {
+  color: #F1F5F9 !important;
+}
+
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-slate-600 {
+  color: #CBD5E1 !important;
+}
+
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400 {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark"] .border-slate-100,
+html[data-theme="dark"] .border-slate-200,
+html[data-theme="dark"] .border-slate-200\/90,
+html[data-theme="dark"] .border-slate-200\/80,
+html[data-theme="dark"] .border-slate-300,
+html[data-theme="dark"] .border-amber-100,
+html[data-theme="dark"] .border-amber-200,
+html[data-theme="dark"] .border-amber-200\/80,
+html[data-theme="dark"] .border-amber-200\/70,
+html[data-theme="dark"] .border-amber-200\/60,
+html[data-theme="dark"] .border-orange-100,
+html[data-theme="dark"] .border-orange-200,
+html[data-theme="dark"] .border-orange-200\/90 {
+  border-color: #1E293B !important;
+}
+
+html[data-theme="dark"] .bg-amber-50,
+html[data-theme="dark"] .bg-amber-50\/80,
+html[data-theme="dark"] .bg-amber-50\/70,
+html[data-theme="dark"] .bg-amber-50\/60,
+html[data-theme="dark"] .bg-amber-50\/30,
+html[data-theme="dark"] .bg-orange-50,
+html[data-theme="dark"] .bg-orange-50\/80,
+html[data-theme="dark"] .bg-orange-50\/60 {
+  background-color: rgba(30, 41, 59, 0.7) !important;
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  background-color: #0F172A;
+  color: #F1F5F9;
+  border-color: #334155;
+}
+
+/* Subtle animations */
 @keyframes gentle-bounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-4px); }
 }
 
 .animate-float {
   animation: gentle-bounce 3s ease-in-out infinite;
 }
 
-.animate-float-delayed {
-  animation: gentle-bounce 3.5s ease-in-out 1s infinite;
-}
-
-/* Custom warm scrollbar */
+/* Custom Sleek Slate Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F3ECE2;
+  background: var(--color-ground);
 }
 ::-webkit-scrollbar-thumb {
-  background: #E0CEB7;
+  background: #CBD5E1;
   border-radius: 999px;
 }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
 ::-webkit-scrollbar-thumb:hover {
-  background: #CDB79E;
+  background: #94A3B8;
 }
 
 :focus-visible {

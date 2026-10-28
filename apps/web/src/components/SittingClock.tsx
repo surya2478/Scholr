@@ -41,3 +41,28 @@ export function SittingClock({ assessmentId }: { assessmentId: string }) {
     </div>
   );
 }
+
+// The same clock for a topic exam, worked out from when it was started and the minutes it was set for. Like a
+// past-paper sitting it never cuts her off; running over is only shown.
+export function ExamClock({ startedAt, durationMin }: { startedAt: string; durationMin: number }) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 15_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const left = durationMin - Math.floor((now - new Date(startedAt).getTime()) / 60_000);
+  const over = left < 0;
+  return (
+    <div
+      className={`flex flex-wrap items-center gap-2 rounded-2xl border-2 px-4 py-2 text-sm font-fun font-bold ${
+        over ? "border-rose-300 bg-rose-50 text-rose-800" : left <= 10 ? "border-amber-300 bg-amber-50 text-amber-900" : "border-blue-200 bg-blue-50 text-blue-900"
+      }`}
+      role="timer"
+      aria-live="polite"
+    >
+      ⏱ {over ? `Over time by ${Math.max(1, -left)} min — finish and submit.` : `${left} min left of ${durationMin}`}
+    </div>
+  );
+}

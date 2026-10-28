@@ -3,6 +3,7 @@
 // the maths or the physics. If a value is missing, the component draws less, never something made up.
 
 import { useState } from "react";
+import { AtomStructure, ParticleBoxes, PeriodicTable } from "./chemistry";
 
 type Data = Record<string, unknown>;
 
@@ -546,4 +547,7 @@ export const DIAGRAMS: Record<string, (props: { data: Data }) => React.ReactElem
   straight_line_graph: StraightLineGraph,
   ray_diagram: RayDiagram,
   circuit: Circuit,
+  atom_structure: AtomStructure,
+  particle_boxes: ParticleBoxes,
+  periodic_table: PeriodicTable,
 };

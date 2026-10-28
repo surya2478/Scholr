@@ -41,7 +41,7 @@ export default function Register() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-ground px-4 py-10">
-      <div className="w-full max-w-md rounded-3xl border-2 border-amber-200/80 bg-white p-8 shadow-lg">
+      <div className="w-full max-w-md rounded-3xl border-2 border-slate-200/90 bg-white p-8 shadow-lg">
         <h1 className="font-fun text-2xl font-extrabold text-ink">Create an account</h1>
         <p className="mt-1 text-xs text-muted">
           Registering does not open the app. An admin reviews every new account and chooses what it can see.
@@ -52,7 +52,7 @@ export default function Register() {
             <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/80 p-4 text-sm text-emerald-900">
               {done}
             </div>
-            <Link href="/sign-in" className="text-center text-xs font-bold text-orange-600 hover:underline">
+            <Link href="/sign-in" className="text-center text-xs font-bold text-blue-600 hover:underline">
               Back to sign in
             </Link>
           </div>
@@ -64,7 +64,7 @@ export default function Register() {
                 required
                 value={form.display_name}
                 onChange={set("display_name")}
-                className="h-11 rounded-2xl border-2 border-amber-200 px-3 text-sm font-normal outline-none focus:border-orange-400"
+                className="h-11 rounded-2xl border-2 border-slate-200 px-3 text-sm font-normal outline-none focus:border-blue-500"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm font-semibold text-slate-700">
@@ -75,7 +75,7 @@ export default function Register() {
                 autoComplete="email"
                 value={form.email}
                 onChange={set("email")}
-                className="h-11 rounded-2xl border-2 border-amber-200 px-3 text-sm font-normal outline-none focus:border-orange-400"
+                className="h-11 rounded-2xl border-2 border-slate-200 px-3 text-sm font-normal outline-none focus:border-blue-500"
               />
             </label>
             <label className="flex flex-col gap-1 text-sm font-semibold text-slate-700">
@@ -87,12 +87,12 @@ export default function Register() {
                 autoComplete="new-password"
                 value={form.password}
                 onChange={set("password")}
-                className="h-11 rounded-2xl border-2 border-amber-200 px-3 text-sm font-normal outline-none focus:border-orange-400"
+                className="h-11 rounded-2xl border-2 border-slate-200 px-3 text-sm font-normal outline-none focus:border-blue-500"
               />
               <span className="text-[11px] font-normal text-muted">At least 10 characters.</span>
             </label>
 
-            <fieldset className="flex flex-col gap-2 rounded-2xl border-2 border-amber-200 p-3">
+            <fieldset className="flex flex-col gap-2 rounded-2xl border-2 border-slate-200 p-3">
               <legend className="px-1 text-sm font-semibold text-slate-700">What would you like to study?</legend>
               {streams.map((stream) => (
                 <label key={stream.key} className="flex items-start gap-2 text-sm text-slate-700">
@@ -117,7 +117,7 @@ export default function Register() {
                 rows={2}
                 value={form.note}
                 onChange={set("note")}
-                className="rounded-2xl border-2 border-amber-200 p-3 text-sm font-normal outline-none focus:border-orange-400"
+                className="rounded-2xl border-2 border-slate-200 p-3 text-sm font-normal outline-none focus:border-blue-500"
               />
             </label>
 
@@ -126,7 +126,7 @@ export default function Register() {
             <Button type="submit" disabled={busy} className="mt-1 w-full">
               {busy ? "Sending…" : "Request access"}
             </Button>
-            <Link href="/sign-in" className="text-center text-xs font-bold text-orange-600 hover:underline">
+            <Link href="/sign-in" className="text-center text-xs font-bold text-blue-600 hover:underline">
               I already have an account
             </Link>
           </form>

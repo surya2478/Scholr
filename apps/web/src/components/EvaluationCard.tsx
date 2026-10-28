@@ -43,7 +43,7 @@ export function EvaluationCard({
   }
 
   return (
-    <div className="flex flex-col gap-3.5 rounded-3xl border-2 border-amber-300/80 bg-[#FFFDF9] p-5 shadow-sm space-y-1">
+    <div className="flex flex-col gap-3.5 rounded-3xl border-2 border-amber-300/80 bg-white p-5 shadow-sm space-y-1">
       {/* Metacognitive Calibration Alert */}
       {isBlindspot && (
         <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-rose-50 border border-rose-300 text-xs text-rose-950 font-medium">
@@ -82,7 +82,7 @@ export function EvaluationCard({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-amber-100 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2.5">
           <span className="text-2xl select-none">{full ? "🎉" : percentage >= 50 ? "⭐" : "💡"}</span>
           <div>
@@ -104,7 +104,7 @@ export function EvaluationCard({
       </div>
 
       {evaluation.feedback.summary && (
-        <div className="text-sm font-medium text-slate-700 bg-white p-3 rounded-2xl border border-amber-100">
+        <div className="text-sm font-medium text-slate-700 bg-white p-3 rounded-2xl border border-slate-100">
           <MathText text={evaluation.feedback.summary} />
         </div>
       )}
@@ -119,7 +119,7 @@ export function EvaluationCard({
       )}
 
       {evaluation.mistakes.map((m, i) => (
-        <div key={i} className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-slate-800 space-y-1">
+        <div key={i} className="p-3 rounded-2xl bg-amber-50 border border-slate-200 text-xs text-slate-800 space-y-1">
           <div className="flex items-center gap-1.5 font-fun font-bold text-amber-900">
             <span>⚠️</span> Watch out for this trap
           </div>
@@ -128,8 +128,8 @@ export function EvaluationCard({
       ))}
 
       {evaluation.feedback.next_step && (
-        <div className="p-3 rounded-2xl bg-orange-50 border border-orange-200 text-xs text-orange-900 space-y-1">
-          <div className="flex items-center gap-1.5 font-fun font-bold text-orange-800">
+        <div className="p-3 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-900 space-y-1">
+          <div className="flex items-center gap-1.5 font-fun font-bold text-blue-800">
             <span>🎯</span> Recommended next step
           </div>
           <MathText text={evaluation.feedback.next_step} className="leading-relaxed font-medium" />
@@ -170,7 +170,7 @@ export function EvaluationCard({
                     </span>
                   </div>
                 </div>
-                <span className="text-[10.5px] font-fun font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full border border-orange-200">
+                <span className="text-[10.5px] font-fun font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
                   Metacognitive Diary
                 </span>
               </div>
@@ -192,8 +192,8 @@ export function EvaluationCard({
                       onClick={() => setCategory(cat.id)}
                       className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
                         category === cat.id
-                          ? "border-orange-500 bg-white text-orange-950 shadow-2xs scale-[1.01]"
-                          : "border-amber-200/80 bg-white/70 text-slate-600 hover:bg-white"
+                          ? "border-orange-500 bg-white text-blue-950 shadow-2xs scale-[1.01]"
+                          : "border-slate-200/90 bg-white/70 text-slate-600 hover:bg-white"
                       }`}
                     >
                       <div className="font-fun font-bold text-[11px] flex items-center gap-1.5">
@@ -215,7 +215,7 @@ export function EvaluationCard({
                   value={takeaway}
                   onChange={(e) => setTakeaway(e.target.value)}
                   placeholder="e.g., Must factorise numerator before cancelling; watch -2 * -4 = +8"
-                  className="w-full h-9 rounded-xl border border-amber-300 bg-white px-3 text-xs font-medium text-slate-900 outline-none focus:border-orange-500"
+                  className="w-full h-9 rounded-xl border border-amber-300 bg-white px-3 text-xs font-medium text-slate-900 outline-none focus:border-blue-600"
                 />
               </div>
 

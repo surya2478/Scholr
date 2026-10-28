@@ -17,14 +17,14 @@ const THEMES: Record<
   }
 > = {
   maths: {
-    bg: "bg-[#FFFAF5]",
-    border: "border-orange-200/90",
+    bg: "bg-slate-50/70",
+    border: "border-blue-200/90",
     gradient: "from-orange-400 via-amber-400 to-yellow-300",
     badgeBg: "bg-white/90",
-    badgeText: "text-orange-700",
-    buttonGradient: "from-orange-500 to-amber-500",
-    buttonHover: "hover:from-orange-600 hover:to-amber-600",
-    shadow: "shadow-orange-500/20",
+    badgeText: "text-blue-700",
+    buttonGradient: "from-blue-600 to-indigo-600",
+    buttonHover: "hover:from-blue-700 hover:to-indigo-700",
+    shadow: "shadow-blue-600/20",
     checkColor: "text-orange-500",
   },
   sociology: {
@@ -51,13 +51,13 @@ const THEMES: Record<
   },
   default: {
     bg: "bg-white",
-    border: "border-amber-200/90",
+    border: "border-slate-200/90",
     gradient: "from-amber-400 via-orange-400 to-amber-300",
     badgeBg: "bg-white/90",
     badgeText: "text-amber-800",
-    buttonGradient: "from-orange-500 to-amber-500",
-    buttonHover: "hover:from-orange-600 hover:to-amber-600",
-    shadow: "shadow-orange-500/20",
+    buttonGradient: "from-blue-600 to-indigo-600",
+    buttonHover: "hover:from-blue-700 hover:to-indigo-700",
+    shadow: "shadow-blue-600/20",
     checkColor: "text-orange-500",
   },
 };
@@ -110,7 +110,7 @@ export function SubjectProgramCard({
         </div>
 
         <div>
-          <h3 className="text-lg font-fun font-bold text-slate-900 group-hover:text-orange-600 transition-colors">
+          <h3 className="text-lg font-fun font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
             {title}
           </h3>
           <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">

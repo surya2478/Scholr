@@ -65,3 +65,30 @@ def test_short_questions_first_and_the_same_day_gives_the_same_set() -> None:
 def test_nothing_to_set_is_an_empty_set_not_an_error() -> None:
     (a,) = objectives(1)
     assert daily.choose([daily.Want(a, "x")], {}, recent=set(), excluded=set(), seed="s") == []
+
+
+def test_a_preview_names_at_most_three_topics_in_order_of_claim() -> None:
+    a, b, c, d = objectives(4)
+    items = {o: [daily.Candidate(uuid4(), 2), daily.Candidate(uuid4(), 2)] for o in (a, b, c, d)}
+    wants = [
+        daily.Want(a, "open_mistake_high"),
+        daily.Want(b, "retention_high"),
+        daily.Want(c, "retention_medium"),
+        daily.Want(d, "lesson_read"),
+    ]
+    picks = daily.choose(wants, items, recent=set(), excluded=set(), seed="s", size=daily.PREVIEW_SIZE)
+    assert [p.objective_id for p in picks] == [a, b, c]
+
+
+def test_a_preview_names_nothing_when_every_question_is_recent() -> None:
+    (a,) = objectives(1)
+    answered = [daily.Candidate(uuid4(), 2), daily.Candidate(uuid4(), 2)]
+    picks = daily.choose(
+        [daily.Want(a, "lesson_read")],
+        {a: answered},
+        recent={c.item_id for c in answered},
+        excluded=set(),
+        seed="s",
+        size=daily.PREVIEW_SIZE,
+    )
+    assert picks == []

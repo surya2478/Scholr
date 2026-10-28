@@ -1,19 +1,19 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Request
-from fastapi.responses import Response
+from fastapi import APIRouter, File, Request, Response, UploadFile
 
 from app.core.deps import DbDep, PrincipalDep, SessionsDep, SettingsDep, llm_gateway
 from app.core.errors import ApiError
-from app.core.rbac import Principal, resolve_student_id
+from app.core.rbac import Principal, require_role, resolve_student_id
 from app.core.telemetry import request_id_of
 from app.llm.gateway import CallContext, LLMError
-from app.modules.learn import audio, service
+from app.modules.learn import audio, homework, service
 from app.modules.learn.schemas import (
+    HomeworkPhotoOut,
     LessonOut,
     PastPapersOut,
     StreamOut,
@@ -132,6 +132,86 @@ def get_lesson_audio(
     return Response(content=audio_bytes, media_type="audio/mpeg", headers=headers)
 
 
+@router.get("/learn/objectives/{objective_id}/podcast")
+@router.head("/learn/objectives/{objective_id}/podcast")
+def get_topic_podcast(
+    objective_id: UUID,
+    request: Request,
+    principal: PrincipalDep,
+    s: DbDep,
+    settings: SettingsDep,
+) -> Response:
+    """Stream NotebookLM or podcast audio file for this objective."""
+    now = datetime.now(UTC)
+    topic = service.topic_view(s, objective_id, student_id=_student(principal, None), now=now)
+    podcasts_dir = settings.private_content_dir / "podcasts"
+    file_path = None
+    if (podcasts_dir / f"{objective_id}.mp3").exists():
+        file_path = podcasts_dir / f"{objective_id}.mp3"
+    elif topic and topic.objective and (podcasts_dir / f"{topic.objective.code}.mp3").exists():
+        file_path = podcasts_dir / f"{topic.objective.code}.mp3"
+
+    if file_path and file_path.stat().st_size > 0:
+        audio_bytes = file_path.read_bytes()
+        headers = {
+            "Cache-Control": "private, max-age=86400",
+            "Content-Length": str(len(audio_bytes)),
+            "Accept-Ranges": "bytes",
+        }
+        if request.method == "HEAD":
+            return Response(content=b"", media_type="audio/mpeg", headers=headers)
+        return Response(content=audio_bytes, media_type="audio/mpeg", headers=headers)
+
+    # Fallback to lesson audio if ready
+    if topic.lesson and topic.lesson.status == "ready":
+        text = ""
+        if topic.lesson.podcast_script:
+            text = " ".join(f"{turn.speaker}: {turn.text}" for turn in topic.lesson.podcast_script)
+        else:
+            text = audio.extract_speech_text(topic.lesson, part="all")
+        if text.strip():
+            ctx = CallContext(
+                request_id=request_id_of(request),
+                tenant_id=principal.tenant_id,
+                student_id=principal.student_id,
+            )
+            try:
+                audio_bytes = audio.get_or_synthesize_audio(
+                    llm_gateway(request), ctx, settings, text, voice=audio.DEFAULT_VOICE
+                )
+                if audio_bytes and len(audio_bytes) >= 100:
+                    headers = {
+                        "Cache-Control": "private, max-age=86400",
+                        "Content-Length": str(len(audio_bytes)),
+                        "Accept-Ranges": "bytes",
+                    }
+                    if request.method == "HEAD":
+                        return Response(content=b"", media_type="audio/mpeg", headers=headers)
+                    return Response(content=audio_bytes, media_type="audio/mpeg", headers=headers)
+            except Exception:
+                pass
+
+    raise ApiError(404, "podcast_not_found", "No podcast audio found for this topic yet.")
+
+
+@router.post("/learn/objectives/{objective_id}/podcast")
+async def upload_topic_podcast(
+    objective_id: UUID,
+    settings: SettingsDep,
+    principal: PrincipalDep,
+    file: Annotated[UploadFile, File()],
+) -> dict[str, str | int]:
+    """Upload a NotebookLM deep-dive MP3 audio file for this topic."""
+    podcasts_dir = settings.private_content_dir / "podcasts"
+    podcasts_dir.mkdir(parents=True, exist_ok=True)
+    target = podcasts_dir / f"{objective_id}.mp3"
+    content = await file.read()
+    if len(content) < 100:
+        raise ApiError(400, "invalid_audio", "Uploaded audio file is empty or too small.")
+    target.write_bytes(content)
+    return {"status": "ok", "url": f"/api/learn/objectives/{objective_id}/podcast", "size_bytes": len(content)}
+
+
 @router.get("/learn/viva", response_model=list[VivaTopicOut])
 def get_viva_topics(subject_id: UUID, principal: PrincipalDep, s: DbDep) -> list[VivaTopicOut]:
     """Topics whose approved solved exam question she can defend step by step (docs/STUDENT-APP.md §19)."""
@@ -150,4 +230,26 @@ def post_viva_step(
     ctx = CallContext(request_id=request_id_of(request), tenant_id=principal.tenant_id, student_id=principal.student_id)
     return service.judge_viva_step(
         s, llm_gateway(request), ctx, principal, objective_id, index, body, now=datetime.now(UTC)
+    )
+
+
+@router.post("/learn/homework-photo", response_model=HomeworkPhotoOut)
+def post_homework_photo(
+    request: Request,
+    principal: PrincipalDep,
+    s: DbDep,
+    photo: Annotated[UploadFile, File()],
+) -> HomeworkPhotoOut:
+    """Read a photo of her own homework and offer the topics it is on (docs/GO-LIVE-ENGAGEMENT.md F3).
+
+    The photo is checked by code, passed to the gateway and dropped: it is not saved, and neither is what was
+    read off it. Nothing here answers the homework — she gets topics, and picks one.
+    """
+    require_role(principal, "student")
+    if principal.student_id is None:
+        raise ApiError(403, "not_a_student", "this needs a student account")
+    data = photo.file.read(homework.MAX_BYTES + 1)
+    ctx = CallContext(request_id=request_id_of(request), tenant_id=principal.tenant_id, student_id=principal.student_id)
+    return service.homework_photo(
+        s, llm_gateway(request), ctx, student_id=principal.student_id, data=data, now=datetime.now(UTC)
     )

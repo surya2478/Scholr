@@ -15,7 +15,7 @@ from uuid import UUID
 RouteSource = Literal["assessment_lock", "session", "rules", "needs_classifier"]
 
 # Assessments where the tutor must not help (validation study and exams).
-NO_HELP_ASSESSMENT_KINDS = frozenset({"baseline", "post", "retention", "exam_style"})
+NO_HELP_ASSESSMENT_KINDS = frozenset({"baseline", "post", "retention", "exam_style", "topic_exam"})
 
 
 @dataclass(frozen=True)

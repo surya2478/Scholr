@@ -67,6 +67,13 @@ def _answer_input(subject_code: str) -> str:
         return "text"
 
 
+def _stage(subject_code: str) -> str:
+    try:
+        return subjects.config_for(subject_code).stage
+    except subjects.SubjectConfigError:
+        return "taught"
+
+
 def _enrollments_by_student(s: Session, student_ids: list[UUID]) -> dict[UUID, list[EnrollmentOut]]:
     views = enrollment.list_enrollments(s, student_ids)
     subjects = curriculum.subject_summaries(s, [v.subject_id for v in views])
@@ -81,6 +88,7 @@ def _enrollments_by_student(s: Session, student_ids: list[UUID]) -> dict[UUID, l
                 tier=v.tier,
                 exam_session=v.exam_session,
                 answer_input=_answer_input(subject.code),
+                stage=_stage(subject.code),
             )
         )
     for items in grouped.values():

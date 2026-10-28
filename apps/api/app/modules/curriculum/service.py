@@ -127,6 +127,24 @@ def _subjects(s: Session, subject_id: UUID | None = None) -> list[SubjectOut]:
     return [_subject_out(subj, syl, components[syl.id] if syl else []) for subj, syl in rows]
 
 
+def exam_seconds_per_mark(s: Session, subject_ids: Sequence[UUID]) -> dict[UUID, float]:
+    """The time her papers allow per mark: all the syllabus's components' minutes over their marks. A subject with no
+    timed component is left out, and nothing is guessed for it."""
+    if not subject_ids:
+        return {}
+    rows = s.execute(
+        select(Subject.id, func.sum(ExamComponent.duration_min), func.sum(ExamComponent.marks))
+        .join(ExamComponent, ExamComponent.syllabus_id == Subject.syllabus_id)
+        .where(
+            Subject.id.in_(list(subject_ids)),
+            ExamComponent.duration_min.is_not(None),
+            ExamComponent.marks.is_not(None),
+        )
+        .group_by(Subject.id)
+    ).all()
+    return {sid: minutes * 60 / marks for sid, minutes, marks in rows if minutes and marks}
+
+
 def list_subjects(s: Session) -> list[SubjectOut]:
     return _subjects(s)
 

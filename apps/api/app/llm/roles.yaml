@@ -154,8 +154,9 @@ roles:
     temperature: 0.3
     # Flash-Lite lessons need ~900-1,500 output tokens. Its failures are repetition loops that run to the cap,
     # so a moderate cap fails fast and cheaply (as paper_extractor_lite). The 3.5-flash lessons needed ~4,000.
-    # Raised to 5,000 on 21 Sep 2026 for lesson_write/v4 (up to six sections and three worked examples).
-    max_tokens: 5000
+    # Raised to 5,000 on 21 Sep 2026 for lesson_write/v4 (up to six sections and three worked examples); to 9,000
+    # on 22 Sep 2026 for v5 revision notes (up to eight sections with bullets, tables, model exam answers).
+    max_tokens: 9000
     timeout_s: 120
     retries: 1
   lesson_illustrator:
@@ -205,6 +206,18 @@ roles:
     temperature: 0.0
     max_tokens: 600
     timeout_s: 30
+    retries: 1
+  homework_reader:
+    # Reads a photo of her own school homework into plain text, so retrieval over her books can say which topic
+    # it is on (docs/GO-LIVE-ENGAGEMENT.md F3). It transcribes the questions only — never an answer, never a
+    # topic — and the photo is passed through, never stored. Flash-Lite takes images directly; live only, since
+    # the Batch API carries no inline images (user rule, 21 Sep 2026). Which topic it is is decided by the
+    # deterministic search in learn/homework.py, not by the model.
+    model: google/gemini-2.5-flash-lite
+    fallbacks: []
+    temperature: 0.0
+    max_tokens: 900
+    timeout_s: 60
     retries: 1
   viva_judge:
     # Judges her explanation of one step of an approved walkthrough against that step only (docs/STUDENT-APP.md

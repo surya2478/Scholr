@@ -64,9 +64,38 @@ class SourceRefOut(BaseModel):
     page: int | None
 
 
+class PodcastDialogueTurnOut(BaseModel):
+    speaker: str
+    text: str
+
+
 class LessonSectionOut(BaseModel):
     heading: str
     body: str
+    # lesson v5 (revision notes): the exam definition, the idea as bullet points (body is them joined, for the
+    # voice), and an exam tip. Empty on lessons written before.
+    definition: str = ""
+    points: list[str] = Field(default_factory=list)
+    exam_tip: str = ""
+    # lesson v6: coaching mental model and formula anatomy notes
+    mental_model: str = ""
+    formula_notes: str = ""
+    sources: list[SourceRefOut]
+
+
+class LessonTableOut(BaseModel):
+    """Every number in it is in the pages it cites (lessons.guard_table)."""
+
+    title: str
+    columns: list[str]
+    rows: list[list[str]]
+    section: int = 0  # the section (from 1) it belongs under; 0 = after the sections
+    sources: list[SourceRefOut]
+
+
+class ExamAnswerOut(BaseModel):
+    question: str
+    points: list[str]
     sources: list[SourceRefOut]
 
 
@@ -77,12 +106,15 @@ class KeyTermOut(BaseModel):
 
 class WorkedExampleOut(BaseModel):
     problem: str
+    strategy: str = ""  # "How to Think / Coaching Game Plan"
     steps: list[str]
     final_answer: str
     unit: str | None = None  # checked with Pint where the subject's answers carry units
     checked: Literal["sympy"] | None  # "sympy": SymPy recomputed the answer before it was stored (AC-U5)
+    coaching_takeaway: str = ""  # "Key Coaching Takeaway / Trap Warning"
     sources: list[SourceRefOut]
     level: Literal["basic", "standard", "exam"] | None = None  # lesson v4: examples rise to exam standard
+    section: int = 0  # lesson v5: the section (from 1) it follows; 0 = after the sections
 
 
 class DiagramOut(BaseModel):
@@ -98,7 +130,12 @@ class LessonOut(BaseModel):
     id: UUID
     status: Literal["ready", "not_enough_material"]
     summary: str = ""
+    introduction: str = ""
+    podcast_audio_url: str | None = None
+    podcast_script: list[PodcastDialogueTurnOut] = Field(default_factory=list)
     sections: list[LessonSectionOut] = Field(default_factory=list)
+    tables: list[LessonTableOut] = Field(default_factory=list)
+    exam_answers: list[ExamAnswerOut] = Field(default_factory=list)
     key_terms: list[KeyTermOut] = Field(default_factory=list)
     worked_examples: list[WorkedExampleOut] = Field(default_factory=list)
     diagrams: list[DiagramOut] = Field(default_factory=list)
@@ -118,6 +155,10 @@ class ItemCardOut(BaseModel):
     command_word: str | None
     stem: str | None = None
     context: str | None = None
+    difficulty: int | None = None
+    origin: str | None = None
+    last_status: Literal["answered", "provisional", "marked"] | None = None
+    last_marks: float | None = None
 
 
 class MistakeCardOut(BaseModel):
@@ -317,3 +358,28 @@ class VivaStepOut(BaseModel):
     step_mark: str = ""
     last: bool = False
     safety_message: str | None = None  # set when her words raised a safety concern; nothing was judged
+
+
+class HomeworkMatchOut(BaseModel):
+    """A topic her homework photo looks like. No book text comes with it: she is offered a topic, not an excerpt."""
+
+    objective_id: UUID
+    code: str
+    statement: str
+    subject_id: UUID
+    subject_name: str
+    similarity: float
+
+
+class HomeworkPhotoOut(BaseModel):
+    """What was read off a homework photo, and the topics it might be (docs/GO-LIVE-ENGAGEMENT.md F3).
+
+    `matches` is empty whenever her own books do not support naming a topic (retrieval below MEDIUM), and she is
+    told to choose for herself instead. Nothing here answers the homework.
+    """
+
+    read: bool
+    text_preview: str  # a short look at what was read, so she can see the photo worked
+    state: Literal["HIGH", "MEDIUM", "LOW", "NONE"]
+    matches: list[HomeworkMatchOut]
+    notice: str | None = None

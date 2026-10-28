@@ -41,7 +41,7 @@ export function ReinforcementList({
             {t.practicable ? (
               <Link
                 href={`/student/practice?subject=${t.subject_id}&objective=${t.objective_id}`}
-                className="w-fit text-xs font-fun font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 px-3.5 py-1.5 rounded-xl shadow-xs shadow-orange-500/20 transition-all flex items-center gap-1.5 hover:scale-105"
+                className="w-fit text-xs font-fun font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-3.5 py-1.5 rounded-xl shadow-xs shadow-blue-600/20 transition-all flex items-center gap-1.5 hover:scale-105"
               >
                 <span>Practise this topic now</span>
                 <span>→</span>
@@ -99,7 +99,7 @@ export function StandingCards({ subjects }: { subjects: SubjectStanding[] }) {
                 {s.weak_lessons.slice(0, 4).map((lesson) => (
                   <span
                     key={lesson.objective_id}
-                    className="rounded-xl bg-amber-50 border border-amber-200 px-2.5 py-1 text-[11px] font-bold text-amber-800"
+                    className="rounded-xl bg-amber-50 border border-slate-200 px-2.5 py-1 text-[11px] font-bold text-amber-800"
                     title={`${lesson.sessions} session(s), last on ${lesson.last_seen_on}`}
                   >
                     ⚠️ {lesson.title}

@@ -103,7 +103,7 @@ export function IndependenceMeter({ data }: { data: IndependenceData | undefined
               </div>
             </div>
 
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-amber-50/70 border border-amber-200/60">
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-amber-50/70 border border-slate-200/80">
               <span className="h-3 w-3 rounded-full bg-amber-400 flex-none" />
               <div>
                 <span className="font-fun font-bold text-amber-950 block text-[11px]">

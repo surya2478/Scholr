@@ -26,6 +26,21 @@ def get_mistakes(
     return service.list_mistakes(s, student_id=sid, subject_id=subject_id, status=status)
 
 
+@router.get("/mistakes/by-assessment/{assessment_id}", response_model=list[MistakeOut])
+def get_mistakes_by_assessment(
+    assessment_id: UUID,
+    principal: PrincipalDep,
+    s: DbDep,
+    student_id: UUID | None = None,
+) -> list[MistakeOut]:
+    sid = resolve_student_id(principal, student_id, scope="assessments")
+    from app.modules.assessment import service as assessment_service
+
+    attempts_map = assessment_service.assessment_attempts(s, principal, assessment_id)
+    attempt_ids = list(attempts_map.values())
+    return service.list_mistakes_for_attempts(s, student_id=sid, attempt_ids=attempt_ids)
+
+
 @router.get("/mistakes/challenges", response_model=list[BugChallenge])
 def list_bug_challenges(principal: PrincipalDep, s: DbDep, subject_id: UUID | None = None) -> list[BugChallenge]:
     """Bug Hunter challenges, built from approved walkthroughs (mistakes/challenges.py)."""

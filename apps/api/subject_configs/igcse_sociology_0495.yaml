@@ -92,3 +92,23 @@ component_skill_weights:
   P1: { AO1: 0.35, AO2: 0.40, AO3: 0.25 }
   P2: { AO1: 0.43, AO2: 0.37, AO3: 0.20 }
 language: en
+
+# Cambridge's command-word definitions for 0495 (first examination 2025), as reprinted in the Cambridge coursebook
+# (2nd ed., 2023) pp. 17-18. Shown beside a question whose command word is listed; checked 22 Sep 2026.
+command_words:
+  source: "Cambridge IGCSE Sociology 0495 syllabus (from 2025): command words, as given in the Cambridge coursebook pp. 17-18"
+  definitions:
+    assess: "Make an informed judgement"
+    define: "Give precise meaning"
+    describe: "State the points of a topic / give characteristics and main features"
+    develop: "Take forward to a more advanced stage or build upon given information"
+    discuss: "Write about issue(s) or topic(s) in depth in a structured way"
+    evaluate: "Judge or calculate the quality, importance, amount, or value of something"
+    explain: "Set out purposes or reasons / make the relationships between things clear / say why and/or how and support with relevant evidence"
+    give: "Produce an answer from a given source or recall/memory"
+    identify: "Name/select/recognise"
+    justify: "Support a case with evidence/argument"
+    outline: "Set out the main points"
+    state: "Express in clear terms"
+    suggest: "Apply knowledge and understanding to situations where there is a range of valid responses in order to make proposals/put forward considerations"
+    summarise: "Select and present the main points, without detail"

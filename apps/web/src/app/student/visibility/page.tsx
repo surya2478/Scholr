@@ -10,13 +10,13 @@ export default function Visibility() {
   const guardians = me?.guardian_visibility ?? [];
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
-      <div className="rounded-3xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-[#FFF4E8] to-orange-50 p-6 md:p-8 shadow-sm">
+      <div className="rounded-3xl border-2 border-slate-200 bg-gradient-to-br from-slate-50 via-white to-blue-50/50 p-6 md:p-8 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="h-14 w-14 rounded-3xl bg-amber-100 border border-amber-300 flex items-center justify-center text-3xl shadow-sm select-none">
             👁️
           </div>
           <div>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 text-[11px] font-fun font-bold border border-orange-200 mb-1">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 text-[11px] font-fun font-bold border border-blue-200 mb-1">
               Complete Transparency
             </span>
             <h1 className="text-xl md:text-2xl font-fun font-bold text-slate-900">
@@ -38,7 +38,7 @@ export default function Visibility() {
           {guardians.map((g) => (
             <div
               key={g.guardian_name}
-              className="flex flex-col gap-2 rounded-2xl border-2 border-amber-200/70 bg-[#FFFDF9] p-4 shadow-2xs"
+              className="flex flex-col gap-2 rounded-2xl border-2 border-slate-200/90 bg-white p-4 shadow-2xs"
             >
               <div className="flex items-center justify-between">
                 <div className="text-sm font-fun font-bold text-slate-900 flex items-center gap-2">
@@ -58,8 +58,8 @@ export default function Visibility() {
           ))}
         </div>
 
-        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-xs leading-relaxed text-amber-900 space-y-1 mt-2">
-          <span className="font-fun font-bold text-orange-800 flex items-center gap-1.5 text-sm">
+        <div className="rounded-2xl bg-amber-50 border border-slate-200 p-4 text-xs leading-relaxed text-amber-900 space-y-1 mt-2">
+          <span className="font-fun font-bold text-blue-800 flex items-center gap-1.5 text-sm">
             <span>🛡️</span> Safety Guardrail Promise
           </span>
           <p>

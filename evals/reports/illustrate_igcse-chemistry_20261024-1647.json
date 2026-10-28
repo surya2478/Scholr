@@ -1,0 +1,21 @@
+{
+  "subject": "igcse-chemistry",
+  "prompt": "lesson_illustrate/v1",
+  "model": "google/gemini-2.5-flash-lite",
+  "lessons": 48,
+  "with_diagram": 7,
+  "no_diagram": 41,
+  "no_vocabulary": 38,
+  "failed": 0,
+  "kinds": {
+    "periodic_table": 5,
+    "atom_structure": 7
+  },
+  "cost_usd": 0.002,
+  "dropped_kind": 0,
+  "dropped_numbers": 4,
+  "dropped_caption": 0,
+  "dropped_uncited": 0,
+  "dropped_ungrounded": 0,
+  "errors": []
+}

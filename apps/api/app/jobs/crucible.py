@@ -59,6 +59,7 @@ def main(argv: list[str]) -> None:
     parser.add_argument("--only", help="objective codes, comma separated")
     parser.add_argument("--redo", action="store_true", help="write again where one is stored")
     parser.add_argument("--run", action="store_true", help="make the calls; without it, print the estimate only")
+    parser.add_argument("--live", action="store_true", help="call the live model one debate at a time (no Batch API)")
     parser.add_argument("--review", action="store_true")
     parser.add_argument("--approve", nargs="+", metavar="CODE")
     parser.add_argument("--reject", nargs="+", metavar="CODE")
@@ -98,7 +99,7 @@ def main(argv: list[str]) -> None:
     role = load_roles().role(learn.CRUCIBLE_ROLE)
     print(
         f"{args.subject}: {len(prepared)} debates to write, estimate ${len(prepared) * COST_PER_DEBATE_USD:.3f} "
-        f"(model {role.batch_model or role.model})",
+        f"(model {role.model if args.live else (role.batch_model or role.model)})",
         flush=True,
     )
     if not args.run or not prepared:
@@ -117,6 +118,7 @@ def main(argv: list[str]) -> None:
             crucible.CrucibleDraft,
             tenant_id,
             tag=f"crucible-{args.subject}",
+            live=args.live,
         )
         cost += spent_here
         retry = {}

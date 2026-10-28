@@ -137,7 +137,7 @@ function WorkedExam({
       {askHref && (
         <Link
           href={askHref(`${worked.context ?? ""} ${worked.stem}`.trim())}
-          className="self-start text-xs font-fun font-bold text-orange-600 hover:underline"
+          className="self-start text-xs font-fun font-bold text-blue-600 hover:underline"
         >
           🦉 Don&apos;t follow a step? Ask the Tutor
         </Link>

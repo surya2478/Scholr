@@ -10,14 +10,17 @@ export default function Learn() {
   const streams = useApi<Stream[]>("/learn/streams");
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-fun font-bold text-slate-900">Subjects &amp; topics</h1>
-        <p className="text-sm text-slate-600 font-medium">
-          Open a subject to see its chapters. Every topic has a lesson, questions to try, and the Tutor for doubts.
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-5 md:p-6 shadow-2xs">
+        <div className="font-mono text-xs font-bold uppercase tracking-wider text-blue-600">
+          CAMBRIDGE CIE &amp; IIT FOUNDATION CURRICULUM
+        </div>
+        <h1 className="mt-1 text-2xl font-extrabold text-slate-900">Syllabus &amp; Revision Notes</h1>
+        <p className="mt-1 text-xs md:text-sm text-slate-600 font-medium">
+          Select a subject to open its revision notes, cheat sheets, recall flashcards and topic questions (<code className="font-mono text-xs text-blue-600">Easy → Medium → Hard</code>).
         </p>
       </div>
       {streams.error ? <ErrorNote error={streams.error} /> : null}
-      {streams.loading && <p className="text-sm text-slate-500">Loading your subjects…</p>}
+      {streams.loading && <p className="text-sm text-slate-500">Loading syllabus streams…</p>}
       {(streams.data ?? []).map((stream) => (
         <StreamSection key={stream.key} stream={stream} />
       ))}

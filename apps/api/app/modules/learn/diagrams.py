@@ -21,7 +21,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sympy import Rational, factorint, gcd, lcm, nsimplify
 
-from app.tools import units
+from app.tools import elements, units
 
 MAX_VALUE = 100_000
 
@@ -134,6 +134,29 @@ class StraightLineGraph(_Spec):
     points: list[dict[str, Any]] = Field(default_factory=list, max_length=4)
 
 
+class AtomStructure(_Spec):
+    """One atom or simple ion: nucleus (protons and neutrons) and electron shells, all worked out from the element,
+    its mass number and its charge."""
+
+    element: str = Field(min_length=1, max_length=12)  # symbol or name: "Na", "sodium"
+    mass_number: int = Field(ge=1, le=80)
+    charge: int = Field(default=0, ge=-3, le=3)  # 0 for an atom; +1 for Na+, -2 for O2-
+
+
+class ParticleBoxes(_Spec):
+    """Boxes of particles, each drawn from the atoms in its particles; what each box is (element, compound or
+    mixture) is worked out here and must agree with its label."""
+
+    boxes: list[dict[str, Any]] = Field(min_length=1, max_length=4)
+
+
+class PeriodicTable(_Spec):
+    """The first four periods, with groups I–VIII and the transition elements; chosen groups or elements lit."""
+
+    highlight_groups: list[int] = Field(default_factory=list, max_length=8)
+    highlight_elements: list[str] = Field(default_factory=list, max_length=12)
+
+
 SPECS: dict[str, type[_Spec]] = {
     "venn_factors": VennFactors,
     "number_line": NumberLine,
@@ -145,13 +168,19 @@ SPECS: dict[str, type[_Spec]] = {
     "straight_line_graph": StraightLineGraph,
     "ray_diagram": RayDiagram,
     "circuit": Circuit,
+    "atom_structure": AtomStructure,
+    "particle_boxes": ParticleBoxes,
+    "periodic_table": PeriodicTable,
 }
 KINDS = frozenset(SPECS)
 # Kinds whose numbers are illustrative rather than this lesson's own: a refraction angle, a cell's voltage or a
 # wave's amplitude shows what the idea means, and each of these carries a physical law of its own (Snell's law,
 # V = IR, the law of reflection, the resultant) that keeps it honest whatever the numbers. The rest — a Venn of
 # two numbers, a bar model, a line graph — are about a particular case, and must use the lesson's own numbers.
-ILLUSTRATIVE = frozenset({"ray_diagram", "circuit", "wave", "force_arrows"})
+# The Chemistry pictures are built wholly from the element table here, so any atom or particle drawn is a true one.
+ILLUSTRATIVE = frozenset(
+    {"ray_diagram", "circuit", "wave", "force_arrows", "atom_structure", "particle_boxes", "periodic_table"}
+)
 _DIRECTIONS = {"left": (-1.0, 0.0), "right": (1.0, 0.0), "up": (0.0, 1.0), "down": (0.0, -1.0)}
 
 
@@ -407,6 +436,93 @@ def _circuit(spec: Circuit) -> dict[str, Any]:
     }
 
 
+def _element(text: str) -> elements.Element:
+    found = elements.find(text)
+    if found is None:
+        raise DiagramError(f"{text!r} is not one of the first 36 elements")
+    return found
+
+
+def _atom_structure(spec: AtomStructure) -> dict[str, Any]:
+    element = _element(spec.element)
+    if element.z > elements.MAX_CONFIGURED:
+        raise DiagramError("electron shells are drawn for proton numbers 1 to 20 only")
+    neutrons = spec.mass_number - element.z
+    # A real nucleus: hydrogen-1 has none; otherwise there are about as many neutrons as protons, never under
+    # half as many or over twice (the first 20 elements' isotopes all fall inside this).
+    if neutrons < 0 or (element.z > 1 and not element.z / 2 <= neutrons <= element.z * 2):
+        raise DiagramError("that mass number is not a real isotope of this element")
+    electrons = element.z - spec.charge
+    return {
+        "symbol": element.symbol,
+        "name": element.name,
+        "protons": element.z,
+        "neutrons": neutrons,
+        "electrons": electrons,
+        "mass_number": spec.mass_number,
+        "charge": spec.charge,
+        "shells": elements.shells(electrons),
+    }
+
+
+_BOX_KINDS = ("element", "compound", "mixture")
+
+
+def _particle_boxes(spec: ParticleBoxes) -> dict[str, Any]:
+    boxes = []
+    for box in spec.boxes:
+        label = str(box.get("label", "")).strip()[:40]
+        particles = box.get("particles")
+        if not label or not isinstance(particles, list) or not 1 <= len(particles) <= 4:
+            raise DiagramError("each box needs a label and one to four kinds of particle")
+        drawn, symbols_by_particle = [], []
+        for particle in particles:
+            atoms = particle.get("atoms") if isinstance(particle, dict) else None
+            count = particle.get("count", 1) if isinstance(particle, dict) else 0
+            if not isinstance(atoms, list) or not 1 <= len(atoms) <= 5 or not isinstance(count, int):
+                raise DiagramError("a particle is a list of one to five atoms, with a count")
+            if not 1 <= count <= 8:
+                raise DiagramError("draw one to eight of each particle")
+            symbols = [_element(str(a)).symbol for a in atoms]
+            drawn.append({"atoms": symbols, "count": count, "formula": _formula(symbols)})
+            symbols_by_particle.append(symbols)
+        kinds = {tuple(sorted(s)) for s in symbols_by_particle}
+        if len(kinds) > 1:
+            what = "mixture"
+        elif len(set(symbols_by_particle[0])) == 1:
+            what = "element"
+        else:
+            what = "compound"
+        # The label must say what the box is: a "compound" label on a box of two elements teaches it backwards.
+        named = [k for k in _BOX_KINDS if k in label.lower()]
+        says = "mixture" if "mixture" in named else (named[0] if len(named) == 1 else None)
+        if (says and what != says) or (named and not says and what == "mixture"):
+            raise DiagramError(f"the box labelled {label!r} holds {'an' if what == 'element' else 'a'} {what}")
+        boxes.append({"label": label, "classification": what, "particles": drawn})
+    return {"boxes": boxes}
+
+
+def _formula(symbols: list[str]) -> str:
+    counts: dict[str, int] = {}
+    for symbol in symbols:
+        counts[symbol] = counts.get(symbol, 0) + 1
+    return "".join(f"{s}{n if n > 1 else ''}" for s, n in counts.items())
+
+
+def _periodic_table(spec: PeriodicTable) -> dict[str, Any]:
+    groups = sorted(set(spec.highlight_groups))
+    if any(not 1 <= g <= 8 for g in groups):
+        raise DiagramError("groups run from I to VIII")
+    lit = [_element(e).symbol for e in spec.highlight_elements]
+    if not groups and not lit:
+        raise DiagramError("light up at least one group or element")
+    cells = [
+        {"symbol": e.symbol, "z": e.z, "group": e.group, "period": e.period}
+        for e in sorted(elements.ELEMENTS.values(), key=lambda e: e.z)
+    ]
+    return {"cells": cells, "highlight_groups": groups, "highlight_elements": lit, "group_names": elements.GROUP_NAMES}
+
+
 _CHECKS = {
     "venn_factors": _venn,
     "number_line": _number_line,
@@ -418,6 +534,9 @@ _CHECKS = {
     "straight_line_graph": _straight_line_graph,
     "ray_diagram": _ray_diagram,
     "circuit": _circuit,
+    "atom_structure": _atom_structure,
+    "particle_boxes": _particle_boxes,
+    "periodic_table": _periodic_table,
 }
 
 
@@ -483,6 +602,22 @@ DESCRIPTIONS = {
         "circuit — a cell and its components in series or parallel; the total resistance and the current are "
         'worked out for you from V = IR. data: {"emf_v": 6, "arrangement": "series", "components": '
         '[{"label": "lamp", "resistance_ohm": 4}, {"label": "resistor", "resistance_ohm": 8}]}'
+    ),
+    "atom_structure": (
+        "atom_structure — one atom or simple ion drawn with its nucleus (protons and neutrons) and electron shells, "
+        "all worked out for you from the element, its mass number and its charge (proton numbers 1 to 20). "
+        'data: {"element": "Mg", "mass_number": 24, "charge": 0}'
+    ),
+    "particle_boxes": (
+        "particle_boxes — up to four boxes of particles, each particle a list of atom symbols (O2 is "
+        '["O", "O"], H2O is ["H", "H", "O"]); whether a box is an element, a compound or a mixture is worked out '
+        'for you and must match its label. data: {"boxes": [{"label": "an element", "particles": '
+        '[{"atoms": ["N", "N"], "count": 4}]}, {"label": "a compound", "particles": [{"atoms": ["C", "O", "O"], '
+        '"count": 3}]}]}'
+    ),
+    "periodic_table": (
+        "periodic_table — the first four periods with groups I to VIII and the transition elements; light up the "
+        'groups or elements the lesson talks about. data: {"highlight_groups": [1, 7], "highlight_elements": ["Na"]}'
     ),
     "straight_line_graph": (
         "straight_line_graph — the line y = mx + c across a range of x, with its intercept marked and the "
