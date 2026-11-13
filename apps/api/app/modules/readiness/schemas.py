@@ -106,3 +106,26 @@ class SittingOut(BaseModel):
     minutes_left: int | None
     over_time: bool
     status: str
+
+
+class TimedItemOut(BaseModel):
+    question_item_id: UUID
+    label: str
+    marks: int
+    command_word: str | None
+    objective_code: str | None
+    objective_statement: str | None
+    minutes: int  # her papers' own pace: their minutes over their marks, times this question's marks
+
+
+class TimedQuestionOut(BaseModel):
+    """This week's timed long answer in one subject (readiness/timed.py)."""
+
+    subject_id: UUID
+    subject_name: str
+    week_start: date
+    item: TimedItemOut
+    assessment_id: UUID | None  # set once she has started it
+    status: Literal["to_do", "in_progress", "submitted", "marked"]
+    minutes_used: int | None = None
+    over_time: bool = False

@@ -24,3 +24,17 @@ def item_label(source_ref: str | None, origin: str) -> str:
     session = SESSIONS.get(match["session"])
     when = f"{session} 20{match['year']}" if session else f"20{match['year']}"
     return f"{when} · Paper {match['paper']} · {match['q']}"
+
+
+_SESSION_MONTH = {"FM": 3, "MJ": 6, "ON": 11}
+
+
+def series_recency(source_ref: str | None) -> tuple[int, int]:
+    """(year, month) of a past paper's exam series, for "newest first"; (0, 0) when it is not a past paper.
+
+    Newer series follow the current syllabus format (CONTEXT: papers from June 2025 on match her exam), so a choice
+    that prefers them prefers questions shaped like the ones she will sit."""
+    match = _PAST_PAPER.match(source_ref or "")
+    if not match:
+        return (0, 0)
+    return (2000 + int(match["year"]), _SESSION_MONTH.get(match["session"], 0))

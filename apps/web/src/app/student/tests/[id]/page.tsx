@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { AnswerBox } from "@/components/AnswerBox";
+import { EvaluationCard } from "@/components/EvaluationCard";
 import { ExamClock, SittingClock } from "@/components/SittingClock";
 import { Button, Card, Chip, ErrorNote } from "@/components/ui";
 import { api, type Assessment, type Evaluation } from "@/lib/api";
@@ -74,8 +75,11 @@ export default function TestDetail() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {a.kind === "exam_style" && inProgress && <SittingClock assessmentId={a.id} />}
-            {a.kind === "topic_exam" && inProgress && a.started_at && a.config?.duration_min ? (
+            {a.kind === "exam_style" && inProgress && a.config?.paper_ref ? <SittingClock assessmentId={a.id} /> : null}
+            {(a.kind === "topic_exam" || (a.kind === "exam_style" && !a.config?.paper_ref)) &&
+            inProgress &&
+            a.started_at &&
+            a.config?.duration_min ? (
               <ExamClock startedAt={a.started_at} durationMin={a.config.duration_min} />
             ) : null}
             {a.no_help && (
@@ -98,7 +102,7 @@ export default function TestDetail() {
                 {marking ?? "Mark my answers 🪄"}
               </Button>
             )}
-            {submitted && (
+            {submitted && a.score?.awarded !== null && (
               <Link
                 href={`/student/tests/${a.id}/report`}
                 className="px-4 py-2 rounded-2xl font-fun font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-colors"
@@ -109,10 +113,16 @@ export default function TestDetail() {
             {a.score && (
               <div className="bg-white border-2 border-emerald-200 px-4 py-2 rounded-2xl shadow-2xs">
                 <span className="text-xs text-slate-500 font-medium block">Total Score:</span>
-                <span className="text-lg font-fun font-bold text-emerald-700">
-                  {a.score.awarded} / {a.score.available}
-                </span>
-                {!a.score.final && <span className="text-[10px] text-amber-700 block font-medium">(provisional)</span>}
+                {a.score.awarded === null ? (
+                  <span className="text-sm font-fun font-bold text-amber-800">Waiting for a check</span>
+                ) : (
+                  <span className="text-lg font-fun font-bold text-emerald-700">
+                    {a.score.awarded} / {a.score.available}
+                  </span>
+                )}
+                {a.score.awarded !== null && !a.score.final && (
+                  <span className="text-[10px] text-amber-700 block font-medium">(provisional)</span>
+                )}
               </div>
             )}
           </div>
@@ -133,13 +143,16 @@ export default function TestDetail() {
                 Tap &ldquo;Start test&rdquo; above to reveal this question.
               </div>
             ) : item.attempt_id ? (
-              <div className="flex flex-wrap items-center gap-3 p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 text-sm font-medium text-emerald-900">
-                <Chip tone="good">Answered ✓</Chip>
-                {item.marks_awarded !== null && (
-                  <span className="font-fun font-bold">
-                    {item.marks_awarded} / {item.marks} marks {item.evaluation_status === "needs_review" ? "(provisional review)" : ""}
-                  </span>
-                )}
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-3 p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 text-sm font-medium text-emerald-900">
+                  <Chip tone="good">Answered ✓</Chip>
+                  {item.marks_awarded !== null && (
+                    <span className="font-fun font-bold">
+                      {item.marks_awarded} / {item.marks} marks
+                    </span>
+                  )}
+                </div>
+                {item.evaluation_id ? <ItemFeedback evaluationId={item.evaluation_id} /> : null}
               </div>
             ) : inProgress ? (
               <AnswerBox
@@ -156,4 +169,12 @@ export default function TestDetail() {
       </div>
     </div>
   );
+}
+
+// The marking of one answer, shown once the test is marked: her feedback, or what a provisional mark said without
+// its number (AC-E6).
+function ItemFeedback({ evaluationId }: { evaluationId: string }) {
+  const evaluation = useApi<Evaluation>(`/evaluations/${evaluationId}`);
+  if (!evaluation.data) return null;
+  return <EvaluationCard evaluation={evaluation.data} />;
 }

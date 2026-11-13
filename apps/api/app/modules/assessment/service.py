@@ -667,6 +667,13 @@ class ScoreEntry:
     mark: ItemMark | None
 
 
+def _student_score(score: ScoreOut, is_student: bool) -> ScoreOut:
+    """A total that includes a provisional mark is not a number she sees (AC-E6); a parent sees it."""
+    if is_student and score.pending_review:
+        return score.model_copy(update={"awarded": None})
+    return score
+
+
 def score_form(entries: Sequence[ScoreEntry], *, submitted: bool) -> ScoreOut:
     """Unanswered items score 0. A score is final only when every answer has a final or reviewed mark."""
     unmarked = sum(1 for e in entries if e.answered and e.mark is None)
@@ -989,7 +996,7 @@ def assessment_detail(
         started_at=row.started_at,
         submitted_at=row.submitted_at,
         items=out_items,
-        score=score_form(entries, submitted=submitted) if show_marks else None,
+        score=_student_score(score_form(entries, submitted=submitted), is_student) if show_marks else None,
         config=row.config,
     )
 

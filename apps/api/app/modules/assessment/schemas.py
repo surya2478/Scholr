@@ -76,7 +76,7 @@ class AssessmentCreate(BaseModel):
 
 
 class ScoreOut(BaseModel):
-    awarded: float
+    awarded: float | None  # None for the student while any mark in it waits for review (AC-E6)
     available: int
     answered: int
     unmarked: int  # answered but not evaluated yet

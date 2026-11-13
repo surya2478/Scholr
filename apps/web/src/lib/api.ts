@@ -367,6 +367,8 @@ export type AssessmentConfig = {
   target_marks?: number;
   total_marks?: number;
   objective_ids?: string[];
+  paper_ref?: string; // a timed past-paper sitting
+  weekly_timed?: string; // this week's timed question: the Monday it belongs to
 };
 export type AssessmentBrief = {
   id: string;
@@ -388,10 +390,12 @@ export type Assessment = AssessmentBrief & {
     marks: number;
     question: Question | null;
     attempt_id: string | null;
+    evaluation_id: string | null;
     evaluation_status: string | null;
     marks_awarded: number | null;
   }[];
-  score: { awarded: number; available: number; answered: number; unmarked: number; pending_review: number; final: boolean } | null;
+  // `awarded` is null for her while any mark in it waits for a parent's check (AC-E6).
+  score: { awarded: number | null; available: number; answered: number; unmarked: number; pending_review: number; final: boolean } | null;
 };
 
 export type ObjectiveNode = {
@@ -944,3 +948,23 @@ export type AssessmentReport = {
   action_plan: string[];
 };
 
+
+// This week's timed long answer in one subject (improvement 4): her papers' own pace sets the minutes.
+export type TimedQuestion = {
+  subject_id: string;
+  subject_name: string;
+  week_start: string;
+  item: {
+    question_item_id: string;
+    label: string;
+    marks: number;
+    command_word: string | null;
+    objective_code: string | null;
+    objective_statement: string | null;
+    minutes: number;
+  };
+  assessment_id: string | null;
+  status: "to_do" | "in_progress" | "submitted" | "marked";
+  minutes_used: number | null;
+  over_time: boolean;
+};

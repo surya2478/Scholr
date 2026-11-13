@@ -7,8 +7,9 @@ import { Icon, type IconName } from "@/components/icons";
 import { SessionDoors } from "@/components/learn/SessionDoors";
 import { StreamSection } from "@/components/learn/Streams";
 import { SubjectLevels } from "@/components/SubjectLevels";
+import { WeeklyTimedQuestion } from "@/components/WeeklyTimedQuestion";
 import { Card, Chip, Empty, ErrorNote } from "@/components/ui";
-import type { Commitment, DailyPractice, Plan, ProgressSummary, Stream, UpcomingBrief } from "@/lib/api";
+import type { Commitment, DailyPractice, Plan, ProgressSummary, Stream, TimedQuestion, UpcomingBrief } from "@/lib/api";
 import { commitmentDays, greeting, minutes, shortDate } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 
@@ -126,6 +127,7 @@ export default function StudentHome() {
   const streams = useApi<Stream[]>("/learn/streams");
   const daily = useApi<DailyPractice>("/practice/daily");
   const commitments = useApi<Commitment[]>("/commitments");
+  const timed = useApi<TimedQuestion[]>("/timed-questions");
 
   const first = me?.student?.display_name.split(" ")[0] ?? "";
   const week = progress.data?.week;
@@ -243,6 +245,9 @@ export default function StudentHome() {
               ))}
             </ul>
           </Card>
+
+          {/* ---- This week's timed question (improvement 4) ------------------------------------------ */}
+          <WeeklyTimedQuestion questions={timed.data ?? []} />
 
           {/* ---- 3. What's the shape of my day? ------------------------------------------------------ */}
           <Card title="Today's plan" subtitle={plan.data ? shortDate(plan.data.plan_date) : undefined}>
