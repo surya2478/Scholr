@@ -291,6 +291,8 @@ class TopicOut(BaseModel):
     external: ExternalLessonOut | None = None
     steps: list[StepOut] = Field(default_factory=list)  # what this page is made of, in page order
     minutes: int = 0  # the whole page, from its own content — never a guess
+    # "questions" once she has read the topic, "notes" before (pacing.opens_on): answers before re-reading.
+    opens_on: Literal["notes", "questions"] = "notes"
     notice: str | None = None
 
 

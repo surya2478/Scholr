@@ -214,8 +214,36 @@ def _timeline(
     ]
 
 
+ANSWER_FIRST = "Answer at least one question on this topic first. Reading the notes is not the same as using them."
+
+
+def _waiting_for_an_answer(s: Session, plan: StudyPlan, items: Sequence[PlanItem]) -> set[UUID]:
+    """Open plan items on a topic with questions she has not answered a question on since the plan's day began.
+
+    Reading a topic is not finishing it: an item on a topic that has questions counts as done only once she has
+    answered one of them that day. A topic with no questions to try (a lessons-only subject, a topic the bank does
+    not cover) has nothing else to ask of her, so it can be marked done as before.
+    """
+    open_items = [i for i in items if i.objective_id and i.status in ("planned", "in_progress")]
+    if not open_items:
+        return set()
+    with_questions = {
+        oid for oid in {i.objective_id for i in open_items} if oid and assessment.items_for_objective(s, oid)
+    }
+    if not with_questions:
+        return set()
+    since = local_day_start(plan.plan_date, identity.student_timezone(s, plan.student_id))
+    answered: set[UUID] = set()
+    for ev in events.list_events(
+        s, student_id=plan.student_id, types=["attempt_submitted"], objective_ids=list(with_questions), since=since
+    ):
+        answered.update(ev.objective_ids)
+    return {i.id for i in open_items if i.objective_id in with_questions and i.objective_id not in answered}
+
+
 def _out(s: Session, plan: StudyPlan) -> PlanOut:
     items = s.scalars(select(PlanItem).where(PlanItem.plan_id == plan.id).order_by(PlanItem.position)).all()
+    waiting = _waiting_for_an_answer(s, plan, items)
     snapshot = plan.inputs_snapshot or {}
     dropped = snapshot.get("dropped", [])
     objective_ids = [i.objective_id for i in items if i.objective_id] + [UUID(d["objective_id"]) for d in dropped]
@@ -247,6 +275,7 @@ def _out(s: Session, plan: StudyPlan) -> PlanOut:
             reason_code=i.reason_code,
             reason=i.reason_detail or texts["reasons"].get(i.reason_code, ""),
             status=i.status,
+            needs_answer=i.id in waiting,
         )
         for i in items
     ]
@@ -606,6 +635,10 @@ def update_item(s: Session, principal: Principal, item_id: UUID, status: str, *,
         raise ApiError(403, "forbidden", "only the student can update their plan items")
     if item.status in ("completed", "skipped") and status != item.status:
         raise ApiError(409, "item_closed", "this plan item is already finished")
+    plan = s.get(StudyPlan, item.plan_id)
+    assert plan is not None
+    if status == "completed" and item.status != "completed" and item.id in _waiting_for_an_answer(s, plan, [item]):
+        raise ApiError(409, "answer_first", ANSWER_FIRST)
     previous, item.status = item.status, status
     if status in ("completed", "skipped") and previous != status:
         events.append(
@@ -621,8 +654,6 @@ def update_item(s: Session, principal: Principal, item_id: UUID, status: str, *,
             ref_id=item.id,
         )
     s.flush()
-    plan = s.get(StudyPlan, item.plan_id)
-    assert plan is not None
     return _out(s, plan)
 
 

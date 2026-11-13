@@ -21,6 +21,8 @@ class PlanItemOut(BaseModel):
     reason_code: str
     reason: str
     status: str
+    # True while the item is on a topic with questions and she has not answered one today: Done waits for that.
+    needs_answer: bool = False
 
 
 class TimelineBlockOut(BaseModel):

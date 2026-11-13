@@ -623,6 +623,7 @@ def _add_steps(s: Session, out: TopicOut, *, row: Lesson | None, student_id: UUI
     )
     out.steps = [StepOut(key=x.key, label=x.label, minutes=x.minutes, done=x.done) for x in steps]
     out.minutes = pacing.total_minutes(steps)
+    out.opens_on = pacing.opens_on(steps)
 
 
 def _external_lesson(

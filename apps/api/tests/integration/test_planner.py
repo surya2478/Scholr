@@ -6,14 +6,16 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.core.db import set_rls_context
+from app.core.ids import uuid7
 from app.main import create_app
+from app.modules.assessment.models import QuestionItem
 from app.modules.curriculum.models import LearningObjective, Subject, Topic
 from app.modules.events import service as events
 from app.modules.events.models import LearningEvent
@@ -210,3 +212,72 @@ def test_coming_up_leaves_out_a_test_that_has_passed(world: SimpleNamespace, aut
     assert [u["title"] for u in coming] == ["Next test"]
     # The parent's schedule still lists both, so the past one can be cleared.
     assert {u["title"] for u in c.get("/upcoming-assessments", headers=parent).json()} >= {"Past mock", "Next test"}
+
+
+def test_a_topic_with_questions_is_done_only_once_she_has_answered_one(
+    world: SimpleNamespace, auth_headers: Auth
+) -> None:
+    """Improvement 1: reading a topic is not finishing it. Done waits for an answer that day; Skip never does."""
+    student, parent = auth_headers("test|student"), auth_headers("test|parent")
+    c = world.client
+    assert c.put(f"/students/{world.student_id}/availability", headers=parent, json={"minutes": [120] * 7}).json()
+    for objective in world.objectives[1:]:
+        weak_evidence(world, objective)
+    plan = c.post("/plan/regenerate", headers=student).json()
+    item = next(i for i in plan["items"] if i["objective_id"])
+    objective = item["objective_id"]
+    assert item["needs_answer"] is False  # no questions on the topic yet: nothing to answer, Done as before
+
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        s.add(
+            QuestionItem(
+                id=uuid7(), tenant_id=world.tenant_id, subject_id=world.subject_id, origin="past_paper",
+                source_ref="0580/21/MJ25/Q1", stem="Fixture stem", marks=1, objective_ids=[objective],
+                verification_status="verified", mark_scheme={"answer": "1"},
+            )
+        )  # fmt: skip
+    plan = c.get("/plan/today", headers=student).json()
+    item = next(i for i in plan["items"] if i["id"] == item["id"])
+    assert item["needs_answer"] is True
+    refused = c.patch(f"/plan/items/{item['id']}", headers=student, json={"status": "completed"})
+    assert refused.status_code == 409 and refused.json()["error"]["code"] == "answer_first"
+
+    with world.factory() as s, s.begin():  # an answer from yesterday does not count for today
+        set_rls_context(s, user_id=None, role="system")
+        events.append(
+            s, tenant_id=world.tenant_id, student_id=world.student_id, event_type="attempt_submitted",
+            occurred_at=datetime.now(UTC) - timedelta(days=2), objective_ids=[UUID(objective)],
+            subject_id=world.subject_id,
+            payload={"attempt_id": uuid4(), "question_item_id": uuid4(), "assessment_id": None, "session_id": None},
+        )  # fmt: skip
+    assert c.patch(f"/plan/items/{item['id']}", headers=student, json={"status": "completed"}).status_code == 409
+
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        events.append(
+            s, tenant_id=world.tenant_id, student_id=world.student_id, event_type="attempt_submitted",
+            occurred_at=datetime.now(UTC), objective_ids=[UUID(objective)], subject_id=world.subject_id,
+            payload={"attempt_id": uuid4(), "question_item_id": uuid4(), "assessment_id": None, "session_id": None},
+        )  # fmt: skip
+    done = c.patch(f"/plan/items/{item['id']}", headers=student, json={"status": "completed"}).json()
+    assert next(i for i in done["items"] if i["id"] == item["id"])["status"] == "completed"
+
+
+def test_skip_never_waits_for_an_answer(world: SimpleNamespace, auth_headers: Auth) -> None:
+    student, parent = auth_headers("test|student"), auth_headers("test|parent")
+    c = world.client
+    assert c.put(f"/students/{world.student_id}/availability", headers=parent, json={"minutes": [120] * 7}).json()
+    for objective in world.objectives[1:]:
+        weak_evidence(world, objective)
+    item = next(i for i in c.post("/plan/regenerate", headers=student).json()["items"] if i["objective_id"])
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        s.add(
+            QuestionItem(
+                id=uuid7(), tenant_id=world.tenant_id, subject_id=world.subject_id, origin="past_paper",
+                source_ref="0580/21/MJ25/Q2", stem="Fixture stem", marks=1, objective_ids=[UUID(item["objective_id"])],
+                verification_status="verified", mark_scheme={"answer": "1"},
+            )
+        )  # fmt: skip
+    assert c.patch(f"/plan/items/{item['id']}", headers=student, json={"status": "skipped"}).status_code == 200

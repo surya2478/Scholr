@@ -69,3 +69,18 @@ def test_a_question_is_named_by_its_paper_or_called_practice() -> None:
     assert labels.item_label(None, "past_paper") == labels.PRACTICE
     # An unfamiliar shape is shown as it stands rather than guessed at.
     assert labels.item_label("0580-paper-two-q4", "past_paper") == "0580-paper-two-q4"
+
+
+def test_a_topic_she_has_read_opens_on_its_questions() -> None:
+    def page(*, read: bool, check: bool = True) -> list[pacing.Step]:
+        return pacing.steps(
+            lesson=LESSON, lesson_read=read, check_marks=3 if check else 0, check_answered=False,
+            exam_marks=0, exam_answered=False,
+        )  # fmt: skip
+
+    assert pacing.opens_on(page(read=False)) == "notes"  # never read: she cannot recall what she was not taught
+    assert pacing.opens_on(page(read=True)) == "questions"  # read before: answers first, notes as help
+    assert pacing.opens_on(page(read=True, check=False)) == "notes"  # no questions to open on
+    no_lesson = pacing.steps(lesson=None, lesson_read=False, check_marks=3, check_answered=False, exam_marks=0,
+                             exam_answered=False)  # fmt: skip
+    assert pacing.opens_on(no_lesson) == "questions"

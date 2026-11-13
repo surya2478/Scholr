@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { api, type Plan, type TimelineBlock } from "@/lib/api";
 import { KIND_LABELS, minutes } from "@/lib/format";
@@ -43,9 +44,11 @@ export function DayTimeline({
   readOnly?: boolean;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
+  const [refused, setRefused] = useState<{ id: string; message: string } | null>(null);
 
   async function update(itemId: string, status: "completed" | "skipped") {
     setBusy(itemId);
+    setRefused(null);
     try {
       onChange?.(
         await api<Plan>(`/plan/items/${itemId}`, {
@@ -53,6 +56,8 @@ export function DayTimeline({
           json: { status },
         }),
       );
+    } catch (err) {
+      setRefused({ id: itemId, message: err instanceof Error ? err.message : "That didn't save. Try again." });
     } finally {
       setBusy(null);
     }
@@ -66,9 +71,10 @@ export function DayTimeline({
         const commitment = block.kind === "commitment";
         // Why this block is here. A reinforcement block names the outside class it came from (AC-X12), and a
         // template line for the rest, so the day always explains itself.
-        const why =
-          plan.items.find((item) => item.id === block.plan_item_id)?.reason ??
-          null;
+        const item = plan.items.find((x) => x.id === block.plan_item_id);
+        const why = item?.reason ?? null;
+        // Reading a topic is not finishing it: Done waits until she has answered one of its questions today.
+        const answerFirst = item?.needs_answer && item.objective_id ? item.objective_id : null;
         const status = block.status ? STATUS[block.status] : null;
         const open =
           block.status === "planned" || block.status === "in_progress";
@@ -112,13 +118,23 @@ export function DayTimeline({
                 ) : null}
                 {!readOnly && open && block.plan_item_id && (
                   <>
-                    <button
-                      disabled={busy === block.plan_item_id}
-                      onClick={() => update(block.plan_item_id!, "completed")}
-                      className="rounded-full px-2.5 py-1 text-[11px] font-semibold text-good hover:bg-good-soft"
-                    >
-                      Done
-                    </button>
+                    {answerFirst ? (
+                      <Link
+                        href={`/student/learn/topic/${answerFirst}#easy-1`}
+                        title="Done unlocks once you have answered one of this topic's questions today"
+                        className="rounded-full px-2.5 py-1 text-[11px] font-semibold text-brand hover:bg-tile"
+                      >
+                        Answer one →
+                      </Link>
+                    ) : (
+                      <button
+                        disabled={busy === block.plan_item_id}
+                        onClick={() => update(block.plan_item_id!, "completed")}
+                        className="rounded-full px-2.5 py-1 text-[11px] font-semibold text-good hover:bg-good-soft"
+                      >
+                        Done
+                      </button>
+                    )}
                     <button
                       disabled={busy === block.plan_item_id}
                       onClick={() => update(block.plan_item_id!, "skipped")}
@@ -133,7 +149,11 @@ export function DayTimeline({
             {why && (
               <div className="px-4 pb-2 text-[10.5px] leading-snug text-faint md:pl-[160px]">
                 {why}
+                {!readOnly && open && answerFirst ? " Answer one of its questions and it can be marked done." : ""}
               </div>
+            )}
+            {refused?.id === block.plan_item_id && (
+              <div className="px-4 pb-2 text-[11px] font-medium text-rose-700 md:pl-[160px]">{refused.message}</div>
             )}
           </li>
         );

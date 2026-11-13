@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActiveRecallDeck } from "@/components/learn/ActiveRecallDeck";
 import { DialecticalCrucible } from "@/components/learn/DialecticalCrucible";
 import { DualLensView } from "@/components/learn/DualLensView";
@@ -190,7 +190,7 @@ export default function TopicPage() {
         setActiveTab("flashcards");
       } else if (hash === "walkthrough" || hash === "part-exam-level") {
         setActiveTab("walkthrough");
-      } else {
+      } else if (hash) {
         setActiveTab("notes");
       }
     }
@@ -199,13 +199,27 @@ export default function TopicPage() {
     return () => window.removeEventListener("hashchange", checkHash);
   }, [id]);
 
+  // With no part named in the link, the page opens where the server says: on the questions once she has read the
+  // topic (answers before re-reading), on the notes before that. Decided once per topic, so a reload after an
+  // answer does not pull her off the tab she is on.
+  const opened = useRef<string | null>(null);
   useEffect(() => {
-    if (lesson?.status !== "ready") return;
+    if (!data || opened.current === id) return;
+    opened.current = id;
+    if (!window.location.hash) setActiveTab(data.opens_on === "questions" ? "questions" : "notes");
+  }, [data, id]);
+
+  // The lesson counts as read only after time with the notes on screen. Time spent answering is not reading.
+  const reading = activeTab === "notes" || activeTab === "all";
+  const recorded = useRef<string | null>(null);
+  useEffect(() => {
+    if (lesson?.status !== "ready" || !reading || recorded.current === id) return;
     const timer = window.setTimeout(() => {
+      recorded.current = id;
       api(`/learn/objectives/${id}/read`, { method: "POST" }).catch(() => undefined);
     }, READ_AFTER_S * 1000);
     return () => window.clearTimeout(timer);
-  }, [id, lesson?.status]);
+  }, [id, lesson?.status, reading]);
 
   async function writeLesson() {
     setWriting(true);
@@ -482,6 +496,21 @@ export default function TopicPage() {
           {/* TAB 2: TOPIC QUESTIONS (Easy / Medium / Hard + #easy-1, #easy-2...) */}
           {(activeTab === "questions" || activeTab === "all") && data.subject.stage === "taught" && (
             <section id="part-questions" className="scroll-mt-24 space-y-5">
+              {activeTab === "questions" && data.opens_on === "questions" && data.lesson_available && (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-blue-200 bg-blue-50/60 px-4 py-3">
+                  <p className="text-sm text-slate-800">
+                    <span className="font-bold">You&apos;ve read this topic before.</span> Try these from memory first —
+                    getting an answer out of your head does more than reading the notes again.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openTab("notes", "notes")}
+                    className="rounded-xl border border-blue-300 bg-white px-3 py-1.5 text-xs font-bold text-blue-800 hover:bg-blue-50 cursor-pointer transition"
+                  >
+                    Stuck? Open the notes
+                  </button>
+                </div>
+              )}
               <TopicQuestions
                 topicName={data.objective.statement}
                 topicCode={data.objective.code}

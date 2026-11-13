@@ -65,6 +65,8 @@ export type PlanItem = {
   est_minutes: number;
   reason: string;
   status: "planned" | "in_progress" | "completed" | "skipped";
+  // A topic with questions she has not answered one of today: Done waits for an answer.
+  needs_answer: boolean;
 };
 export type TimelineBlock = {
   kind: string;
@@ -648,6 +650,8 @@ export type Topic = {
   // What this page is made of and how long it takes, computed from its own content (AC-U13).
   steps: { key: string; label: string; minutes: number; done: boolean }[];
   minutes: number;
+  // "questions" once she has read the topic: she answers from memory before she re-reads.
+  opens_on: "notes" | "questions";
   notice: string | null;
 };
 export type ExternalLesson = {

@@ -202,11 +202,13 @@ def test_a_lesson_is_written_once_guarded_and_audited(
     # What the page is made of (AC-U13): computed from the page's own content, nothing done yet.
     assert [x["key"] for x in topic["steps"]][0] == "lesson"
     assert not any(x["done"] for x in topic["steps"])
+    assert topic["opens_on"] == "notes"  # never read: the notes come first
     assert topic["minutes"] == sum(x["minutes"] for x in topic["steps"]) >= len(topic["steps"])
 
     world.client.post(f"/learn/objectives/{world.objective}/read", headers=student)
     read = world.client.get(f"/learn/objectives/{world.objective}", headers=student).json()
     assert read["steps"][0]["done"] is True  # her own record, so it still says so tomorrow
+    assert read["opens_on"] == "questions"  # read once: next time she answers before she re-reads
 
     with world.factory() as s, s.begin():
         set_rls_context(s, user_id=None, role="system")

@@ -74,5 +74,17 @@ def steps(
     return out
 
 
+def opens_on(steps_: list[Step]) -> str:
+    """Where the page opens: her own answers first once she has met the topic, the notes only before that.
+
+    Recalling an answer teaches more than reading the notes again, so a topic she has already read opens on its
+    questions, with the notes a tap away as help. A topic she has never read opens on the notes — she cannot
+    recall what she has not been taught. A page with no questions has nowhere else to open.
+    """
+    has_questions = any(step.key in ("check", "exam") for step in steps_)
+    lesson = next((step for step in steps_ if step.key == "lesson"), None)
+    return "questions" if has_questions and (lesson is None or lesson.done) else "notes"
+
+
 def total_minutes(steps_: list[Step]) -> int:
     return sum(step.minutes for step in steps_)
