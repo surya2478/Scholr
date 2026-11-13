@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.core.config import API_ROOT
 from app.core.db import set_rls_context
@@ -116,6 +116,21 @@ def test_readiness_refuses_to_judge_without_evidence(world: SimpleNamespace, aut
     # Command words are listed with what the bank can offer, even before she has answered any.
     assert {row["command_word"] for row in body["command_words"]} >= {"evaluate", "discuss", "explain"}
     assert all(row["answers"] == 0 for row in body["command_words"])
+
+
+def test_readiness_counts_each_units_objectives(world: SimpleNamespace, auth_headers: Auth) -> None:
+    # Objectives sit under subtopics; the per-unit rows must roll them up, not report zero for every unit.
+    body = world.client.get(f"/subjects/{world.subject_id}/readiness", headers=auth_headers("test|student")).json()
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        total = s.scalar(
+            select(func.count(LearningObjective.id))
+            .join(Topic, Topic.id == LearningObjective.topic_id)
+            .where(Topic.subject_id == world.subject_id)
+        )
+    assert body["topics"], "readiness lists the units"
+    assert all(row["objectives_total"] > 0 for row in body["topics"])
+    assert sum(row["objectives_total"] for row in body["topics"]) == total
 
 
 def test_a_paper_is_offered_with_what_it_is_really_worth(world: SimpleNamespace, auth_headers: Auth) -> None:

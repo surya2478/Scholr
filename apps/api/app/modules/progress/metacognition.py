@@ -59,6 +59,10 @@ def classify_quadrant(
     return "known_gap"
 
 
+# Below this many rated answers a calibration percentage is noise, so none is shown (PRINCIPLES 29).
+MIN_CALIBRATION_ANSWERS = 3
+
+
 def calculate_brier_calibration(items: Sequence[tuple[float, float]]) -> float:
     """Calculate calibration percentage from (normalized_confidence, accuracy) pairs.
 
@@ -80,7 +84,7 @@ def derive_advice(
     calibration_score: float,
 ) -> tuple[str, str]:
     """Provide pedagogical insight based on the student's metacognitive calibration."""
-    if total < 3:
+    if total < MIN_CALIBRATION_ANSWERS:
         return (
             "Gathering Data",
             "Rate your confidence on at least 3 practice questions to reveal your metacognitive pattern.",
@@ -239,7 +243,7 @@ def _empty_profile(student_id: UUID, attempts: Sequence[assessment.ConfidenceAtt
     return MetacognitionOut(
         student_id=student_id,
         total_evaluated_with_confidence=0,
-        brier_calibration_score=100.0,
+        brier_calibration_score=None,
         calibration_rating="Gathering Data",
         quadrants={
             "true_mastery": QuadrantCount(count=0, percentage=0.0),
@@ -327,13 +331,14 @@ def get_metacognitive_profile(
         quadrants["hesitant_mastery"].percentage,
         brier_score,
     )
+    shown_score = brier_score if total >= MIN_CALIBRATION_ANSWERS else None
 
     blindspots = [it for it in items if it.quadrant == "dangerous_blindspot"]
 
     return MetacognitionOut(
         student_id=student_id,
         total_evaluated_with_confidence=total,
-        brier_calibration_score=brier_score,
+        brier_calibration_score=shown_score,
         calibration_rating=rating,
         quadrants=quadrants,
         blindspots=blindspots[:10],

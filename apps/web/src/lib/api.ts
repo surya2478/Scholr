@@ -157,7 +157,7 @@ export type VelocityStats = {
 export type Metacognition = {
   student_id: string;
   total_evaluated_with_confidence: number;
-  brier_calibration_score: number;
+  brier_calibration_score: number | null;
   calibration_rating: string;
   quadrants: {
     true_mastery: { count: number; percentage: number };
@@ -925,7 +925,6 @@ export type AssessmentReport = {
   total_marks_available: number;
   total_marks_awarded: number;
   score_percentage: number;
-  projected_grade: string;
   pacing: PacingSummary;
   time_sinks: TimeSinkItem[];
   topic_breakdown: TopicBreakdownItem[];

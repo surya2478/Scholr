@@ -1565,7 +1565,6 @@ def get_assessment_report(
         total_marks_available=report.total_marks_available,
         total_marks_awarded=report.total_marks_awarded,
         score_percentage=report.score_percentage,
-        projected_grade=report.projected_grade,
         pacing=report.pacing,  # type: ignore[arg-type]
         time_sinks=report.time_sinks,  # type: ignore[arg-type]
         topic_breakdown=report.topic_breakdown,  # type: ignore[arg-type]

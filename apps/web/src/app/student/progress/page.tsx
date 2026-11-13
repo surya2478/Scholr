@@ -23,7 +23,7 @@ export default function Progress() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-2 text-center sm:text-left">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-emerald-300 font-mono text-xs font-bold border border-white/15">
-              <span>📈</span> PERFORMANCE ANALYTICS &amp; AO TELEMETRY
+              <span>📈</span> YOUR PROGRESS
             </span>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
               Performance Analytics &amp; Syllabus Mastery

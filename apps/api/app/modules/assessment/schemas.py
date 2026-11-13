@@ -299,7 +299,6 @@ class AssessmentReportOut(BaseModel):
     total_marks_available: float
     total_marks_awarded: float
     score_percentage: float
-    projected_grade: str
     pacing: PacingSummary
     time_sinks: list[TimeSinkItem]
     topic_breakdown: list[TopicBreakdownItem]

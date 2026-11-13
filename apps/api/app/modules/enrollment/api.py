@@ -84,8 +84,14 @@ def remove_teaching_entry(entry_id: UUID, principal: PrincipalDep, s: DbDep) -> 
 
 
 @router.get("/upcoming-assessments", response_model=list[UpcomingOut])
-def get_upcoming(principal: PrincipalDep, s: DbDep, student_id: UUID | None = None) -> list[UpcomingOut]:
-    return service.list_upcoming_assessments(s, student_id=resolve_student_id(principal, student_id, SCOPE))
+def get_upcoming(
+    principal: PrincipalDep, s: DbDep, student_id: UUID | None = None, upcoming_only: bool = False
+) -> list[UpcomingOut]:
+    # The parent's schedule lists everything so past tests can be cleared; the student's "coming up" does not.
+    start = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0) if upcoming_only else None
+    return service.list_upcoming_assessments(
+        s, student_id=resolve_student_id(principal, student_id, SCOPE), start=start
+    )
 
 
 @router.post("/upcoming-assessments", response_model=UpcomingOut, status_code=201)

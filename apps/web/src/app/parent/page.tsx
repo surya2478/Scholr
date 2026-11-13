@@ -115,7 +115,7 @@ export default function ParentOverview() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-3 py-1 font-mono text-xs font-bold text-emerald-300">
-              <span>🏛️ GUARDIAN EXECUTIVE TELEMETRY</span>
+              <span>PARENT OVERVIEW</span>
               <span>·</span>
               <span>CAMBRIDGE CIE &amp; IIT FOUNDATION</span>
             </div>

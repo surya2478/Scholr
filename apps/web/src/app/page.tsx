@@ -49,10 +49,10 @@ export default function Entry() {
 
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-white">
-            SCHOLR <span className="font-mono text-sm text-emerald-400">PRO</span>
+            SCHOLR
           </h1>
           <p className="mt-1 text-xs font-medium text-slate-400">
-            Cambridge IGCSE Extended &amp; IIT Foundation Academic Studio
+            Cambridge IGCSE and IIT Foundation study
           </p>
         </div>
 

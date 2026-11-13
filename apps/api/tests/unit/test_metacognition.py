@@ -136,6 +136,7 @@ def test_get_metacognitive_profile_aggregation(monkeypatch) -> None:  # noqa: AN
     profile = get_metacognitive_profile(mock_session, student_id=student_id, subject_id=subject_id)
 
     assert profile.total_evaluated_with_confidence == 4
+    assert profile.brier_calibration_score is not None
     assert profile.quadrants["true_mastery"].count == 1
     assert profile.quadrants["dangerous_blindspot"].count == 1
     assert profile.quadrants["hesitant_mastery"].count == 1
@@ -166,6 +167,7 @@ def test_rated_but_not_yet_marked_attempts_do_not_break_the_profile(monkeypatch)
     monkeypatch.setattr(metacognition.curriculum, "exam_seconds_per_mark", lambda *a, **k: {})
     profile = metacognition.get_metacognitive_profile(None, student_id=uuid4())  # type: ignore[arg-type]
     assert profile.total_evaluated_with_confidence == 0 and profile.independence.total == 1
+    assert profile.brier_calibration_score is None, "no rated, marked answer: no calibration figure"
     assert profile.velocity is not None
     assert profile.velocity.speed_trap_count == 0
 
@@ -205,3 +207,22 @@ def test_derive_velocity_stats() -> None:
     assert "trick" not in stats.diagnosis
     empty = derive_velocity_stats([], [])
     assert empty.exam_time_used_percent is None and empty.speed_trap_count == 0
+
+
+def test_two_rated_answers_show_no_calibration_figure(monkeypatch) -> None:  # noqa: ANN001
+    """Her Progress page, 13 Nov 2026: "Calibration Accuracy: 97.9%" from two answers."""
+    from app.modules.assessment import service as assessment
+    from app.modules.evaluation import service as evaluation
+    from app.modules.progress import metacognition
+
+    attempts = [
+        assessment.ConfidenceAttempt(uuid4(), uuid4(), uuid4(), "stem", 4, 0, datetime.now(UTC)) for _ in range(2)
+    ]
+    evals = {a.id: EvaluationSummary(uuid4(), "final", 1.0, 1.0, ()) for a in attempts}
+    monkeypatch.setattr(assessment, "attempts_with_confidence", lambda *a, **k: attempts)
+    monkeypatch.setattr(evaluation, "evaluation_summaries_for_attempts", lambda *a, **k: evals)
+    monkeypatch.setattr(metacognition.curriculum, "exam_seconds_per_mark", lambda *a, **k: {})
+    profile = metacognition.get_metacognitive_profile(None, student_id=uuid4())  # type: ignore[arg-type]
+    assert profile.total_evaluated_with_confidence == 2
+    assert profile.brier_calibration_score is None
+    assert profile.calibration_rating == "Gathering Data"

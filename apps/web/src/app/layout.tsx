@@ -4,13 +4,13 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Scholr Pro — IGCSE Extended & IIT Foundation Studio",
-  description: "High-performance academic study & test-prep platform — Cambridge CIE & IIT Foundation",
-  applicationName: "Scholr Pro",
+  title: "Scholr — IGCSE and IIT Foundation study",
+  description: "Your Cambridge IGCSE and IIT Foundation study space.",
+  applicationName: "Scholr",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/favicon.png", apple: "/apple-touch-icon.png" },
   // Installed on her phone it opens like an app (docs/STUDENT-APP.md D6).
-  appleWebApp: { capable: true, title: "Scholr Pro", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Scholr", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

@@ -79,9 +79,10 @@ export function CalibrationMatrix({ data }: { data: Metacognition | null | undef
               <div className="flex items-center gap-2">
                 <span className="text-xl">🎯</span>
                 <span className="font-fun font-bold text-slate-900 text-sm md:text-base">
-                  Calibration Accuracy: {data.brier_calibration_score}%
+                  How well your confidence matched your marks:{" "}
+                  {data.brier_calibration_score === null ? "not enough answers yet" : `${data.brier_calibration_score}%`}
                 </span>
-                <Chip tone={data.brier_calibration_score >= 75 ? "good" : "warn"}>
+                <Chip tone={data.brier_calibration_score !== null && data.brier_calibration_score >= 75 ? "good" : "warn"}>
                   {data.calibration_rating}
                 </Chip>
               </div>

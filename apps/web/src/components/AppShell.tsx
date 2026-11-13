@@ -75,7 +75,7 @@ const PARENT_NAV: NavGroup[] = [
   {
     section: "Safety",
     items: [
-      { href: "/parent/safety", label: "Safety Telemetry", icon: "shield" },
+      { href: "/parent/safety", label: "Safety", icon: "shield" },
       { href: "/consent", label: "Privacy", icon: "privacy" },
     ],
   },
@@ -93,7 +93,7 @@ function Logo({ portal, isStudent }: { portal: string; isStudent: boolean }) {
             SCHOLR
           </span>
           <span className="inline-block px-1.5 py-0.5 font-mono text-[10px] font-bold rounded bg-blue-500/20 text-blue-300 border border-blue-400/30">
-            {isStudent ? "PRO · Y10" : "GUARDIAN"}
+            {isStudent ? "Y10" : "PARENT"}
           </span>
         </div>
         <div className="text-[11px] text-slate-400 font-medium truncate">
@@ -197,7 +197,7 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
           }`}
         >
           <Logo
-            portal={isStudent ? "Cambridge CIE & IIT Studio" : "Academic Telemetry & Oversight"}
+            portal={isStudent ? "IGCSE and IIT Foundation" : "Parent view"}
             isStudent={isStudent}
           />
 
@@ -247,7 +247,7 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
             ))}
           </nav>
 
-          {/* Bottom Academic Telemetry Status Card */}
+          {/* Bottom status card */}
           <div className="mt-auto pt-3">
             <div className="rounded-2xl border border-blue-500/25 bg-gradient-to-br from-blue-950/90 via-slate-900 to-indigo-950/90 p-3.5 space-y-1.5">
               <div className="flex items-center justify-between">
@@ -262,7 +262,7 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
               <p className="text-[10.5px] text-slate-300 leading-relaxed">
                 {isStudent
                   ? "Cambridge 0495 / 0580 / 0625 Mark Schemes + SymPy Symbolic Verification"
-                  : "Real-time syllabus mastery & independent attempt telemetry"}
+                  : "Progress counted from marked answers, never from reading alone"}
               </p>
             </div>
           </div>
@@ -349,7 +349,7 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
                       ? "bg-blue-600 text-white shadow-2xs"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
-                  title="Dark Focus Studio Theme"
+                  title="Dark theme"
                 >
                   🌙 Dark
                 </button>
@@ -435,8 +435,8 @@ export function AppShell({ audience, children }: { audience: "student" | "parent
                     S
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-slate-900">Initialising Scholr Pro Workspace…</div>
-                    <div className="text-xs text-slate-500">Loading Cambridge CIE &amp; IIT Foundation telemetry</div>
+                    <div className="text-sm font-bold text-slate-900">Loading Scholr…</div>
+                    <div className="text-xs text-slate-500">Getting your day ready</div>
                   </div>
                 </div>
               </div>

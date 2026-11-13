@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from app.modules.assessment.analytics import compute_projected_grade
+from app.modules.assessment import analytics
 from app.modules.assessment.schemas import (
     AssessmentReportOut,
     DifficultyBreakdownItem,
@@ -18,16 +18,10 @@ from app.modules.assessment.schemas import (
 )
 
 
-def test_grade_projection_thresholds() -> None:
-    assert compute_projected_grade(92.0) == "A*"
-    assert compute_projected_grade(80.0) == "A*"
-    assert compute_projected_grade(75.0) == "A"
-    assert compute_projected_grade(68.0) == "A"
-    assert compute_projected_grade(60.0) == "B"
-    assert compute_projected_grade(50.0) == "C"
-    assert compute_projected_grade(35.0) == "D"
-    assert compute_projected_grade(22.0) == "E"
-    assert compute_projected_grade(15.0) == "U"
+def test_no_grade_is_projected_from_invented_boundaries() -> None:
+    # Cambridge sets boundaries per component per series; a fixed percentage table would be invented (PRINCIPLES 9).
+    assert not hasattr(analytics, "compute_projected_grade")
+    assert "projected_grade" not in AssessmentReportOut.model_fields
 
 
 def test_notebook_schemas_validate() -> None:
@@ -82,7 +76,6 @@ def test_assessment_report_schema_validate() -> None:
         total_marks_available=80.0,
         total_marks_awarded=68.0,
         score_percentage=85.0,
-        projected_grade="A*",
         pacing=PacingSummary(
             total_time_seconds=4800,
             avg_time_per_question_s=400.0,
@@ -147,7 +140,6 @@ def test_assessment_report_schema_validate() -> None:
         mistake_types_summary={"calculation": 2, "conceptual": 1},
         action_plan=["Focus on Mensuration: 62.5% accuracy."],
     )
-    assert report.projected_grade == "A*"
     assert report.pacing.pace_status == "optimal"
     assert len(report.time_sinks) == 1
     assert report.time_sinks[0].position == 4

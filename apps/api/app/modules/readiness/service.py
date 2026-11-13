@@ -110,6 +110,19 @@ def _topic_rows(s: Session, subject_id: UUID) -> list[Topic]:
     )
 
 
+def _root_topics(s: Session, subject_id: UUID) -> dict[UUID, UUID]:
+    """Every topic in the subject mapped to its top-level (depth 0) ancestor."""
+    parents = dict(s.execute(select(Topic.id, Topic.parent_id).where(Topic.subject_id == subject_id)).all())
+    root: dict[UUID, UUID] = {}
+    for topic_id in parents:
+        current, seen = topic_id, set()
+        while parents.get(current) is not None and current not in seen:
+            seen.add(current)
+            current = parents[current]
+        root[topic_id] = current
+    return root
+
+
 def _topic_evidence(
     s: Session,
     *,
@@ -119,6 +132,8 @@ def _topic_evidence(
     items: dict[UUID, QuestionItem],
 ) -> tuple[list[rules.TopicEvidence], dict[str, UUID]]:
     topics = _topic_rows(s, subject_id)
+    root = _root_topics(s, subject_id)
+    # Objectives hang off subtopics (depth 1); readiness reports by top-level topic, so roll each one up.
     objective_topic: dict[UUID, UUID] = {}
     counts: dict[UUID, int] = defaultdict(int)
     for objective_id, topic_id in s.execute(
@@ -126,8 +141,11 @@ def _topic_evidence(
         .join(Topic, Topic.id == LearningObjective.topic_id)
         .where(Topic.subject_id == subject_id)
     ).all():
-        objective_topic[objective_id] = topic_id
-        counts[topic_id] += 1
+        top = root.get(topic_id)
+        if top is None:
+            continue
+        objective_topic[objective_id] = top
+        counts[top] += 1
 
     secure: dict[UUID, int] = defaultdict(int)
     for row in mastery.list_mastery(s, student_id=student_id, subject_id=subject_id):

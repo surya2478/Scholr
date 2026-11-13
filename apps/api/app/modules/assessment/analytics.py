@@ -31,32 +31,12 @@ class DiagnosticReport:
     total_marks_available: float
     total_marks_awarded: float
     score_percentage: float
-    projected_grade: str
     pacing: dict[str, Any]
     time_sinks: list[dict[str, Any]]
     topic_breakdown: list[dict[str, Any]]
     difficulty_breakdown: list[dict[str, Any]]
     mistake_types_summary: dict[str, int]
     action_plan: list[str]
-
-
-# Grade boundary thresholds for Cambridge IGCSE Extended Maths standard
-GRADE_THRESHOLDS = (
-    (80.0, "A*"),
-    (68.0, "A"),
-    (56.0, "B"),
-    (44.0, "C"),
-    (32.0, "D"),
-    (20.0, "E"),
-    (0.0, "U"),
-)
-
-
-def compute_projected_grade(percentage: float) -> str:
-    for threshold, grade in GRADE_THRESHOLDS:
-        if percentage >= threshold:
-            return grade
-    return "U"
 
 
 def generate_diagnostic_report(
@@ -243,7 +223,6 @@ def generate_diagnostic_report(
         total_marks_available=total_marks_available,
         total_marks_awarded=total_marks_awarded,
         score_percentage=score_pct,
-        projected_grade=compute_projected_grade(score_pct),
         pacing=pacing_data,
         time_sinks=time_sinks,
         topic_breakdown=topic_breakdown,

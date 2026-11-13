@@ -37,7 +37,7 @@ export default function AssessmentReportPage() {
               {r.title} — Detailed Performance Analysis 📊
             </h1>
             <p className="text-xs md:text-sm text-slate-600 font-medium">
-              Comprehensive diagnostic: pacing telemetry, time-sink analysis, topic conversion, and grade projection.
+              Your marks, your pacing and where the time went. No grade is shown: Cambridge sets new grade boundaries for every paper in every series.
             </p>
           </div>
 
@@ -52,22 +52,14 @@ export default function AssessmentReportPage() {
         </div>
       </div>
 
-      {/* 1. Executive Summary & Grade Projection Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* 1. Marks, pacing and time sinks */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-3xl bg-white border-2 border-emerald-200 shadow-2xs space-y-1">
           <span className="text-xs font-medium text-slate-500 block">Total Score</span>
           <div className="text-2xl md:text-3xl font-fun font-bold text-emerald-700">
             {r.total_marks_awarded} <span className="text-sm font-normal text-slate-400">/ {r.total_marks_available}</span>
           </div>
           <span className="text-xs font-bold text-emerald-800">{r.score_percentage}% awarded</span>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-white border-2 border-indigo-200 shadow-2xs space-y-1">
-          <span className="text-xs font-medium text-slate-500 block">Projected Grade</span>
-          <div className="text-2xl md:text-3xl font-fun font-bold text-indigo-700">
-            {r.projected_grade}
-          </div>
-          <span className="text-[11px] text-indigo-800 font-medium">Cambridge Standard Band</span>
         </div>
 
         <div className="p-5 rounded-3xl bg-white border-2 border-slate-200 shadow-2xs space-y-1">

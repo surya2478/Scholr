@@ -214,7 +214,7 @@ class IndependenceStats(BaseModel):
 class MetacognitionOut(BaseModel):
     student_id: UUID
     total_evaluated_with_confidence: int
-    brier_calibration_score: float  # 0.0 to 100.0% calibration
+    brier_calibration_score: float | None  # 0.0 to 100.0; None until MIN_CALIBRATION_ANSWERS rated answers
     calibration_rating: str
     quadrants: dict[str, QuadrantCount]
     blindspots: list[MetacognitionItem]

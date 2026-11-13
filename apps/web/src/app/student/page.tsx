@@ -122,7 +122,7 @@ export default function StudentHome() {
   const me = useMe();
   const plan = useApi<Plan>("/plan/today");
   const progress = useApi<ProgressSummary>("/progress/summary");
-  const upcoming = useApi<UpcomingBrief[]>("/upcoming-assessments");
+  const upcoming = useApi<UpcomingBrief[]>("/upcoming-assessments?upcoming_only=true");
   const streams = useApi<Stream[]>("/learn/streams");
   const daily = useApi<DailyPractice>("/practice/daily");
   const commitments = useApi<Commitment[]>("/commitments");

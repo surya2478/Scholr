@@ -195,3 +195,18 @@ def test_a_day_with_no_study_time_never_also_says_the_day_is_full(world: SimpleN
     assert len(plan["notices"]) == 1
     assert "No study time is planned" in plan["notices"][0]
     assert not any("optional practice" in n for n in plan["notices"])
+
+
+def test_coming_up_leaves_out_a_test_that_has_passed(world: SimpleNamespace, auth_headers: Auth) -> None:
+    """Her home page, 13 Nov 2026: "Coming up: Sociology pre-mock", a mock that was due on 5 Nov."""
+    student, parent = auth_headers("test|student"), auth_headers("test|parent")
+    c = world.client
+    now = datetime.now(UTC)
+    for title, due in (("Past mock", now - timedelta(days=8)), ("Next test", now + timedelta(days=3))):
+        body = {"subject_id": str(world.subject_id), "title": title, "due_at": due.isoformat(), "objective_ids": []}
+        assert c.post("/upcoming-assessments", headers=parent, json=body).status_code == 201
+
+    coming = c.get("/upcoming-assessments?upcoming_only=true", headers=student).json()
+    assert [u["title"] for u in coming] == ["Next test"]
+    # The parent's schedule still lists both, so the past one can be cleared.
+    assert {u["title"] for u in c.get("/upcoming-assessments", headers=parent).json()} >= {"Past mock", "Next test"}
