@@ -109,6 +109,12 @@ export function AnswerBox({
           </div>
           <div className="flex items-center gap-2">
             <BookmarkButton question={question} />
+            {/* Seen before she starts: the paper this comes from forbids a calculator (0580 Paper 2 from 2025). */}
+            {question.calculator_allowed === false && (
+              <span className="font-fun font-bold text-amber-900 bg-amber-100 px-3 py-0.5 rounded-full border border-amber-300">
+                No calculator
+              </span>
+            )}
             <span className="font-fun font-bold text-blue-600 bg-blue-50 px-3 py-0.5 rounded-full border border-blue-200">
               {question.marks} Exam Mark{question.marks === 1 ? "" : "s"} ⭐
             </span>
@@ -127,7 +133,11 @@ export function AnswerBox({
 
         <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/80 text-xs text-slate-500 font-medium">
           <span>
-            {question.calculator_allowed === false ? "💡 Non-calculator exam question!" : "✓ Calculator allowed"}
+            {question.calculator_allowed === false
+              ? "Work it out by hand, as on Paper 2: show every step."
+              : question.calculator_allowed === true
+                ? "Calculator allowed"
+                : ""}
           </span>
           {question.has_diagram && (
             <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">

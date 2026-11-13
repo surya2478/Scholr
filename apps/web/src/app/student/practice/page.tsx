@@ -21,6 +21,8 @@ export default function Practice() {
   const subjects = me?.student?.enrollments ?? [];
   const params = useSearchParams();
   const [subjectId, setSubjectId] = useState<string>(params.get("subject") ?? "");
+  // Paper 2 practice: only questions from papers that forbid a calculator (from the subject page's button).
+  const [noCalculator, setNoCalculator] = useState<boolean>(params.get("no_calculator") === "1");
   const [practiceMode, setPracticeMode] = useState<"standard" | "viva">("standard");
   const [session, setSession] = useState<SessionOut | null>(null);
   const [question, setQuestion] = useState<Question | null>(null);
@@ -55,7 +57,10 @@ export default function Practice() {
 
   async function start() {
     await run(async () => {
-      const created = await api<SessionOut>("/tutor/sessions", { method: "POST", json: { subject_id: subjectId, mode: "practice" } });
+      const created = await api<SessionOut>("/tutor/sessions", {
+        method: "POST",
+        json: { subject_id: subjectId, mode: "practice", no_calculator: noCalculator },
+      });
       setSession(created);
       await next(created.id);
     });
@@ -131,6 +136,12 @@ export default function Practice() {
                   </option>
                 ))}
               </select>
+              {noCalculator && (
+                <label className="flex items-center gap-2 rounded-2xl border-2 border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-950">
+                  <input type="checkbox" checked onChange={() => setNoCalculator(false)} />
+                  No calculator: Paper 2 questions only
+                </label>
+              )}
               <Button disabled={!subjectId || busy} onClick={start}>
                 {busy ? "Starting session…" : "Enter Practice Lab →"}
               </Button>

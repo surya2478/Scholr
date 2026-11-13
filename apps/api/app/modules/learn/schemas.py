@@ -57,6 +57,8 @@ class SubjectLearnOut(BaseModel):
     subject: SubjectCardOut
     stream: str
     chapters: list[ChapterOut]
+    # Questions from papers that forbid a calculator: offered as their own practice when there are any.
+    non_calculator_questions: int = 0
 
 
 class SourceRefOut(BaseModel):

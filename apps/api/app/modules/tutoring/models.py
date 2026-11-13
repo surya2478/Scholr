@@ -22,6 +22,7 @@ class LearningSession(IdMixin, TimestampMixin, StudentScoped, Base):
     # A command-word drill: a practice session that serves only questions asking for this command word
     # ("evaluate", "to what extent"). Null for an ordinary session (Phase 2, AC-R4).
     command_word: Mapped[str | None] = mapped_column(String(32))
+    no_calculator: Mapped[bool] = mapped_column(default=False)  # serve only non-calculator papers' questions
     state: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)  # learning-engine state (tutoring.engine)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

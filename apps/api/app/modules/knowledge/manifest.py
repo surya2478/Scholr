@@ -29,6 +29,9 @@ class SourceIn(BaseModel):
     content_kind: str
     exam_series: str | None = None
     component: str | None = None
+    # A question paper's own rule, printed on its cover. Declared per paper, never inferred from the subject: 0580
+    # Paper 2 allowed a calculator until 2024 and is non-calculator from June 2025. None: not stated (not maths).
+    calculator_allowed: bool | None = None
     notes: str | None = None
     # Question numbers whose section has no unit in the current syllabus (old papers' Media option): their items
     # are saved with no objectives, whatever the extractor tagged, so they never stand for a current topic.

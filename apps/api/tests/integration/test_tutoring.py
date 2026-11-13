@@ -321,3 +321,47 @@ def test_speech_becomes_text_she_checks_and_the_recording_is_not_kept(
     silent = world.client.post("/tutor/speech", headers=student, json={"audio": recording})
     assert silent.status_code == 422 and silent.json()["error"]["code"] == "nothing_heard"
     assert world.client.post("/tutor/speech", json={"audio": recording}).status_code == 401
+
+
+def test_a_no_calculator_drill_serves_only_non_calculator_questions(world: SimpleNamespace, auth_headers: Auth) -> None:
+    """Improvement 5: Paper 2 practice. The fixture's own item allows a calculator; one non-calculator item is added."""
+    student = auth_headers("test|student")
+    refused = world.client.post(
+        "/tutor/sessions",
+        headers=student,
+        json={"subject_id": str(world.subject_id), "mode": "practice", "no_calculator": True},
+    )
+    assert (refused.status_code, refused.json()["error"]["code"]) == (422, "no_non_calculator_items")
+
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        hand = QuestionItem(
+            tenant_id=world.tenant_id,
+            subject_id=world.subject_id,
+            origin="school",
+            source_ref="test/no-calculator",
+            stem="Work out $\\frac{3}{4} + \\frac{1}{6}$.",
+            marks=2,
+            command_word="work out",
+            objective_ids=[world.objective_id],
+            calculator_allowed=False,
+            answer_spec=SPEC,
+            mark_scheme={"text": "M1 common denominator\nA1 11/12", "source": "test_fixture"},
+            verification_status="verified",
+        )
+        s.add(hand)
+        s.flush()
+        hand_id = hand.id
+
+    view = world.client.get(f"/learn/subjects/{world.subject_id}", headers=student).json()
+    assert view["non_calculator_questions"] == 1
+    created = world.client.post(
+        "/tutor/sessions",
+        headers=student,
+        json={"subject_id": str(world.subject_id), "mode": "practice", "no_calculator": True},
+    )
+    assert created.status_code == 201 and created.json()["no_calculator"] is True
+    served = world.client.post(f"/tutor/sessions/{created.json()['id']}/next", headers=student).json()
+    assert served["question"]["id"] == str(hand_id) and served["question"]["calculator_allowed"] is False
+    again = world.client.post(f"/tutor/sessions/{created.json()['id']}/next", headers=student).json()
+    assert again["question"] is None or again["question"]["id"] == str(hand_id)  # never the calculator item

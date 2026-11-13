@@ -109,6 +109,7 @@ def _session_out(row: LearningSession) -> SessionOut:
         objective_id=row.objective_id,
         mode=row.mode,
         command_word=row.command_word,
+        no_calculator=row.no_calculator,
         started_at=row.started_at,
         ended_at=row.ended_at,
         active_minutes=row.active_minutes,
@@ -271,6 +272,10 @@ def start_session(s: Session, principal: Principal, body: SessionCreate, *, now:
     if command_word and not assessment.candidate_items(s, subject_id=body.subject_id, command_word=command_word):
         # Better to refuse than to open a drill that will say "no questions" on its first turn.
         raise ApiError(422, "no_items_for_command_word", "there are no questions asking for that yet")
+    if body.no_calculator and not assessment.candidate_items(
+        s, subject_id=body.subject_id, command_word=command_word, no_calculator=True
+    ):
+        raise ApiError(422, "no_non_calculator_items", "there are no non-calculator questions in this subject yet")
     row = LearningSession(
         tenant_id=principal.tenant_id,
         student_id=principal.student_id,
@@ -278,6 +283,7 @@ def start_session(s: Session, principal: Principal, body: SessionCreate, *, now:
         objective_id=body.objective_id,
         mode=body.mode,
         command_word=command_word,
+        no_calculator=body.no_calculator,
         state=engine.SessionState().dump(),
         started_at=now,
     )
@@ -303,7 +309,9 @@ def next_item(s: Session, principal: Principal, session_id: UUID, *, now: dateti
     state = engine.SessionState.load(row.state)
     items = {
         item.id: item
-        for item in assessment.candidate_items(s, subject_id=row.subject_id, command_word=row.command_word)
+        for item in assessment.candidate_items(
+            s, subject_id=row.subject_id, command_word=row.command_word, no_calculator=row.no_calculator
+        )
     }
     candidates = [engine.ItemCandidate(i.id, i.objective_ids, i.marks, i.source_ref) for i in items.values()]
     selection = {

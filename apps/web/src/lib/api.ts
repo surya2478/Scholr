@@ -554,7 +554,13 @@ export type ObjectiveCard = {
   struggled: boolean;
 };
 export type Chapter = { id: string; code: string; name: string; objectives: ObjectiveCard[]; chapters: Chapter[] };
-export type SubjectLearn = { subject: SubjectCard; stream: string; chapters: Chapter[] };
+export type SubjectLearn = {
+  subject: SubjectCard;
+  stream: string;
+  chapters: Chapter[];
+  // Questions from papers that forbid a calculator, offered as their own practice when there are any.
+  non_calculator_questions: number;
+};
 export type SourceRef = { title: string; page: number | null };
 export type Lesson = {
   id: string;

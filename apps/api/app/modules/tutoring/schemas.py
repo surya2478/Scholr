@@ -16,6 +16,8 @@ class SessionCreate(BaseModel):
     mode: Literal["learn", "practice", "test"] = "practice"
     # Drill one command word. The readiness view lists them weakest first (AC-R4).
     command_word: str | None = Field(default=None, max_length=32)
+    # Serve only questions from papers that forbid a calculator (0580 Paper 2 from June 2025).
+    no_calculator: bool = False
 
 
 class SessionStateOut(BaseModel):
@@ -31,6 +33,7 @@ class SessionOut(BaseModel):
     objective_id: UUID | None
     mode: str
     command_word: str | None = None
+    no_calculator: bool = False
     started_at: datetime
     ended_at: datetime | None
     active_minutes: int

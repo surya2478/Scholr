@@ -229,11 +229,14 @@ def attempt_out(view: AttemptView, evaluation_id: UUID | None) -> AttemptOut:
     )
 
 
-def candidate_items(s: Session, *, subject_id: UUID, command_word: str | None = None) -> list[ItemView]:
+def candidate_items(
+    s: Session, *, subject_id: UUID, command_word: str | None = None, no_calculator: bool = False
+) -> list[ItemView]:
     """Verified practice items for a subject. Study-reserved items are never practice candidates.
 
     ``command_word`` narrows the pool to one command word, for a drill (AC-R4). Command words are stored
     lower case (app.jobs.ao_tag normalises them), so the match is exact rather than case-insensitive.
+    ``no_calculator`` keeps only questions from papers that forbid a calculator (an unknown rule is not "no").
     """
     query = select(QuestionItem).where(
         QuestionItem.subject_id == subject_id,
@@ -242,6 +245,8 @@ def candidate_items(s: Session, *, subject_id: UUID, command_word: str | None = 
     )
     if command_word:
         query = query.where(QuestionItem.command_word == command_word.strip().lower())
+    if no_calculator:
+        query = query.where(QuestionItem.calculator_allowed.is_(False))
     return [_item_view(r) for r in s.scalars(query).all()]
 
 

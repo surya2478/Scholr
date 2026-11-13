@@ -294,6 +294,15 @@ export default function SubjectPage() {
                   📝 Past-Paper Question Hub →
                 </Link>
               )}
+              {(view.data?.non_calculator_questions ?? 0) > 0 && (
+                <Link
+                  href={`/student/practice?subject=${subject.id}&no_calculator=1`}
+                  title={`${view.data?.non_calculator_questions} questions from Paper 2, which allows no calculator`}
+                  className="rounded-xl bg-amber-300 hover:bg-amber-200 px-3.5 py-2 text-xs font-extrabold text-slate-950 shadow-sm transition"
+                >
+                  ✏️ Practise without a calculator →
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => setExpandAll((v) => !v)}

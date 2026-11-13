@@ -242,6 +242,9 @@ def subject_view(s: Session, subject_id: UUID, *, student_id: UUID | None, now: 
         subject=_card(tree.subject, all_ids, levels),
         stream=config.path,
         chapters=[chapter(node) for node in tree.topics],
+        non_calculator_questions=len(assessment.candidate_items(s, subject_id=subject_id, no_calculator=True))
+        if config.taught_here
+        else 0,
     )
 
 

@@ -337,7 +337,7 @@ def run_job(job: PaperJob, *, role: str = EXTRACTOR_ROLE, model: str | None = No
             merged=merged,
             check=check,
             objective_map=objective_map,
-            calculator_allowed=True if job.subject_code == "igcse-maths" else None,
+            calculator_allowed=job.qp.calculator_allowed,
             model=model_used,
             prompt_version=extraction.prompt_version,
             answers_from_table=table is not None,
@@ -403,6 +403,49 @@ def recheck_job(job: PaperJob, *, apply: bool = True) -> str:
     )
 
 
+def calculator_labels(*, apply: bool) -> str:
+    """Set every bank item's calculator rule from its paper's manifest entry; report what changed. No LLM.
+
+    Until 13 Nov 2026 the importer wrote "calculator allowed" for every Maths item, so the June 2025 Paper 2
+    questions (non-calculator) said otherwise. Idempotent: a second run changes nothing."""
+    declared = {
+        src.key: src.calculator_allowed
+        for manifest in load_all()
+        for src in manifest.sources
+        if src.content_kind == "question" and src.calculator_allowed is not None
+    }
+    lines, changed = [], 0
+    with session_scope(user_id=None, role="system") as s:
+        sources = dict(s.execute(select(Source.manifest_key, Source.id).where(Source.manifest_key.in_(declared))).all())
+        for key, allowed in sorted(declared.items()):
+            source_id = sources.get(key)
+            if source_id is None:
+                continue
+            rows = s.scalars(select(QuestionItem).where(QuestionItem.source_id == source_id)).all()
+            wrong = [r for r in rows if r.calculator_allowed is not allowed]
+            if wrong:
+                lines.append(f"{key}: {len(wrong)} of {len(rows)} items -> calculator_allowed={allowed}")
+                changed += len(wrong)
+                if apply:
+                    for r in wrong:
+                        r.calculator_allowed = allowed
+        if apply and changed:
+            tenant_id = s.scalar(select(Source.tenant_id).limit(1))
+            s.add(
+                AuditLog(
+                    tenant_id=tenant_id,
+                    actor_role="system",
+                    action="assessment.calculator_labels",
+                    entity_type="question_item",
+                    meta={"changed": changed, "papers": [line.split(":")[0] for line in lines]},
+                )
+            )
+        if not apply:
+            s.rollback()
+    verb = "changed" if apply else "would change"
+    return "\n".join([*lines, f"{verb} {changed} item(s)"])
+
+
 def main(argv: list[str]) -> None:
     parser = argparse.ArgumentParser(prog="app.jobs.question_bank")
     parser.add_argument("--only")
@@ -411,7 +454,13 @@ def main(argv: list[str]) -> None:
     parser.add_argument("--model", help="override the role's model")
     parser.add_argument("--dry-run", action="store_true", help="save nothing (extraction: compare with the bank)")
     parser.add_argument("--recheck", action="store_true", help="re-run deterministic checks on stored items; no LLM")
+    parser.add_argument(
+        "--calculator-labels", action="store_true", help="set each item's calculator rule from its paper's manifest"
+    )
     args = parser.parse_args(argv[1:])
+    if args.calculator_labels:
+        print(calculator_labels(apply=not args.dry_run), flush=True)
+        return
     jobs = _jobs(args.only)
     if args.recheck:
         for job in jobs:

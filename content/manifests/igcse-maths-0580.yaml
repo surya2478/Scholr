@@ -31,6 +31,7 @@ sources:
     content_kind: question
     exam_series: MJ24
     component: "21"
+    calculator_allowed: true  # printed on the paper's cover
     notes: >-
       Pre-2025 paper structure (Paper 2: 1h30, 70 marks, calculator allowed). Content remains useful;
       paper format differs from the syllabus examined in 2028 (to verify against 2028 syllabus).
@@ -50,6 +51,7 @@ sources:
     content_kind: question
     exam_series: MJ24
     component: "41"
+    calculator_allowed: true  # printed on the paper's cover
     notes: Pre-2025 paper structure (Paper 4 — 2h30, 130 marks, calculator allowed).
   - key: 0580-mj24-ms41
     <<: *cambridge
@@ -67,6 +69,7 @@ sources:
     content_kind: question
     exam_series: MJ24
     component: "11"
+    calculator_allowed: true  # printed on the paper's cover
     notes: Core tier — used for warm-up/foundation practice only.
   - key: 0580-mj24-ms11
     <<: *cambridge
@@ -84,6 +87,7 @@ sources:
     content_kind: question
     exam_series: MJ24
     component: "31"
+    calculator_allowed: true  # printed on the paper's cover
     notes: Core tier — used for warm-up/foundation practice only.
   - key: 0580-mj24-ms31
     <<: *cambridge
@@ -173,6 +177,7 @@ sources:
     content_kind: question
     exam_series: MJ23
     component: "21"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
   - key: 0580-mj23-qp22
     <<: *papacambridge
@@ -182,6 +187,7 @@ sources:
     content_kind: question
     exam_series: MJ23
     component: "22"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
   - key: 0580-mj23-qp41
     <<: *papacambridge
@@ -191,6 +197,7 @@ sources:
     content_kind: question
     exam_series: MJ23
     component: "41"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
   - key: 0580-mj23-qp42
     <<: *papacambridge
@@ -200,6 +207,7 @@ sources:
     content_kind: question
     exam_series: MJ23
     component: "42"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
   - key: 0580-mj25-er
     <<: *papacambridge
@@ -248,6 +256,7 @@ sources:
     content_kind: question
     exam_series: MJ25
     component: "21"
+    calculator_allowed: false  # printed on the paper's cover
     notes: "Current structure (from 2025): Paper 2 non-calculator / Paper 4 calculator, 2h, 100 marks."
   - key: 0580-mj25-qp22
     <<: *papacambridge
@@ -257,6 +266,7 @@ sources:
     content_kind: question
     exam_series: MJ25
     component: "22"
+    calculator_allowed: false  # printed on the paper's cover
     notes: "Current structure (from 2025): Paper 2 non-calculator / Paper 4 calculator, 2h, 100 marks."
   - key: 0580-mj25-qp41
     <<: *papacambridge
@@ -266,6 +276,7 @@ sources:
     content_kind: question
     exam_series: MJ25
     component: "41"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Current structure (from 2025): Paper 2 non-calculator / Paper 4 calculator, 2h, 100 marks."
   - key: 0580-mj25-qp42
     <<: *papacambridge
@@ -275,6 +286,7 @@ sources:
     content_kind: question
     exam_series: MJ25
     component: "42"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Current structure (from 2025): Paper 2 non-calculator / Paper 4 calculator, 2h, 100 marks."
   - key: 0580-on24-ms21
     <<: *papacambridge
@@ -316,6 +328,7 @@ sources:
     content_kind: question
     exam_series: ON24
     component: "21"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
   - key: 0580-on24-qp22
     <<: *papacambridge
@@ -325,6 +338,7 @@ sources:
     content_kind: question
     exam_series: ON24
     component: "22"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
   - key: 0580-on24-qp41
     <<: *papacambridge
@@ -334,6 +348,7 @@ sources:
     content_kind: question
     exam_series: ON24
     component: "41"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
   - key: 0580-on24-qp42
     <<: *papacambridge
@@ -343,4 +358,5 @@ sources:
     content_kind: question
     exam_series: ON24
     component: "42"
+    calculator_allowed: true  # printed on the paper's cover
     notes: "Pre-2025 structure (Paper 2: 1h30, 70 marks; Paper 4: 2h30, 130 marks; calculator allowed)."
