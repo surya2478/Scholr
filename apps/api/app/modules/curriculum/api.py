@@ -11,6 +11,7 @@ from app.modules.curriculum.schemas import (
     CommandWordsOut,
     ObjectiveDetailOut,
     RelatedObjectiveOut,
+    SkillRefOut,
     SubjectOut,
     SubjectTreeOut,
 )
@@ -38,12 +39,18 @@ def get_command_words(subject_id: UUID, s: DbDep) -> CommandWordsOut:
     summary = service.subject_summaries(s, [subject_id]).get(subject_id)
     if summary is None:
         raise not_found("subject")
+    skills = [
+        SkillRefOut(id=sid, code=code, name=name)
+        for code, (sid, name) in sorted(service.skills_by_code(s, subject_id).items())
+    ]
     try:
         config = subjects.taught_config_for(summary.code)
     except subjects.SubjectConfigError:
-        return CommandWordsOut(source=None, definitions={})
+        return CommandWordsOut(source=None, definitions={}, skills=skills)
     words = config.command_words
-    return CommandWordsOut(source=words.source if words else None, definitions=words.definitions if words else {})
+    return CommandWordsOut(
+        source=words.source if words else None, definitions=words.definitions if words else {}, skills=skills
+    )
 
 
 @router.get("/objectives/{objective_id}", response_model=ObjectiveDetailOut)

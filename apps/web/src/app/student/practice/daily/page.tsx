@@ -25,7 +25,7 @@ const STATUS: Record<DailyItem["status"], { label: string; tone: "neutral" | "go
   provisional: { label: "Waiting for a parent's check", tone: "warn" },
 };
 
-function Feedback({ evaluationId }: { evaluationId: string }) {
+function Feedback({ evaluationId, subjectId }: { evaluationId: string; subjectId: string }) {
   const [open, setOpen] = useState(false);
   const evaluation = useApi<Evaluation>(open ? `/evaluations/${evaluationId}` : null);
   if (!open) {
@@ -39,7 +39,7 @@ function Feedback({ evaluationId }: { evaluationId: string }) {
       </button>
     );
   }
-  return evaluation.data ? <EvaluationCard evaluation={evaluation.data} /> : null;
+  return evaluation.data ? <EvaluationCard evaluation={evaluation.data} subjectId={subjectId} /> : null;
 }
 
 // Shown when every question in today's set has been answered: the day has an end, and it says what tomorrow
@@ -410,7 +410,7 @@ export default function TodaysHomeworkPage() {
                     {item.marks_awarded !== null ? ` · ${item.marks_awarded}/${item.marks}` : ""}
                   </Chip>
                 </div>
-                {item.evaluation_id && !answeredHere.has(item.item_id) && <Feedback evaluationId={item.evaluation_id} />}
+                {item.evaluation_id && !answeredHere.has(item.item_id) && <Feedback evaluationId={item.evaluation_id} subjectId={item.subject_id} />}
                 {(item.status === "to_do" || answeredHere.has(item.item_id)) && (
                   <TryQuestion
                     item={{

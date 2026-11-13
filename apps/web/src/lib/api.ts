@@ -308,6 +308,7 @@ export type Question = {
   has_diagram: boolean;
   calculator_allowed: boolean | null;
   objective_ids: string[];
+  skill_ids?: string[]; // the assessment objectives it tests, named by CommandWords.skills
 };
 export type Attempt = { id: string; status: string; evaluation_id: string | null };
 export type Evaluation = {
@@ -331,6 +332,11 @@ export type Evaluation = {
   };
   final_answer_check: { status: string; detail: string } | null;
   mistakes: { label: string; severity: string; description: string }[];
+  // Mark-scheme literacy (improvement 6): each mark with what kind of mark it is, and why working matters.
+  awards?: { code: string; awarded: boolean; reason: string; meaning: string | null }[];
+  method_note?: string | null;
+  // Level-marked answers: the assessment objectives it showed; `marks` is null while the mark is provisional.
+  skills?: { code: string; shown: boolean; marks: number | null }[];
 };
 export type ExaminerInsight = {
   kind: "common_error" | "what_scored" | "advice";
@@ -442,7 +448,11 @@ export type Bookmark = {
   saved_at: string;
 };
 export type BookmarkTag = "examiner_trap" | "calc_heavy" | "must_revise";
-export type CommandWords = { source: string | null; definitions: Record<string, string> };
+export type CommandWords = {
+  source: string | null;
+  definitions: Record<string, string>;
+  skills?: { id: string; code: string; name: string }[]; // the subject's assessment objectives
+};
 
 export type ExamFromTopicsIn = {
   subject_id: string;

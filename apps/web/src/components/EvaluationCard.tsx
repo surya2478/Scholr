@@ -1,12 +1,75 @@
 import { useState } from "react";
-import { api, type Evaluation } from "@/lib/api";
+import { api, type CommandWords, type Evaluation } from "@/lib/api";
+import { useApi } from "@/lib/useApi";
 import { ExaminerInsights } from "./ExaminerInsights";
 import { MathText } from "./MathText";
 import { Button, Chip } from "./ui";
 
+// Mark-scheme literacy (improvement 6). Which assessment objectives a level-marked answer showed: with their marks
+// once the mark is final, and only "showed / not yet" while it is provisional (AC-E6: no numbers).
+function SkillsShown({ evaluation, subjectId }: { evaluation: Evaluation; subjectId?: string }) {
+  const words = useApi<CommandWords>(subjectId ? `/subjects/${subjectId}/command-words` : null);
+  const skills = evaluation.skills ?? [];
+  if (skills.length === 0) return null;
+  const nameOf = (code: string) => words.data?.skills?.find((x) => x.code === code)?.name;
+  return (
+    <div className="space-y-1.5 rounded-2xl border border-purple-200 bg-purple-50 p-3 text-xs text-slate-800">
+      <div className="font-fun font-bold text-purple-900">What the examiner looks for, and what your answer showed</div>
+      <ul className="space-y-1">
+        {skills.map((sk) => (
+          <li key={sk.code} className="flex items-start gap-2">
+            <span className={`mt-0.5 font-bold ${sk.shown ? "text-emerald-700" : "text-amber-700"}`}>{sk.shown ? "✓" : "○"}</span>
+            <span>
+              <b>{sk.code}</b>
+              {nameOf(sk.code) ? ` ${nameOf(sk.code)}` : ""}
+              {" — "}
+              {sk.shown ? "your answer showed this" : "not yet in your answer"}
+              {sk.marks !== null ? ` (${sk.marks} mark${sk.marks === 1 ? "" : "s"})` : ""}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// How each mark was given (improvement 6): the code, what that kind of mark is for, and whether she earned it.
+function MarksGiven({ evaluation }: { evaluation: Evaluation }) {
+  const awards = evaluation.awards ?? [];
+  if (awards.length === 0) return null;
+  return (
+    <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-800">
+      <div className="font-fun font-bold text-slate-900">How the marks were given</div>
+      <ul className="space-y-2">
+        {awards.map((a, i) => (
+          <li key={i} className="flex items-start gap-2.5">
+            <span
+              className={`mt-0.5 inline-flex min-w-[2.5rem] justify-center rounded-lg px-1.5 py-0.5 font-mono text-[11px] font-bold ${
+                a.awarded ? "bg-emerald-100 text-emerald-900" : "bg-slate-100 text-slate-500 line-through"
+              }`}
+            >
+              {a.code}
+            </span>
+            <span className="space-y-0.5">
+              {a.meaning && <span className="block font-semibold text-slate-700">{a.meaning}</span>}
+              <span className="block text-slate-600">
+                {a.awarded ? "Earned: " : "Not earned: "}
+                <MathText text={a.reason} />
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      {evaluation.method_note && (
+        <p className="rounded-xl bg-emerald-50 px-3 py-2 font-semibold text-emerald-900">{evaluation.method_note}</p>
+      )}
+    </div>
+  );
+}
+
 // A provisional mark as she sees it (AC-E6): what her answer did and what would earn more, from the mark-scheme
 // marking itself, and who checks it. No mark, level or band — the number waits for a person.
-function PendingCheckCard({ evaluation }: { evaluation: Evaluation }) {
+function PendingCheckCard({ evaluation, subjectId }: { evaluation: Evaluation; subjectId?: string }) {
   const pending = evaluation.pending!;
   const since = new Date(pending.waiting_since).toLocaleDateString(undefined, { day: "numeric", month: "short" });
   return (
@@ -42,6 +105,8 @@ function PendingCheckCard({ evaluation }: { evaluation: Evaluation }) {
         </div>
       )}
 
+      <SkillsShown evaluation={evaluation} subjectId={subjectId} />
+
       {evaluation.feedback.what_went_well && (
         <div className="rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-800">
           <div className="font-fun font-bold text-slate-800">What went well</div>
@@ -71,30 +136,36 @@ function PendingCheckCard({ evaluation }: { evaluation: Evaluation }) {
 export function EvaluationCard({
   evaluation,
   confidence,
+  subjectId,
 }: {
   evaluation: Evaluation;
   confidence?: number | null;
+  subjectId?: string; // names the assessment objectives a level-marked answer showed
 }) {
   if (evaluation.pending || evaluation.marks_awarded === null) {
     return evaluation.pending ? (
-      <PendingCheckCard evaluation={evaluation} />
+      <PendingCheckCard evaluation={evaluation} subjectId={subjectId} />
     ) : (
       <div className="rounded-3xl border-2 border-amber-300/80 bg-white p-5 text-sm text-slate-700">
         Your answer is waiting for a check before it gets a mark.
       </div>
     );
   }
-  return <MarkedCard evaluation={evaluation} awarded={evaluation.marks_awarded} confidence={confidence} />;
+  return (
+    <MarkedCard evaluation={evaluation} awarded={evaluation.marks_awarded} confidence={confidence} subjectId={subjectId} />
+  );
 }
 
 function MarkedCard({
   evaluation,
   awarded,
   confidence,
+  subjectId,
 }: {
   evaluation: Evaluation;
   awarded: number;
   confidence?: number | null;
+  subjectId?: string;
 }) {
   const full = awarded === evaluation.marks_available;
   const percentage = evaluation.marks_available > 0 ? Math.round((awarded / evaluation.marks_available) * 100) : 0;
@@ -193,6 +264,9 @@ function MarkedCard({
           <MathText text={evaluation.feedback.summary} />
         </div>
       )}
+
+      <MarksGiven evaluation={evaluation} />
+      <SkillsShown evaluation={evaluation} subjectId={subjectId} />
 
       {evaluation.feedback.what_went_well && (
         <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-slate-800 space-y-1">

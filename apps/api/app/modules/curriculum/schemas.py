@@ -15,11 +15,19 @@ class ComponentOut(BaseModel):
     calculator_allowed: bool | None
 
 
+class SkillRefOut(BaseModel):
+    id: UUID
+    code: str  # "AO1"
+    name: str
+
+
 class CommandWordsOut(BaseModel):
-    """Cambridge's command-word definitions for a subject, where a checked source has them; otherwise empty."""
+    """How a subject's questions are worded and examined: Cambridge's command-word definitions, where a checked source
+    has them, and the subject's assessment objectives (which each question names by id)."""
 
     source: str | None
     definitions: dict[str, str]
+    skills: list[SkillRefOut] = []
 
 
 class SubjectOut(BaseModel):

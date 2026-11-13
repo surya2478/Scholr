@@ -22,6 +22,8 @@ class QuestionOut(BaseModel):
     has_diagram: bool
     calculator_allowed: bool | None
     objective_ids: list[UUID]
+    # The assessment objectives this question tests (app.jobs.ao_tag), named by GET /subjects/{id}/command-words.
+    skill_ids: list[UUID] = []
 
 
 class AttemptMeta(BaseModel):

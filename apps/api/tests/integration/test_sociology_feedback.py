@@ -23,7 +23,7 @@ from app.core.db import set_rls_context
 from app.core.ids import uuid7
 from app.main import create_app
 from app.modules.assessment.models import QuestionItem
-from app.modules.curriculum.models import LearningObjective, Subject, Topic
+from app.modules.curriculum.models import LearningObjective, Skill, Subject, Topic
 from app.seed.curriculum import load_file, seed_curriculum
 from tests.fixtures.llm import scripted_gateway
 
@@ -46,6 +46,8 @@ def world(household_world: SimpleNamespace) -> SimpleNamespace:
             .where(Topic.subject_id == subject_id)
             .order_by(LearningObjective.code)
         )
+        # A 4-mark "describe" question tests AO1 and AO2 (the syllabus rule app.jobs.ao_tag applies).
+        tested = list(s.scalars(select(Skill.id).where(Skill.subject_id == subject_id, Skill.code.in_(["AO1", "AO2"]))))
         item_id = uuid7()
         s.add(
             QuestionItem(
@@ -58,6 +60,7 @@ def world(household_world: SimpleNamespace) -> SimpleNamespace:
                 marks=4,
                 command_word="describe",
                 objective_ids=[objective_id],
+                skill_ids=tested,
                 verification_status="verified",
                 mark_scheme={"text": "1 mark per example identified, 1 mark per development (2x2)."},
             )
@@ -133,3 +136,24 @@ def test_once_checked_she_sees_the_mark(world: SimpleNamespace, auth_headers: Au
     assert done.status_code == 200, done.text
     checked = world.client.get(f"/evaluations/{evaluation['id']}", headers=student).json()
     assert (checked["status"], checked["marks_awarded"], checked["pending"]) == ("overridden", 3, None)
+
+
+def test_she_sees_which_assessment_objectives_her_answer_showed_without_numbers(
+    world: SimpleNamespace, auth_headers: Auth
+) -> None:
+    """Improvement 6: the objectives this question tests, AO1 and AO2, both shown; AO3 is left out because a
+    "describe" question does not ask for evaluation. While the mark is provisional, no per-objective numbers."""
+    student, parent = auth_headers("test|student"), auth_headers("test|parent")
+    evaluation = answer(world, student)
+    assert [(x["code"], x["shown"], x["marks"]) for x in evaluation["skills"]] == [
+        ("AO1", True, None),
+        ("AO2", True, None),
+    ]
+    checked = world.client.get(f"/evaluations/{evaluation['id']}", headers=parent).json()
+    assert [x["marks"] for x in checked["skills"]] == [2, 1]  # the reviewer sees the split
+
+    subject_id = next(
+        x["id"] for x in world.client.get("/subjects", headers=student).json() if x["code"] == "igcse-sociology"
+    )
+    words = world.client.get(f"/subjects/{subject_id}/command-words", headers=student).json()
+    assert {x["code"] for x in words["skills"]} >= {"AO1", "AO2", "AO3"}  # names for what each question tests

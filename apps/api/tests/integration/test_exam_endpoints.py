@@ -136,4 +136,5 @@ def test_bookmarks_follow_her_record_and_only_she_changes_them(world: SimpleName
 def test_command_words_come_only_from_a_checked_source(world: SimpleNamespace, auth_headers: Auth) -> None:
     student = auth_headers("test|student")
     maths = world.client.get(f"/subjects/{world.subject_id}/command-words", headers=student).json()
-    assert maths == {"source": None, "definitions": {}}  # no checked table for 0580: nothing is shown
+    assert (maths["source"], maths["definitions"]) == (None, {})  # no checked table for 0580: nothing is shown
+    assert {x["code"] for x in maths["skills"]} == {"AO1", "AO2"}  # its assessment objectives come from the syllabus

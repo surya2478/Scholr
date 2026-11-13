@@ -36,6 +36,15 @@ class AwardOut(BaseModel):
     code: str
     awarded: bool
     reason: str
+    meaning: str | None = None  # what this kind of mark is for (mark_codes.py); None for a code it does not know
+
+
+class SkillShownOut(BaseModel):
+    """One assessment objective in a level-marked answer: whether the answer showed it, and its marks once final."""
+
+    code: str  # "AO1"
+    shown: bool
+    marks: float | None = None  # None for the student while the mark is provisional (AC-E6)
 
 
 class MistakeNoteOut(BaseModel):
@@ -78,6 +87,9 @@ class EvaluationOut(BaseModel):
     created_at: datetime
     reviewed_at: datetime | None = None  # set when a parent/admin reviewed and overrode the marks
     pending: PendingCheckOut | None = None  # the student's view of a provisional mark
+    # Mark-scheme literacy (improvement 6): when working earned a method mark that the answer alone would not have.
+    method_note: str | None = None
+    skills: list[SkillShownOut] = Field(default_factory=list)  # level-marked answers: the objectives it showed
 
 
 class ReviewItemOut(BaseModel):

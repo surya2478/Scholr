@@ -152,7 +152,7 @@ export default function TestDetail() {
                     </span>
                   )}
                 </div>
-                {item.evaluation_id ? <ItemFeedback evaluationId={item.evaluation_id} /> : null}
+                {item.evaluation_id ? <ItemFeedback evaluationId={item.evaluation_id} subjectId={a.subject_id} /> : null}
               </div>
             ) : inProgress ? (
               <AnswerBox
@@ -173,8 +173,8 @@ export default function TestDetail() {
 
 // The marking of one answer, shown once the test is marked: her feedback, or what a provisional mark said without
 // its number (AC-E6).
-function ItemFeedback({ evaluationId }: { evaluationId: string }) {
+function ItemFeedback({ evaluationId, subjectId }: { evaluationId: string; subjectId: string }) {
   const evaluation = useApi<Evaluation>(`/evaluations/${evaluationId}`);
   if (!evaluation.data) return null;
-  return <EvaluationCard evaluation={evaluation.data} />;
+  return <EvaluationCard evaluation={evaluation.data} subjectId={subjectId} />;
 }

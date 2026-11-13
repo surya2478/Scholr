@@ -284,3 +284,24 @@ def test_parent_reviews_a_provisional_evaluation(world: SimpleNamespace, auth_he
 
     [evidence] = world.client.get(f"/mastery/{world.objective_id}/evidence", headers=student).json()
     assert evidence["overridden"] is True and evidence["score"] == 0.5
+
+
+def test_each_mark_says_what_kind_of_mark_it_is(world: SimpleNamespace, auth_headers: Auth) -> None:
+    """Improvement 6: her working earned the method mark though the answer was wrong, and the card says so."""
+    student = auth_headers("test|student")
+    attempt_id = submit(world, student, final_answer="12.4").json()["id"]
+    world.transport.reply(
+        marking(
+            awards=[
+                {"code": "M1", "awarded": True, "reason": "2 x pi x 2 seen"},
+                {"code": "A1", "awarded": False, "reason": "12.4 is not 12.6"},
+            ],
+            marks_awarded=1,
+            final_answer_correct=False,
+        )
+    )
+    evaluation = world.client.post(f"/attempts/{attempt_id}/evaluate", headers=student).json()
+    assert evaluation["status"] == "final"
+    method, accuracy = evaluation["awards"]
+    assert method["meaning"].startswith("Method mark") and accuracy["meaning"].startswith("Accuracy mark")
+    assert "M1" in evaluation["method_note"] and evaluation["skills"] == []

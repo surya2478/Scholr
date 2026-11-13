@@ -95,6 +95,7 @@ class ItemView:
     answer_spec: dict[str, Any]
     mark_scheme: dict[str, Any]
     reserved_for_study: bool
+    skill_ids: tuple[UUID, ...] = ()
 
 
 def _item_view(row: QuestionItem) -> ItemView:
@@ -114,6 +115,7 @@ def _item_view(row: QuestionItem) -> ItemView:
         answer_spec=dict(row.answer_spec or {}),
         mark_scheme=dict(row.mark_scheme or {}),
         reserved_for_study=row.reserved_for_study,
+        skill_ids=tuple(row.skill_ids or ()),
     )
 
 
@@ -137,6 +139,7 @@ def question_out(item: ItemView) -> QuestionOut:
         has_diagram=item.has_diagram,
         calculator_allowed=item.calculator_allowed,
         objective_ids=list(item.objective_ids),
+        skill_ids=list(item.skill_ids),
     )
 
 
@@ -491,6 +494,16 @@ def recent_item_ids(s: Session, *, student_id: UUID, since: datetime) -> set[UUI
             select(Attempt.question_item_id).where(Attempt.student_id == student_id, Attempt.submitted_at >= since)
         )
     )
+
+
+def tested_skills(s: Session, attempt_id: UUID) -> tuple[UUID, tuple[UUID, ...]] | None:
+    """(subject id, the assessment objectives its question tests) for one attempt; None if it is gone."""
+    row = s.execute(
+        select(QuestionItem.subject_id, QuestionItem.skill_ids)
+        .join(Attempt, Attempt.question_item_id == QuestionItem.id)
+        .where(Attempt.id == attempt_id)
+    ).first()
+    return (row[0], tuple(row[1] or ())) if row else None
 
 
 def get_attempt(s: Session, principal: Principal, attempt_id: UUID) -> AttemptView:

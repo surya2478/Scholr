@@ -108,7 +108,7 @@ export function PhotoAnswer({ question, sessionId, assessmentId, markNow = true,
         </div>
       )}
       {error ? <ErrorNote error={error} /> : null}
-      {evaluation && <EvaluationCard evaluation={evaluation} />}
+      {evaluation && <EvaluationCard evaluation={evaluation} subjectId={question.subject_id} />}
     </div>
   );
 }

@@ -329,7 +329,7 @@ export function AnswerBox({
       )}
 
       {error ? <ErrorNote error={error} /> : null}
-      {evaluation && <EvaluationCard evaluation={evaluation} confidence={confidence} />}
+      {evaluation && <EvaluationCard evaluation={evaluation} confidence={confidence} subjectId={question.subject_id} />}
       {evaluation && !assessmentId && (
         // Not inside a test: a submitted test is reviewed with the parent, and tutoring is off during one (AC-L5).
         <Link

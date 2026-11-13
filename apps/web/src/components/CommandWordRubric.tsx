@@ -9,13 +9,28 @@ import { useApi } from "@/lib/useApi";
 // guesses how a question is marked — the mark scheme and the examiner's comments come with her feedback.
 export function CommandWordRubric({ question }: { question: Question }) {
   const [open, setOpen] = useState(false);
-  const words = useApi<CommandWords>(question.command_word ? `/subjects/${question.subject_id}/command-words` : null);
+  const tested = question.skill_ids ?? [];
+  const words = useApi<CommandWords>(
+    question.command_word || tested.length ? `/subjects/${question.subject_id}/command-words` : null,
+  );
   const word = question.command_word?.trim().toLowerCase() ?? "";
   const definition = words.data?.definitions[word];
-  if (!definition) return null;
+  // Which assessment objectives this question tests (improvement 6), so she writes for all of them.
+  const skills = (words.data?.skills ?? []).filter((x) => tested.includes(x.id));
+  const aos =
+    skills.length > 0 ? (
+      <span
+        className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-fun font-bold text-slate-700"
+        title={skills.map((x) => `${x.code}: ${x.name}`).join("\n")}
+      >
+        Tests {skills.map((x) => x.code).join(" · ")}
+      </span>
+    ) : null;
+  if (!definition) return aos;
 
   return (
-    <span className="relative inline-flex">
+    <span className="relative inline-flex items-center gap-1.5">
+      {aos}
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}

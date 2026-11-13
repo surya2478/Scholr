@@ -9,7 +9,7 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from app.core.errors import ApiError, not_found
 from app.core.rbac import Principal, require_role, require_student_access
@@ -18,7 +18,7 @@ from app.modules.assessment import service as assessment
 from app.modules.assessment.schemas import ExaminerInsightsOut
 from app.modules.audit import service as audit
 from app.modules.curriculum import service as curriculum
-from app.modules.evaluation import essay_levels, structured_math
+from app.modules.evaluation import essay_levels, mark_codes, structured_math
 from app.modules.evaluation.models import Evaluation
 from app.modules.evaluation.schemas import (
     AnswerCheckOut,
@@ -31,6 +31,7 @@ from app.modules.evaluation.schemas import (
     OverrideIn,
     PendingCheckOut,
     ReviewItemOut,
+    SkillShownOut,
 )
 from app.modules.events import service as events
 from app.modules.mastery import service as mastery
@@ -135,9 +136,33 @@ def to_out(row: Evaluation, viewer: Principal | None = None) -> EvaluationOut:
             "marks_awarded": None,
             "feedback": out.feedback.model_copy(update={"summary": ""}),
             "awards": [],
+            "method_note": None,
+            "skills": [x.model_copy(update={"marks": None}) for x in out.skills],
             "pending": _pending(row),
         }
     )
+
+
+def _skills_shown(row: Evaluation) -> list[SkillShownOut]:
+    """The first marker's assessment-objective split (the one whose feedback she reads), as shown / not yet.
+
+    Only the objectives the question tests: a 4-mark "describe" question asks for no evaluation, so "AO3 not yet"
+    would tell her she missed something nobody asked for. A question with no objectives tagged shows none."""
+    markers = (row.criterion_scores or {}).get("markers") or []
+    split = (markers[0].get("ao_marks") if markers else None) or {}
+    if not split:
+        return []
+    s = object_session(row)
+    found = assessment.tested_skills(s, row.attempt_id) if s is not None else None
+    if not found or not found[1]:
+        return []
+    subject_id, skill_ids = found
+    tested = {code for code, (sid, _name) in curriculum.skills_by_code(s, subject_id).items() if sid in skill_ids}
+    return [
+        SkillShownOut(code=code, shown=float(value) > 0, marks=float(value))
+        for code, value in sorted(split.items())
+        if code in tested
+    ]
 
 
 def _full_out(row: Evaluation) -> EvaluationOut:
@@ -157,7 +182,12 @@ def _full_out(row: Evaluation) -> EvaluationOut:
             autopsy=feedback.get("autopsy"),
         ),
         final_answer_check=AnswerCheckOut(status=check["status"], detail=check["detail"]) if check else None,
-        awards=[AwardOut(**a) for a in (row.criterion_scores or {}).get("awards", [])],
+        awards=[
+            AwardOut(**a, meaning=mark_codes.meaning(a.get("code", "")))
+            for a in (row.criterion_scores or {}).get("awards", [])
+        ],
+        method_note=mark_codes.method_note((row.criterion_scores or {}).get("awards", [])),
+        skills=_skills_shown(row),
         mistakes=[
             MistakeNoteOut(
                 category=m["category"], label=m["label"], severity=m["severity"], description=m["description"]
