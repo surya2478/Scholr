@@ -13,10 +13,11 @@ from app.modules.planner.engine import (
     build_plan,
     day_capacity,
     entry_for,
+    exam_weight,
     notice_codes,
     priority,
 )
-from app.tools.dates import RecurrenceError, occurs_on, parse_rrule
+from app.tools.dates import RecurrenceError, days_to_exam, occurs_on, parse_rrule
 
 MONDAY = date(2026, 10, 5)
 SUBJECT = uuid4()
@@ -143,3 +144,27 @@ def test_a_full_day_and_a_lighter_day_still_say_so() -> None:
     assert notice_codes(overload=False, lighter_day=True, capacity_minutes=60) == ["lighter_day"]
     assert notice_codes(overload=True, lighter_day=True, capacity_minutes=60) == ["overload", "lighter_day"]
     assert notice_codes(overload=False, lighter_day=False, capacity_minutes=60) == []
+
+
+def test_a_nearer_exam_and_more_unseen_syllabus_pull_harder() -> None:
+    today = date(2026, 11, 13)
+    sociology = exam_weight(days_to_exam("2027-06", today), unseen_share=70 / 81)  # 214 days
+    maths = exam_weight(days_to_exam("2028-06", today), unseen_share=180 / 194)  # 580 days
+    assert days_to_exam("2027-06", today) == 214 and days_to_exam("2028-06", today) == 580
+    assert 0.9 < sociology < 1.1 and 0.25 < maths < 0.35
+    assert exam_weight(30, 0.0) > exam_weight(300, 0.0)  # closer pulls harder
+    assert exam_weight(300, 1.0) > exam_weight(300, 0.0)  # less covered pulls harder
+    assert exam_weight(800, 1.0) == 0.0  # beyond two years: nothing
+    assert exam_weight(None, 1.0) == 0.0 and exam_weight(-5, 1.0) == 0.0  # no date, or already sat
+    assert exam_weight(0, 1.0) == 1.5  # the ceiling
+
+
+def test_the_nearer_exam_wins_a_tie_but_never_beats_a_mistake() -> None:
+    near, far = uuid4(), uuid4()
+    soc = ObjectiveSignal(objective_id=uuid4(), subject_id=near, mastery_level=1, exam_weight=1.0)
+    maths = ObjectiveSignal(objective_id=uuid4(), subject_id=far, mastery_level=1, exam_weight=0.3)
+    mistake = ObjectiveSignal(objective_id=uuid4(), subject_id=far, mistake_severity="high", exam_weight=0.3)
+    draft = build_plan([maths, soc], capacity_minutes=20, control_objectives=set())
+    assert [e.objective_id for e in draft.entries] == [soc.objective_id]  # one slot: the nearer exam takes it
+    first = build_plan([soc, mistake], capacity_minutes=20, control_objectives=set()).entries[0]
+    assert first.objective_id == mistake.objective_id  # a high mistake (2) outweighs any exam pull (max 1.5)

@@ -2,7 +2,10 @@
 
 capacity = availability - commitments - 15% buffer (x0.6 on the week's lighter day)
 priority = 3*assessment_within_14d + 2*retention_high + 2*open_mistake_high + 2*current_school_topic
-         + 1*low_mastery + 0.5*challenge
+         + 1*low_mastery + 0.5*challenge + exam_weight(subject)
+exam_weight = 1.5 * urgency * (0.5 + 0.5*unseen), urgency = 1 - days_to_exam/730 (0 beyond two years), unseen =
+      share of the syllabus not yet introduced. The nearer exam and the less-covered syllabus pull harder, but never
+      past a high-severity mistake or the current school topic (each worth 2).
 fill: core (assessment prep, mistake fixes, revision, school topic) first, then reinforcement of an external
       class, then practice, then challenge; at most one reinforcement item a day (AC-X9);
       new learning (a current school topic with no evidence yet) capped at 40% of capacity; assessment prep is
@@ -28,6 +31,8 @@ LIGHTER_DAY_FACTOR = 0.6
 NEW_LEARNING_CAP = 0.40
 MAX_BLOCK_MINUTES = 45
 ASSESSMENT_WINDOW_DAYS = 14
+EXAM_HORIZON_DAYS = 730  # two years out, an exam adds nothing to a day's choices
+EXAM_WEIGHT_MAX = 1.5
 
 Kind = Literal["assessment", "mistake_fix", "revision", "school_topic", "reinforcement", "practice", "challenge"]
 EST_MINUTES: dict[str, int] = {
@@ -97,6 +102,7 @@ class ObjectiveSignal:
     # `external_rank` is that trace's own order, 0 = its best suggestion, so the day picks up the strongest.
     external_weakness: bool = False
     external_rank: int | None = None
+    exam_weight: float = 0.0  # the subject's pull from its exam date and unseen syllabus (exam_weight())
 
 
 @dataclass(frozen=True)
@@ -108,6 +114,20 @@ class PlanEntry:
     priority: float
     reason_code: str
     new_learning: bool
+
+
+def exam_weight(days_to_exam: int | None, unseen_share: float) -> float:
+    """How hard a subject's exam pulls on today's choices: nearer exam, and more of the syllabus unseen, pull harder.
+
+    Sociology in November 2026 (exam June 2027, 214 days, 86% unseen) weighs about 1.0; Maths (June 2028, 580 days)
+    about 0.3. Without this, a mock that had passed left Sociology with nothing to say for it, and equal priorities
+    were settled by the order of internal ids.
+    """
+    if days_to_exam is None or days_to_exam < 0:
+        return 0.0
+    urgency = max(0.0, 1 - days_to_exam / EXAM_HORIZON_DAYS)
+    unseen = min(1.0, max(0.0, unseen_share))
+    return round(EXAM_WEIGHT_MAX * urgency * (0.5 + 0.5 * unseen), 3)
 
 
 def priority(signal: ObjectiveSignal) -> float:
@@ -123,6 +143,7 @@ def priority(signal: ObjectiveSignal) -> float:
         - EXTERNAL_RANK_STEP * (signal.external_rank or 0)
         + 1 * low_mastery
         + 0.5 * challenge
+        + signal.exam_weight
     )
 
 

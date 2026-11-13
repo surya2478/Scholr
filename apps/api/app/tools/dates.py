@@ -56,3 +56,19 @@ def local_day_start(day: date, timezone: str) -> datetime:
     except (ZoneInfoNotFoundError, ValueError):
         zone = ZoneInfo("UTC")
     return datetime.combine(day, time.min, tzinfo=zone)
+
+
+def exam_day(exam_session: str | None) -> date | None:
+    """Exam sessions are a month ("2027-06"); Cambridge sits IGCSE mid-month, so the 15th is the marker."""
+    if not exam_session or len(exam_session) != 7:
+        return None
+    try:
+        year, month = (int(part) for part in exam_session.split("-"))
+        return date(year, month, 15)
+    except ValueError:
+        return None
+
+
+def days_to_exam(exam_session: str | None, today: date) -> int | None:
+    day = exam_day(exam_session)
+    return (day - today).days if day else None

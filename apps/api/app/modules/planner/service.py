@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from pathlib import Path
@@ -42,7 +43,7 @@ from app.modules.planner.schemas import (
 )
 from app.modules.studies import service as studies
 from app.modules.subjects import service as subjects
-from app.tools.dates import RecurrenceError, local_date, local_day_start, occurs_on
+from app.tools.dates import RecurrenceError, days_to_exam, exam_day, local_date, local_day_start, occurs_on
 
 REASONS_FILE = Path(__file__).with_name("reasons.yaml")
 REASON_DETAIL_MAX = 300  # plan_item.reason_detail
@@ -54,17 +55,50 @@ def reasons() -> dict[str, dict[str, str]]:
     return yaml.safe_load(REASONS_FILE.read_text(encoding="utf-8"))
 
 
+# A subject whose exam is this close names it on its practice items, so the day explains why it leads.
+EXAM_REASON_WITHIN_DAYS = 365
+
+
+@dataclass(frozen=True)
+class ExamPull:
+    days: int
+    exam_month: str  # "Jun 2027"
+    weight: float
+
+
+def _exam_pulls(s: Session, student_id: UUID, day: date, mastery_rows: Sequence[Any]) -> dict[UUID, ExamPull]:
+    """Each enrolled subject's exam date and how much of its syllabus she has not met yet (engine.exam_weight)."""
+    enrolled = enrollment.list_enrollments(s, [student_id])
+    totals = curriculum.objective_counts(s, [e.subject_id for e in enrolled])
+    met: dict[UUID, int] = defaultdict(int)
+    for m in mastery_rows:
+        if m.level >= 1:
+            met[m.subject_id] += 1
+    out: dict[UUID, ExamPull] = {}
+    for e in enrolled:
+        days, exam = days_to_exam(e.exam_session, day), exam_day(e.exam_session)
+        total = totals.get(e.subject_id, 0)
+        if days is None or exam is None or not total:
+            continue
+        unseen = 1 - met[e.subject_id] / total
+        out[e.subject_id] = ExamPull(days, exam.strftime("%b %Y"), engine.exam_weight(days, unseen))
+    return out
+
+
 def _signals(
     s: Session,
     student_id: UUID,
     day: date,
     now: datetime,
     reinforcement: Sequence[UUID] = (),  # best first
+    pulls: dict[UUID, ExamPull] | None = None,
 ) -> list[engine.ObjectiveSignal]:
     subject_ids = {e.subject_id for e in enrollment.list_enrollments(s, [student_id])}
     flags: dict[UUID, dict[str, Any]] = defaultdict(dict)
+    mastery_rows = mastery.list_mastery(s, student_id=student_id)
+    pulls = pulls if pulls is not None else _exam_pulls(s, student_id, day, mastery_rows)
 
-    for m in mastery.list_mastery(s, student_id=student_id):
+    for m in mastery_rows:
         flags[m.objective_id].update(mastery_level=m.level, retention_risk=m.retention_risk)
     for p in mistakes.list_mistakes(s, student_id=student_id):
         if p.objective_id is None or p.status == "resolved":
@@ -87,10 +121,25 @@ def _signals(
 
     summaries = curriculum.objective_summaries(s, list(flags))
     return [
-        engine.ObjectiveSignal(objective_id=oid, subject_id=summaries[oid].subject_id, **values)
+        engine.ObjectiveSignal(
+            objective_id=oid,
+            subject_id=summaries[oid].subject_id,
+            exam_weight=pulls[summaries[oid].subject_id].weight if summaries[oid].subject_id in pulls else 0.0,
+            **values,
+        )
         for oid, values in flags.items()
         if oid in summaries and summaries[oid].subject_id in subject_ids
     ]
+
+
+def _exam_reason(pull: ExamPull | None, subject_name: str) -> str | None:
+    if pull is None or pull.days > EXAM_REASON_WITHIN_DAYS:
+        return None
+    months = max(1, round(pull.days / 30.4))
+    when = f"about {months} month{'s' if months != 1 else ''} away" if pull.days >= 45 else f"in {pull.days} days"
+    return (
+        f"{subject_name} is examined in {pull.exam_month}, {when} — it comes first among topics you're still building."
+    )
 
 
 def _generate(s: Session, *, tenant_id: UUID, student_id: UUID, day: date, now: datetime) -> StudyPlan:
@@ -109,7 +158,9 @@ def _generate(s: Session, *, tenant_id: UUID, student_id: UUID, day: date, now: 
         # something to revise, but a plan item with no questions behind it is a dead end.
         for target in external_training.reinforcement(s, student_id=student_id, today=day, practicable_only=True)
     }
-    signals = _signals(s, student_id, day, now, reinforcement=list(reinforcement_reasons))
+    pulls = _exam_pulls(s, student_id, day, mastery.list_mastery(s, student_id=student_id))
+    signals = _signals(s, student_id, day, now, reinforcement=list(reinforcement_reasons), pulls=pulls)
+    subject_names = {sid: sub.name for sid, sub in curriculum.subject_summaries(s, list(pulls)).items()}
     control = studies.control_objective_ids(s, student_id=student_id, at=now)
     draft = engine.build_plan(signals, capacity_minutes=capacity.minutes, control_objectives=control)
     plan = StudyPlan(
@@ -128,6 +179,9 @@ def _generate(s: Session, *, tenant_id: UUID, student_id: UUID, day: date, now: 
                 "unsupported_rules": list(capacity.unsupported_rules),
             },
             "signals": len(signals),
+            "exam_weights": {
+                str(sid): {"days": p.days, "weight": p.weight} for sid, p in sorted(pulls.items(), key=str)
+            },
             "excluded_control_objectives": draft.excluded_control,
             "overload": draft.overload,
             "dropped": [
@@ -151,7 +205,11 @@ def _generate(s: Session, *, tenant_id: UUID, student_id: UUID, day: date, now: 
                 est_minutes=entry.est_minutes,
                 priority=entry.priority,
                 reason_code=entry.reason_code,
-                reason_detail=reinforcement_reasons.get(entry.objective_id) if entry.kind == "reinforcement" else None,
+                reason_detail=reinforcement_reasons.get(entry.objective_id)
+                if entry.kind == "reinforcement"
+                else _exam_reason(pulls.get(entry.subject_id), subject_names.get(entry.subject_id, ""))
+                if entry.kind in ("practice", "challenge")
+                else None,
             )
         )
     s.flush()

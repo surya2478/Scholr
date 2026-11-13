@@ -39,6 +39,7 @@ from app.modules.readiness.schemas import (
     TopicReadinessOut,
 )
 from app.modules.subjects import service as subjects
+from app.tools.dates import days_to_exam
 
 SCOPE = "progress"
 EVENT_TYPES = ("attempt_evaluated", "evaluation_overridden")
@@ -249,14 +250,7 @@ def _papers(s: Session, subject_id: UUID) -> dict[str, dict[str, object]]:
 
 
 def _days_to_exam(exam_session: str | None, today: date) -> int | None:
-    """Exam sessions are a month ("2027-06"); Cambridge sits IGCSE mid-month, so the 15th is the marker."""
-    if not exam_session or len(exam_session) != 7:
-        return None
-    try:
-        year, month = (int(part) for part in exam_session.split("-"))
-        return (date(year, month, 15) - today).days
-    except ValueError:
-        return None
+    return days_to_exam(exam_session, today)
 
 
 def readiness(s: Session, principal: Principal, *, student_id: UUID, subject_id: UUID, today: date) -> ReadinessOut:

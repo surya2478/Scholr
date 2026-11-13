@@ -281,3 +281,35 @@ def test_skip_never_waits_for_an_answer(world: SimpleNamespace, auth_headers: Au
             )
         )  # fmt: skip
     assert c.patch(f"/plan/items/{item['id']}", headers=student, json={"status": "skipped"}).status_code == 200
+
+
+def test_a_subject_with_an_exam_this_year_says_so_on_its_practice(world: SimpleNamespace, auth_headers: Auth) -> None:
+    """Improvement 3: the plan knows the exam dates. A subject examined within a year leads its practice and says why;
+    the weight is recorded with the plan so the day can be explained later."""
+    from app.modules.enrollment.models import Enrollment
+    from app.modules.planner.models import StudyPlan
+
+    student, parent = auth_headers("test|student"), auth_headers("test|parent")
+    c = world.client
+    soon = (datetime.now(UTC) + timedelta(days=200)).strftime("%Y-%m")
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        row = s.scalar(
+            select(Enrollment).where(
+                Enrollment.student_id == world.student_id, Enrollment.subject_id == world.subject_id
+            )
+        )
+        row.exam_session = soon
+    assert c.put(f"/students/{world.student_id}/availability", headers=parent, json={"minutes": [120] * 7}).json()
+    for objective in world.objectives[1:]:
+        weak_evidence(world, objective)
+
+    plan = c.post("/plan/regenerate", headers=student).json()
+    practice = [i for i in plan["items"] if i["kind"] == "practice"]
+    assert practice, plan["items"]
+    assert all("is examined in" in i["reason"] and "months away" in i["reason"] for i in practice)
+    with world.factory() as s, s.begin():
+        set_rls_context(s, user_id=None, role="system")
+        snapshot = s.get(StudyPlan, UUID(plan["id"])).inputs_snapshot
+    weights = snapshot["exam_weights"]
+    assert weights[str(world.subject_id)]["weight"] > 0 and 150 < weights[str(world.subject_id)]["days"] < 230
