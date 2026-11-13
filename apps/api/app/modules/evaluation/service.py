@@ -29,6 +29,7 @@ from app.modules.evaluation.schemas import (
     FeedbackOut,
     MistakeNoteOut,
     OverrideIn,
+    PendingCheckOut,
     ReviewItemOut,
 )
 from app.modules.events import service as events
@@ -108,7 +109,38 @@ def latest_id_for_attempt(s: Session, attempt_id: UUID) -> UUID | None:
     return row.id if row else None
 
 
-def to_out(row: Evaluation) -> EvaluationOut:
+PENDING_WHO = "A parent checks this mark before it counts. Until then it does not change your progress."
+
+
+def _pending(row: Evaluation) -> PendingCheckOut:
+    """The provisional mark as she sees it (AC-E6): the first marker's points, no number."""
+    markers = (row.criterion_scores or {}).get("markers") or []
+    first = markers[0] if markers else {}
+    return PendingCheckOut(
+        points_made=[str(p) for p in first.get("credited_points") or []],
+        points_missed=[str(p) for p in first.get("missing") or []],
+        who=PENDING_WHO,
+        waiting_since=row.created_at,
+    )
+
+
+def to_out(row: Evaluation, viewer: Principal | None = None) -> EvaluationOut:
+    """One evaluation. A student never receives the number of a provisional mark, nor the summary that states it
+    (AC-E6): she gets what her answer did and did not do, and who will check it. Parents and admins see it all."""
+    out = _full_out(row)
+    if row.status != "needs_review" or viewer is None or viewer.role != "student":
+        return out
+    return out.model_copy(
+        update={
+            "marks_awarded": None,
+            "feedback": out.feedback.model_copy(update={"summary": ""}),
+            "awards": [],
+            "pending": _pending(row),
+        }
+    )
+
+
+def _full_out(row: Evaluation) -> EvaluationOut:
     feedback = row.feedback or {}
     check = (row.tool_results or {}).get("final_answer")
     return EvaluationOut(
@@ -142,7 +174,7 @@ def prepare(s: Session, principal: Principal, attempt_id: UUID) -> PreparedEvalu
     attempt = assessment.get_attempt(s, principal, attempt_id)
     existing = latest_row(s, attempt.id)
     if existing is not None:
-        return to_out(existing)
+        return to_out(existing, principal)
     if attempt.assessment_kind in assessment.EXAM_CONDITION_KINDS and attempt.assessment_status not in (
         "submitted",
         "evaluated",
@@ -213,7 +245,7 @@ def record(
     attempt = prepared.attempt
     existing = latest_row(s, attempt.id)  # a concurrent request may have finished first
     if existing is not None:
-        return to_out(existing)
+        return to_out(existing, principal)
 
     row = Evaluation(
         tenant_id=attempt.tenant_id,
@@ -238,7 +270,7 @@ def record(
 
     item = attempt.item
     if not item.objective_ids:  # untagged item: feedback only, no mastery evidence
-        return to_out(row)
+        return to_out(row, principal)
     common = {
         "tenant_id": attempt.tenant_id,
         "student_id": attempt.student_id,
@@ -288,7 +320,7 @@ def record(
             descriptions[(row.id, mistake["fingerprint"])] = mistake["description"]
     mistakes.project(s, new_events, tenant_id=attempt.tenant_id, descriptions=descriptions)
     mastery.project(s, new_events, tenant_id=attempt.tenant_id, now=now)
-    return to_out(row)
+    return to_out(row, principal)
 
 
 def get_evaluation(s: Session, principal: Principal, evaluation_id: UUID) -> EvaluationOut:
@@ -296,7 +328,7 @@ def get_evaluation(s: Session, principal: Principal, evaluation_id: UUID) -> Eva
     if row is None:
         raise not_found("evaluation")
     require_student_access(principal, row.student_id, "assessments")
-    return to_out(row)
+    return to_out(row, principal)
 
 
 def examiner_insights(s: Session, principal: Principal, evaluation_id: UUID) -> ExaminerInsightsOut:
@@ -421,7 +453,7 @@ def record_autopsy(
     }
     row.feedback = {**(row.feedback or {}), "autopsy": autopsy_data}
     s.flush()
-    return to_out(row)
+    return to_out(row, principal)
 
 
 def list_autopsies(

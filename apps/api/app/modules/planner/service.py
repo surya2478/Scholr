@@ -586,7 +586,7 @@ def daily_practice(s: Session, principal: Principal, *, student_id: UUID, now: d
                 reason=texts.get(entry["reason_code"], ""),
                 status=status,  # type: ignore[arg-type]
                 evaluation_id=mark.evaluation_id if mark else None,
-                marks_awarded=mark.marks_awarded if mark else None,
+                marks_awarded=mark.marks_awarded if mark and mark.status != "needs_review" else None,  # AC-E6
             )
         )
     plan = _plan_for(s, student_id, day)

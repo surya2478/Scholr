@@ -970,7 +970,10 @@ def assessment_detail(
                 attempt_id=attempt_id,
                 evaluation_id=mark.evaluation_id if mark and show_marks else None,
                 evaluation_status=mark.status if mark and show_marks else None,
-                marks_awarded=mark.marks_awarded if mark and show_marks else None,
+                # A provisional mark is not a number she sees (AC-E6); the parent review queue has it.
+                marks_awarded=mark.marks_awarded
+                if mark and show_marks and not (is_student and mark.status == "needs_review")
+                else None,
             )
         )
     return AssessmentOut(

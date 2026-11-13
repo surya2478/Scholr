@@ -435,7 +435,9 @@ def topic_view(s: Session, objective_id: UUID, *, student_id: UUID | None, now: 
             if mark is None
             else ("provisional" if mark.status == "needs_review" else "marked")
         )
-        return _item_card(brief, last_status=status, last_marks=mark.marks_awarded if mark else None)
+        # A provisional mark is shown as "waiting for a check", never as a number (AC-E6).
+        shown = mark.marks_awarded if mark and mark.status != "needs_review" else None
+        return _item_card(brief, last_status=status, last_marks=shown)
 
     # Check yourself: short items first; past-paper parts fill in when the bank has nothing else.
     out.check_yourself = [_card_with_status(i) for i in (other or past)[:CHECK_YOURSELF]]
@@ -759,7 +761,7 @@ def past_papers(s: Session, subject_id: UUID, *, student_id: UUID | None, now: d
                 marks=brief.marks,
                 command_word=brief.command_word,
                 last_status=status,
-                last_marks=mark.marks_awarded if mark else None,
+                last_marks=mark.marks_awarded if mark and mark.status != "needs_review" else None,  # AC-E6
             )
         )
 

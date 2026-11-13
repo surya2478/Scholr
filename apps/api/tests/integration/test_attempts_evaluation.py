@@ -150,6 +150,13 @@ def test_tool_llm_disagreement_is_provisional_and_leaves_projections_alone(
     evaluation = world.client.post(f"/attempts/{attempt_id}/evaluate", headers=student).json()
     assert (evaluation["status"], evaluation["provisional"]) == ("needs_review", True)
     assert evaluation["final_answer_check"]["status"] == "insufficient_accuracy"
+    # AC-E6: she sees no number and no summary that states one, and is told who checks it.
+    assert evaluation["marks_awarded"] is None and evaluation["feedback"]["summary"] == ""
+    assert evaluation["awards"] == [] and "parent" in evaluation["pending"]["who"]
+    again = world.client.get(f"/evaluations/{evaluation['id']}", headers=student).json()
+    assert again["marks_awarded"] is None and again["pending"] is not None
+    parent = world.client.get(f"/evaluations/{evaluation['id']}", headers=auth_headers("test|parent")).json()
+    assert parent["marks_awarded"] == 2 and parent["pending"] is None  # the reviewer sees the mark to check
     assert world.client.get(f"/mastery/{world.objective_id}/evidence", headers=student).json() == []
     assert world.client.get("/mastery", headers=student).json() == []
     assert world.client.get("/mistakes", headers=student).json() == []

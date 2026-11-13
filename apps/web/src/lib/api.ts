@@ -314,8 +314,15 @@ export type Evaluation = {
   id: string;
   status: "final" | "needs_review" | "overridden";
   provisional: boolean;
-  marks_awarded: number;
+  // null for her while the mark is provisional (AC-E6): `pending` says what her answer did instead.
+  marks_awarded: number | null;
   marks_available: number;
+  pending?: {
+    points_made: string[];
+    points_missed: string[];
+    who: string;
+    waiting_since: string;
+  } | null;
   feedback: {
     summary: string;
     what_went_well: string | null;

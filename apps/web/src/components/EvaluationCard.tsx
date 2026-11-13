@@ -4,6 +4,70 @@ import { ExaminerInsights } from "./ExaminerInsights";
 import { MathText } from "./MathText";
 import { Button, Chip } from "./ui";
 
+// A provisional mark as she sees it (AC-E6): what her answer did and what would earn more, from the mark-scheme
+// marking itself, and who checks it. No mark, level or band — the number waits for a person.
+function PendingCheckCard({ evaluation }: { evaluation: Evaluation }) {
+  const pending = evaluation.pending!;
+  const since = new Date(pending.waiting_since).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  return (
+    <div className="flex flex-col gap-3 rounded-3xl border-2 border-amber-300/80 bg-white p-5 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div className="text-lg font-fun font-bold text-slate-900 leading-tight">Feedback on your answer</div>
+        <Chip tone="warn">Waiting for a check · since {since}</Chip>
+      </div>
+
+      {pending.points_made.length > 0 && (
+        <div className="space-y-1.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-slate-800">
+          <div className="font-fun font-bold text-emerald-800">What your answer did</div>
+          <ul className="list-disc space-y-1 pl-5">
+            {pending.points_made.map((p, i) => (
+              <li key={i}>
+                <MathText text={p} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {pending.points_missed.length > 0 && (
+        <div className="space-y-1.5 rounded-2xl border border-blue-200 bg-blue-50 p-3 text-xs text-slate-800">
+          <div className="font-fun font-bold text-blue-800">What would earn more</div>
+          <ul className="list-disc space-y-1 pl-5">
+            {pending.points_missed.map((p, i) => (
+              <li key={i}>
+                <MathText text={p} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {evaluation.feedback.what_went_well && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-800">
+          <div className="font-fun font-bold text-slate-800">What went well</div>
+          <MathText text={evaluation.feedback.what_went_well} className="leading-relaxed" />
+        </div>
+      )}
+
+      {evaluation.mistakes.map((m, i) => (
+        <div key={i} className="rounded-2xl border border-slate-200 bg-amber-50 p-3 text-xs text-slate-800">
+          <div className="font-fun font-bold text-amber-900">Watch out for this</div>
+          <MathText text={m.description} className="leading-relaxed" />
+        </div>
+      ))}
+
+      {evaluation.feedback.next_step && (
+        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 text-xs text-blue-900">
+          <div className="font-fun font-bold text-blue-800">Next step</div>
+          <MathText text={evaluation.feedback.next_step} className="leading-relaxed font-medium" />
+        </div>
+      )}
+
+      <p className="text-[11px] font-medium text-slate-500">{pending.who}</p>
+    </div>
+  );
+}
+
 export function EvaluationCard({
   evaluation,
   confidence,
@@ -11,8 +75,29 @@ export function EvaluationCard({
   evaluation: Evaluation;
   confidence?: number | null;
 }) {
-  const full = evaluation.marks_awarded === evaluation.marks_available;
-  const percentage = evaluation.marks_available > 0 ? Math.round((evaluation.marks_awarded / evaluation.marks_available) * 100) : 0;
+  if (evaluation.pending || evaluation.marks_awarded === null) {
+    return evaluation.pending ? (
+      <PendingCheckCard evaluation={evaluation} />
+    ) : (
+      <div className="rounded-3xl border-2 border-amber-300/80 bg-white p-5 text-sm text-slate-700">
+        Your answer is waiting for a check before it gets a mark.
+      </div>
+    );
+  }
+  return <MarkedCard evaluation={evaluation} awarded={evaluation.marks_awarded} confidence={confidence} />;
+}
+
+function MarkedCard({
+  evaluation,
+  awarded,
+  confidence,
+}: {
+  evaluation: Evaluation;
+  awarded: number;
+  confidence?: number | null;
+}) {
+  const full = awarded === evaluation.marks_available;
+  const percentage = evaluation.marks_available > 0 ? Math.round((awarded / evaluation.marks_available) * 100) : 0;
   const isBlindspot = confidence !== undefined && confidence !== null && confidence >= 3 && percentage < 70;
   const isHesitant = confidence !== undefined && confidence !== null && confidence <= 2 && percentage >= 70;
   const isCalibrated = confidence !== undefined && confidence !== null && confidence >= 3 && percentage >= 70;

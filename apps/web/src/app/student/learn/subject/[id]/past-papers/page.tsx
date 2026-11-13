@@ -19,10 +19,10 @@ function seriesName(series: string | null): string {
 function LastTry({ item }: { item: PastPaperItem }) {
   if (item.last_status === null) return null;
   if (item.last_status === "answered") return <Chip tone="brand">Answered</Chip>;
+  // A provisional mark has no number for her (AC-E6).
+  if (item.last_status === "provisional") return <Chip tone="warn">Waiting for a check</Chip>;
   const score = `${item.last_marks ?? 0}/${item.marks}`;
-  return item.last_status === "provisional" ? (
-    <Chip tone="warn">{score} · pending review</Chip>
-  ) : (
+  return (
     <Chip tone={item.last_marks === item.marks ? "good" : "neutral"}>Score: {score}</Chip>
   );
 }

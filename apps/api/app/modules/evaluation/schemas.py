@@ -50,12 +50,26 @@ class AnswerCheckOut(BaseModel):
     detail: str
 
 
+class PendingCheckOut(BaseModel):
+    """What she sees of a provisional mark (AC-E6): what her answer did and did not do, never a number.
+
+    The points come from the mark-scheme marking itself. No mark, level or band total is shown, nothing here is
+    read by mastery, and `who` says who will check it.
+    """
+
+    points_made: list[str] = Field(default_factory=list)
+    points_missed: list[str] = Field(default_factory=list)
+    who: str
+    waiting_since: datetime
+
+
 class EvaluationOut(BaseModel):
     id: UUID
     attempt_id: UUID
     status: str
     provisional: bool
-    marks_awarded: float
+    # None for the student while the mark is provisional (AC-E6): she sees `pending` instead of a number.
+    marks_awarded: float | None
     marks_available: float
     feedback: FeedbackOut
     final_answer_check: AnswerCheckOut | None
@@ -63,6 +77,7 @@ class EvaluationOut(BaseModel):
     mistakes: list[MistakeNoteOut] = Field(default_factory=list)
     created_at: datetime
     reviewed_at: datetime | None = None  # set when a parent/admin reviewed and overrode the marks
+    pending: PendingCheckOut | None = None  # the student's view of a provisional mark
 
 
 class ReviewItemOut(BaseModel):

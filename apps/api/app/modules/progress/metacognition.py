@@ -280,7 +280,8 @@ def get_metacognitive_profile(
 
     for att in attempts:
         ev = eval_map.get(att.id)
-        if not ev or ev.marks_available <= 0:
+        # A provisional mark is not evidence yet, and its number is not shown to her (AC-E6).
+        if not ev or ev.marks_available <= 0 or ev.status == "needs_review":
             continue
 
         acc = min(1.0, max(0.0, ev.marks_awarded / ev.marks_available))

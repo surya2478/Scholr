@@ -202,7 +202,8 @@ function BankQuestionSolver({
       <AnswerBox
         question={question.data}
         onAnswered={(_attempt: Attempt, evaluation: Evaluation | null) => {
-          if (evaluation) {
+          // A provisional mark has no number for her (AC-E6), so there is no score to record yet.
+          if (evaluation && evaluation.marks_awarded !== null) {
             onScored(evaluation.marks_awarded, question.data?.marks ?? item.marks);
           }
         }}
