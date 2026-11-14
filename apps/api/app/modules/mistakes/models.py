@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, SmallInteger, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, SmallInteger, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, IdMixin, StudentScoped, TimestampMixin
@@ -44,6 +44,8 @@ class MistakePattern(IdMixin, TimestampMixin, StudentScoped, Base):
     clean_streak: Mapped[int] = mapped_column(SmallInteger, default=0)
     status: Mapped[str] = mapped_column(String(16), default="open")
     resolution: Mapped[str | None] = mapped_column(Text)
+    due_on: Mapped[date | None] = mapped_column(Date)  # when to try it again (spaced repair); None once resolved
+    resolved_on: Mapped[date | None] = mapped_column(Date)
 
 
 class MistakeOccurrence(IdMixin, StudentScoped, Base):

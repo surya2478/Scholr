@@ -24,7 +24,9 @@ def ev(event_type: str, payload: dict[str, object], *, hours: float) -> EventVie
     )
 
 
-def evaluated(evaluation_id: UUID, *, hours: float, status: str = "final", retention: bool = False) -> EventView:
+def evaluated(
+    evaluation_id: UUID, *, hours: float, status: str = "final", retention: bool = False, help_level: int = 0
+) -> EventView:
     return ev(
         "attempt_evaluated",
         {
@@ -32,7 +34,7 @@ def evaluated(evaluation_id: UUID, *, hours: float, status: str = "final", reten
             "evaluation_id": str(evaluation_id),
             "marks_awarded": 2,
             "marks_available": 2,
-            "help_level": 0,
+            "help_level": help_level,
             "evaluation_confidence": 0.9,
             "status": status,
             "retention_check": retention,
@@ -87,3 +89,37 @@ def test_recurrence_reopens_and_counts() -> None:
     history = [*with_mistake(0), evaluated(uuid4(), hours=1), evaluated(uuid4(), hours=30, retention=True)]
     state = only_state([*history, *with_mistake(60)])
     assert (state.status, len(state.occurrences), state.clean_streak) == ("open", 2, 0)
+
+
+DAY = 24
+
+
+def test_an_answer_she_was_helped_through_is_not_a_repair() -> None:
+    """Improvement 8: only an unaided answer counts towards fixing a mistake (PRINCIPLES 18-20)."""
+    helped = [
+        *with_mistake(0),
+        evaluated(uuid4(), hours=DAY, help_level=2),
+        evaluated(uuid4(), hours=5 * DAY, help_level=3),
+    ]
+    state = only_state(helped)
+    assert (state.status, state.repair_days, state.clean_streak) == ("open", [], 0)
+
+
+def test_two_unaided_repairs_three_days_apart_close_it_without_a_study_test() -> None:
+    """Before 14 Nov 2026 a mistake could only close through a parent-set retention test."""
+    first = [*with_mistake(0), evaluated(uuid4(), hours=DAY)]
+    state = only_state(first)
+    assert state.status == "open" and state.due_on == (T0 + timedelta(hours=DAY)).date() + timedelta(days=3)
+    too_soon = only_state([*first, evaluated(uuid4(), hours=2 * DAY)])
+    assert too_soon.status == "improving" and too_soon.resolved_on is None  # two in a row, but not yet spaced
+    closed = only_state([*first, evaluated(uuid4(), hours=4 * DAY)])
+    assert (closed.status, closed.due_on) == ("resolved", None)
+    assert closed.resolved_on == (T0 + timedelta(hours=4 * DAY)).date()
+
+
+def test_a_mistake_is_due_the_day_after_it_and_again_after_a_recurrence() -> None:
+    state = only_state(with_mistake(0))
+    assert state.due_on == T0.date() + timedelta(days=1)
+    back = only_state([*with_mistake(0), evaluated(uuid4(), hours=DAY), *with_mistake(10 * DAY)])
+    assert (back.status, back.repair_days) == ("open", [])
+    assert back.due_on == (T0 + timedelta(hours=10 * DAY)).date() + timedelta(days=1)

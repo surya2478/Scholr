@@ -6,6 +6,7 @@ The LLM is a scripted transport (tests/fixtures/llm.py); the answer checks, cons
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -190,6 +191,9 @@ def test_final_evaluation_with_a_mistake_appears_in_the_mistake_bank(
     [mistake] = world.client.get("/mistakes", headers=student).json()
     assert mistake["fingerprint"] == "calculation:premature_rounding"
     assert (mistake["status"], mistake["occurrences"], mistake["severity"]) == ("open", 1, "medium")
+    # Spaced repair (improvement 8): due the day after it was made, and not closed yet.
+    seen = date.fromisoformat(mistake["last_seen"][:10])
+    assert mistake["due_on"] == (seen + timedelta(days=1)).isoformat() and mistake["resolved_on"] is None
     assert mistake["description"] == "Used 3.1 for pi before multiplying."
     assert world.client.get("/mistakes", headers=auth_headers("test|parent")).json() == [mistake]
 

@@ -23,6 +23,8 @@ export default function Practice() {
   const [subjectId, setSubjectId] = useState<string>(params.get("subject") ?? "");
   // Paper 2 practice: only questions from papers that forbid a calculator (from the subject page's button).
   const [noCalculator, setNoCalculator] = useState<boolean>(params.get("no_calculator") === "1");
+  // "Fix it now" from a mistake (improvement 8): practise that topic first.
+  const objectiveId = params.get("objective");
   const [practiceMode, setPracticeMode] = useState<"standard" | "viva">("standard");
   const [session, setSession] = useState<SessionOut | null>(null);
   const [question, setQuestion] = useState<Question | null>(null);
@@ -59,7 +61,7 @@ export default function Practice() {
     await run(async () => {
       const created = await api<SessionOut>("/tutor/sessions", {
         method: "POST",
-        json: { subject_id: subjectId, mode: "practice", no_calculator: noCalculator },
+        json: { subject_id: subjectId, mode: "practice", no_calculator: noCalculator, objective_id: objectiveId || undefined },
       });
       setSession(created);
       await next(created.id);

@@ -281,6 +281,9 @@ export type Mistake = {
   status: "open" | "improving" | "resolved";
   last_seen: string;
   resolution?: string | null;
+  // Spaced repair (improvement 8): when to try it again; null once it is fixed.
+  due_on?: string | null;
+  resolved_on?: string | null;
 };
 export type AutopsyEntry = {
   evaluation_id: string;

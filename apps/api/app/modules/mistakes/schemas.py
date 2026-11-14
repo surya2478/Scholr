@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -20,3 +20,5 @@ class MistakeOut(BaseModel):
     first_seen: datetime
     last_seen: datetime
     resolution: str | None = None
+    due_on: date | None = None  # when to try it again; None once resolved
+    resolved_on: date | None = None

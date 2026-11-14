@@ -31,6 +31,11 @@ export default function Mistakes() {
   const [drillError, setDrillError] = useState<string | null>(null);
 
   const list = useApi<Mistake[]>(`/mistakes${status ? `?status=${status}` : ""}`);
+  // "Fixed this month" (improvement 8): a list that shrinks pulls harder than a score that grows.
+  const fixed = useApi<Mistake[]>("/mistakes?status=resolved");
+  const today = new Date().toLocaleDateString("en-CA"); // her local date, YYYY-MM-DD
+  const monthKey = today.slice(0, 7);
+  const fixedThisMonth = (fixed.data ?? []).filter((m) => (m.resolved_on ?? "").startsWith(monthKey));
   const autopsies = useApi<AutopsyEntry[]>("/evaluations/autopsies");
 
   useEffect(() => {
@@ -349,6 +354,16 @@ export default function Mistakes() {
         </Card>
       ) : (
         <Card title="Mistake Tracker" subtitle="Filter by status to target what to practice next">
+          <div className="mb-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-950">
+            <b className="text-sm">Fixed this month: {fixedThisMonth.length}</b>
+            {fixedThisMonth.length > 0 && (
+              <span> · {fixedThisMonth.map((m) => m.objective_code ?? "topic").join(", ")}</span>
+            )}
+            <p className="mt-1 text-emerald-900">
+              A mistake closes when you get its topic right without help, then once more at least three days later.
+              That second time is what shows it stuck.
+            </p>
+          </div>
           <div className="flex flex-wrap gap-2 pt-1">
             {FILTERS.map((f) => (
               <button
@@ -386,7 +401,24 @@ export default function Mistakes() {
                     )}
                     Seen {m.occurrences} time{m.occurrences === 1 ? "" : "s"} · last on {shortDate(m.last_seen)}
                   </div>
+                  {m.status === "resolved" ? (
+                    m.resolved_on && <div className="text-xs font-semibold text-emerald-700">Fixed on {shortDate(m.resolved_on)}</div>
+                  ) : m.due_on ? (
+                    <div className={`text-xs font-semibold ${m.due_on <= today ? "text-amber-800" : "text-slate-600"}`}>
+                      {m.due_on <= today
+                        ? "Due today: try one question on it, without help."
+                        : `Next try on ${shortDate(m.due_on)}. Trying again sooner won't close it faster.`}
+                    </div>
+                  ) : null}
                   <div className="flex flex-wrap gap-3 pt-1 text-xs font-fun font-bold">
+                    {m.objective_id && m.status !== "resolved" && (
+                      <Link
+                        href={`/student/practice?subject=${m.subject_id}&objective=${m.objective_id}`}
+                        className="rounded-lg bg-amber-500 px-2.5 py-0.5 text-white hover:bg-amber-600"
+                      >
+                        Fix it now →
+                      </Link>
+                    )}
                     {m.objective_id && (
                       <Link href={`/student/learn/topic/${m.objective_id}`} className="text-blue-600 hover:underline">
                         📘 Open the topic

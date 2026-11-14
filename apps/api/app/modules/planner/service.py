@@ -101,7 +101,8 @@ def _signals(
     for m in mastery_rows:
         flags[m.objective_id].update(mastery_level=m.level, retention_risk=m.retention_risk)
     for p in mistakes.list_mistakes(s, student_id=student_id):
-        if p.objective_id is None or p.status == "resolved":
+        # Spaced repair (improvement 8): a mistake comes back on its due day, not every day.
+        if p.objective_id is None or p.status == "resolved" or (p.due_on is not None and p.due_on > day):
             continue
         current = flags[p.objective_id].get("mistake_severity")
         if current is None or _SEVERITY_RANK[p.severity] > _SEVERITY_RANK[current]:
@@ -407,14 +408,17 @@ def _plan_wants(s: Session, plan: StudyPlan) -> list[daily.Want]:
     ]
 
 
-def _state_wants(s: Session, student_id: UUID) -> list[daily.Want]:
-    """What her record alone asks for, in order of claim: open mistakes, retention risk, then lessons only read.
+def _state_wants(s: Session, student_id: UUID, day: date) -> list[daily.Want]:
+    """What her record alone asks for, in order of claim: mistakes due for repair, retention risk, then lessons only
+    read. A mistake that is not due yet (spaced repair, improvement 8) waits for its day.
 
     Split from the plan's wants so tomorrow's preview can be built without generating tomorrow's plan.
     """
     wants: list[daily.Want] = []
     open_mistakes = [
-        m for m in mistakes.list_mistakes(s, student_id=student_id) if m.objective_id and m.status != "resolved"
+        m
+        for m in mistakes.list_mistakes(s, student_id=student_id)
+        if m.objective_id and m.status != "resolved" and (m.due_on is None or m.due_on <= day)
     ]
     for m in sorted(open_mistakes, key=lambda m: -_SEVERITY_RANK[m.severity]):
         wants.append(daily.Want(m.objective_id, _MISTAKE_REASON[m.severity]))  # type: ignore[arg-type]
@@ -428,7 +432,7 @@ def _state_wants(s: Session, student_id: UUID) -> list[daily.Want]:
 
 
 def _daily_wants(s: Session, plan: StudyPlan, student_id: UUID) -> list[daily.Want]:
-    return _plan_wants(s, plan) + _state_wants(s, student_id)
+    return _plan_wants(s, plan) + _state_wants(s, student_id, plan.plan_date)
 
 
 def _servable(
@@ -527,7 +531,7 @@ def _tomorrow_topics(s: Session, *, student_id: UUID, day: date, now: datetime) 
     not there. Tomorrow's plan may add topics on top, which is why the UI says it can change.
     """
     tomorrow = day + timedelta(days=1)
-    wants, candidates, summaries = _servable(s, _state_wants(s, student_id), student_id)
+    wants, candidates, summaries = _servable(s, _state_wants(s, student_id, tomorrow), student_id)
     picks = daily.choose(
         wants,
         candidates,
