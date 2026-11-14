@@ -5,7 +5,8 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
+from datetime import time as dt_time
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -31,12 +32,16 @@ from app.modules.evaluation.schemas import (
     OverrideIn,
     PendingCheckOut,
     ReviewItemOut,
+    ReviewSlotIn,
+    ReviewStatusOut,
     SkillShownOut,
 )
 from app.modules.events import service as events
+from app.modules.identity import service as identity
 from app.modules.mastery import service as mastery
 from app.modules.mistakes import service as mistakes
 from app.modules.subjects import service as subjects
+from app.tools.dates import last_weekly, next_weekly
 
 
 @dataclass(frozen=True)
@@ -113,16 +118,69 @@ def latest_id_for_attempt(s: Session, attempt_id: UUID) -> UUID | None:
 PENDING_WHO = "A parent checks this mark before it counts. Until then it does not change your progress."
 
 
-def _pending(row: Evaluation) -> PendingCheckOut:
-    """The provisional mark as she sees it (AC-E6): the first marker's points, no number."""
+def _when(check_at: datetime) -> str:
+    return f"{check_at:%a} {check_at.day} {check_at:%b}"
+
+
+def review_status(s: Session, *, student_id: UUID, now: datetime) -> ReviewStatusOut:
+    """The weekly check-in and what is waiting for it (improvement 9). Missed: a check-in time has passed since the
+    oldest waiting answer arrived, so that answer has already waited through one."""
+    slot = identity.review_slot(s, student_id)
+    tz = identity.student_timezone(s, student_id)
+    oldest = s.scalar(
+        select(func.min(Evaluation.created_at)).where(
+            Evaluation.student_id == student_id, Evaluation.status == "needs_review"
+        )
+    )
+    last = last_weekly(now, slot.weekday, slot.at, tz)
+    return ReviewStatusOut(
+        weekday=slot.weekday,
+        time=slot.at.strftime("%H:%M"),
+        chosen=slot.chosen,
+        next_check=next_weekly(now, slot.weekday, slot.at, tz),
+        waiting=needs_review_count(s, student_id=student_id),
+        oldest_waiting_since=oldest,
+        missed=oldest is not None and oldest < last,
+    )
+
+
+def set_review_slot(
+    s: Session, principal: Principal, *, student_id: UUID, body: ReviewSlotIn, now: datetime
+) -> ReviewStatusOut:
+    """A parent sets the weekly check-in. Only a guardian (or admin) with the assessments scope."""
+    require_role(principal, "guardian", "admin")
+    require_student_access(principal, student_id, "assessments")
+    hours, minutes = (int(x) for x in body.time.split(":"))
+    identity.set_review_slot(s, student_id, weekday=body.weekday, at=dt_time(hours, minutes))
+    return review_status(s, student_id=student_id, now=now)
+
+
+def _pending(row: Evaluation, *, now: datetime | None = None) -> PendingCheckOut:
+    """The provisional mark as she sees it (AC-E6): the first marker's points, no number, and when it is checked."""
     markers = (row.criterion_scores or {}).get("markers") or []
     first = markers[0] if markers else {}
-    return PendingCheckOut(
+    out = PendingCheckOut(
         points_made=[str(p) for p in first.get("credited_points") or []],
         points_missed=[str(p) for p in first.get("missing") or []],
         who=PENDING_WHO,
         waiting_since=row.created_at,
     )
+    s = object_session(row)
+    if s is None:
+        return out
+    now = now or datetime.now(UTC)
+    slot = identity.review_slot(s, row.student_id)
+    tz = identity.student_timezone(s, row.student_id)
+    check_at = next_weekly(now, slot.weekday, slot.at, tz)
+    overdue = row.created_at < last_weekly(now, slot.weekday, slot.at, tz)
+    who = (
+        f"Your weekly check-in passed and this is still waiting. A parent checks it next on {_when(check_at)}. "
+        "Until then it does not change your progress."
+        if overdue
+        else f"A parent checks this at your weekly check-in on {_when(check_at)}. "
+        "Until then it does not change your progress."
+    )
+    return out.model_copy(update={"who": who, "check_at": check_at, "overdue": overdue})
 
 
 def to_out(row: Evaluation, viewer: Principal | None = None) -> EvaluationOut:

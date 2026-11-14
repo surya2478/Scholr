@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ReviewCheckIn } from "@/components/ReviewCheckIn";
 import { DayBars, HelpMixBars, TrendLine } from "@/components/Charts";
 import { DayTimeline } from "@/components/DayTimeline";
 import { DinnerStartersCard, type ConversationStarter } from "@/components/DinnerStartersCard";
@@ -351,12 +352,12 @@ export default function ParentOverview() {
           </Card>
         )}
 
-        {o?.evaluations_needing_review !== null && o && (
-          <Card title="Marks to check" action={{ href: "/parent/review", label: "Review" }}>
-            <p className="text-sm text-ink-2">
-              {o.evaluations_needing_review === 0 ? "Nothing waiting." : `${o.evaluations_needing_review} answer(s) the AI was not sure about.`}
-            </p>
-          </Card>
+        {o?.review && id && (
+          <ReviewCheckIn
+            studentId={id}
+            status={o.review}
+            onChange={(review) => overview.setData((prev) => (prev ? { ...prev, review } : prev))}
+          />
         )}
 
         {o?.safety && (

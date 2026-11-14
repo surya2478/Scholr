@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass
+from datetime import time
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.errors import not_found
 from app.core.rbac import Principal
 from app.modules.curriculum import service as curriculum
 from app.modules.enrollment import service as enrollment
@@ -150,3 +153,31 @@ def dev_account_subject(s: Session, role: str) -> str | None:
         .order_by(AppUser.created_at)
         .limit(1)
     )
+
+
+# The weekly check-in for provisional marks (improvement 9; docs/GO-LIVE-ENGAGEMENT.md F12, "ten minutes on Sunday").
+DEFAULT_REVIEW_WEEKDAY = 6  # Sunday
+DEFAULT_REVIEW_TIME = time(18, 0)
+
+
+@dataclass(frozen=True)
+class ReviewSlot:
+    weekday: int  # 0 = Monday
+    at: time
+    chosen: bool  # False while it is still the default
+
+
+def review_slot(s: Session, student_id: UUID) -> ReviewSlot:
+    row = s.execute(select(Student.review_weekday, Student.review_time).where(Student.id == student_id)).first()
+    if row is None or row[0] is None or row[1] is None:
+        return ReviewSlot(DEFAULT_REVIEW_WEEKDAY, DEFAULT_REVIEW_TIME, chosen=False)
+    return ReviewSlot(int(row[0]), row[1], chosen=True)
+
+
+def set_review_slot(s: Session, student_id: UUID, *, weekday: int, at: time) -> ReviewSlot:
+    student = s.get(Student, student_id)
+    if student is None:
+        raise not_found("student")
+    student.review_weekday, student.review_time = weekday, at
+    s.flush()
+    return ReviewSlot(weekday, at, chosen=True)

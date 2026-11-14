@@ -187,6 +187,7 @@ export type GuardianOverview = {
   scopes: string[];
   summary: ProgressSummary;
   evaluations_needing_review: number | null;
+  review?: ReviewStatus | null; // the weekly check-in for those marks (improvement 9)
   upcoming_assessments: UpcomingBrief[] | null;
   safety: { open_total: number; open_by_severity: Record<string, number>; latest_open_at: string | null } | null;
   suggestions: { lead: string; text: string }[];
@@ -1000,4 +1001,15 @@ export type ClassCheckIn = {
     suggestions: ClassChapter[];
     others: ClassChapter[];
   }[];
+};
+
+// The weekly check-in when a parent reviews provisional marks (improvement 9).
+export type ReviewStatus = {
+  weekday: number; // 0 = Monday
+  time: string; // "18:00", the student's local time
+  chosen: boolean;
+  next_check: string;
+  waiting: number;
+  oldest_waiting_since: string | null;
+  missed: boolean;
 };

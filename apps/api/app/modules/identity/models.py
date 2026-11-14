@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, time
 from uuid import UUID
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, SmallInteger, String, UniqueConstraint, func
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, SmallInteger, String, Time, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -37,6 +37,9 @@ class Student(IdMixin, TimestampMixin, TenantScoped, Base):
     year_group: Mapped[str] = mapped_column(String(32))
     timezone: Mapped[str] = mapped_column(String(64), default="Asia/Dubai", server_default="Asia/Dubai")
     locale: Mapped[str] = mapped_column(String(16), default="en", server_default="en")
+    # The weekly check-in when a parent reviews provisional marks (improvement 9). None: the default, Sunday 18:00.
+    review_weekday: Mapped[int | None] = mapped_column(SmallInteger)  # 0 = Monday
+    review_time: Mapped[time | None] = mapped_column(Time)
 
 
 class Guardian(IdMixin, TimestampMixin, TenantScoped, Base):

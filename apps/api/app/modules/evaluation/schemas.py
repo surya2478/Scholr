@@ -70,6 +70,26 @@ class PendingCheckOut(BaseModel):
     points_missed: list[str] = Field(default_factory=list)
     who: str
     waiting_since: datetime
+    check_at: datetime | None = None  # the next weekly check-in (improvement 9)
+    overdue: bool = False  # a check-in has passed since it arrived and it is still waiting
+
+
+class ReviewSlotIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    weekday: int = Field(ge=0, le=6)  # 0 = Monday
+    time: str = Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")  # "18:00", her local time
+
+
+class ReviewStatusOut(BaseModel):
+    """The weekly check-in for marks waiting for a parent (improvement 9; GO-LIVE F12)."""
+
+    weekday: int  # 0 = Monday
+    time: str  # "18:00", the student's local time
+    chosen: bool  # False while it is still the default (Sunday 18:00)
+    next_check: datetime
+    waiting: int
+    oldest_waiting_since: datetime | None
+    missed: bool  # a check-in passed while something was already waiting
 
 
 class EvaluationOut(BaseModel):

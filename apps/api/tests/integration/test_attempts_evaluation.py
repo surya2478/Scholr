@@ -309,3 +309,31 @@ def test_each_mark_says_what_kind_of_mark_it_is(world: SimpleNamespace, auth_hea
     method, accuracy = evaluation["awards"]
     assert method["meaning"].startswith("Method mark") and accuracy["meaning"].startswith("Accuracy mark")
     assert "M1" in evaluation["method_note"] and evaluation["skills"] == []
+
+
+def test_a_weekly_check_in_says_when_a_waiting_mark_is_checked(world: SimpleNamespace, auth_headers: Auth) -> None:
+    """Improvement 9: a provisional mark names the next check-in; a parent sees what waits and can move the slot."""
+    student, parent = auth_headers("test|student"), auth_headers("test|parent")
+    attempt_id = submit(world, student, final_answer="13").json()["id"]
+    world.transport.reply(marking())  # tool/LLM disagreement -> needs_review
+    evaluation = world.client.post(f"/attempts/{attempt_id}/evaluate", headers=student).json()
+    pending = evaluation["pending"]
+    assert "weekly check-in" in pending["who"] and pending["check_at"] and pending["overdue"] is False
+
+    url = f"/students/{world.student_id}/review-slot"
+    slot = world.client.get(url, headers=parent).json()
+    assert (slot["weekday"], slot["time"], slot["chosen"], slot["waiting"], slot["missed"]) == (
+        6,
+        "18:00",
+        False,
+        1,
+        False,
+    )
+    assert world.client.put(url, headers=student, json={"weekday": 2, "time": "19:30"}).status_code == 403
+    assert world.client.put(url, headers=parent, json={"weekday": 2, "time": "25:00"}).status_code == 422
+    moved = world.client.put(url, headers=parent, json={"weekday": 2, "time": "19:30"}).json()
+    assert (moved["weekday"], moved["time"], moved["chosen"]) == (2, "19:30", True)
+    assert moved["next_check"].endswith("+04:00") or "T19:30" in moved["next_check"]  # her local evening
+
+    overview = world.client.get(f"/guardian/students/{world.student_id}/overview", headers=parent).json()
+    assert overview["review"]["waiting"] == 1 and overview["review"]["weekday"] == 2

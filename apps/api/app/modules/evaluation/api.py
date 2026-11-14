@@ -6,7 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Request
 
 from app.core.deps import DbDep, PrincipalDep, SessionsDep, llm_gateway
-from app.core.rbac import resolve_student_id
+from app.core.rbac import require_student_access, resolve_student_id
 from app.core.telemetry import request_id_of
 from app.llm.gateway import CallContext
 from app.modules.assessment.schemas import ExaminerInsightsOut
@@ -17,6 +17,8 @@ from app.modules.evaluation.schemas import (
     EvaluationOut,
     OverrideIn,
     ReviewItemOut,
+    ReviewSlotIn,
+    ReviewStatusOut,
 )
 
 router = APIRouter(tags=["evaluation"])
@@ -73,3 +75,15 @@ def get_examiner_insights(evaluation_id: UUID, principal: PrincipalDep, s: DbDep
 @router.post("/evaluations/{evaluation_id}/override", response_model=EvaluationOut)
 def override_evaluation(evaluation_id: UUID, body: OverrideIn, principal: PrincipalDep, s: DbDep) -> EvaluationOut:
     return service.override(s, principal, evaluation_id, body, now=datetime.now(UTC))
+
+
+@router.get("/students/{student_id}/review-slot", response_model=ReviewStatusOut)
+def get_review_slot(student_id: UUID, principal: PrincipalDep, s: DbDep) -> ReviewStatusOut:
+    """The weekly check-in for marks waiting for a parent, and what is waiting for it (improvement 9)."""
+    require_student_access(principal, student_id, "assessments")
+    return service.review_status(s, student_id=student_id, now=datetime.now(UTC))
+
+
+@router.put("/students/{student_id}/review-slot", response_model=ReviewStatusOut)
+def put_review_slot(student_id: UUID, body: ReviewSlotIn, principal: PrincipalDep, s: DbDep) -> ReviewStatusOut:
+    return service.set_review_slot(s, principal, student_id=student_id, body=body, now=datetime.now(UTC))

@@ -276,6 +276,7 @@ def guardian_overview(s: Session, principal: Principal, *, student_id: UUID, now
         evaluations_needing_review=evaluation.needs_review_count(s, student_id=student_id)
         if allowed("assessments")
         else None,
+        review=evaluation.review_status(s, student_id=student_id, now=now) if allowed("assessments") else None,
         upcoming_assessments=upcoming,
         safety=safety_out,
         suggestions=suggestions(

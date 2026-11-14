@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from app.modules.evaluation.schemas import ReviewStatusOut
+
 
 class SubjectProgressOut(BaseModel):
     subject_id: UUID
@@ -85,6 +87,7 @@ class GuardianOverviewOut(BaseModel):
     scopes: list[str]  # what this guardian can see; the student is shown the same list (PRINCIPLES 26)
     summary: ProgressSummaryOut
     evaluations_needing_review: int | None  # None without the `assessments` scope
+    review: ReviewStatusOut | None = None  # the weekly check-in for those marks; None without `assessments`
     upcoming_assessments: list[UpcomingBriefOut] | None  # None without the `plans` scope
     safety: SafetyOverviewOut | None  # None without the `safety` scope
     suggestions: list[SuggestionOut]
