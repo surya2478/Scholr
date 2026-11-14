@@ -131,6 +131,10 @@ def test_readiness_counts_each_units_objectives(world: SimpleNamespace, auth_hea
     assert body["topics"], "readiness lists the units"
     assert all(row["objectives_total"] > 0 for row in body["topics"])
     assert sum(row["objectives_total"] for row in body["topics"]) == total
+    # Improvement 10: the syllabus at a glance, and no "weakest" objective before any can be judged.
+    assert (body["objectives_total"], body["objectives_met"], body["objectives_secure"]) == (total, 0, 0)
+    assert body["weakest_skill"] is None
+    assert not any("your review" in note for note in body["notes"])  # she reads this, not the parent
 
 
 def test_a_paper_is_offered_with_what_it_is_really_worth(world: SimpleNamespace, auth_headers: Auth) -> None:

@@ -30,6 +30,7 @@ class TopicReadinessOut(BaseModel):
     answers: int
     objectives_total: int
     objectives_secure: int
+    objectives_met: int = 0  # introduced or better
 
 
 class CommandWordOut(BaseModel):
@@ -50,6 +51,12 @@ class ReadinessOut(BaseModel):
     rule_version: str
     # Her share of marks weighted the way the exam weights each AO, over the objectives with enough evidence.
     weighted_share: float | None
+    # The AO to work on: lowest share among those with enough evidence; None until one can be judged.
+    weakest_skill: str | None = None
+    # The syllabus at a glance (improvement 10): met = introduced or better; secure = competent or better.
+    objectives_total: int = 0
+    objectives_met: int = 0
+    objectives_secure: int = 0
     # What we could not judge, said plainly rather than shown as zero.
     notes: list[str]
     skills: list[SkillReadinessOut]

@@ -1013,3 +1013,21 @@ export type ReviewStatus = {
   oldest_waiting_since: string | null;
   missed: boolean;
 };
+
+// Exam readiness for one subject (GET /subjects/{id}/readiness): one honest picture, never a grade (improvement 10).
+export type Readiness = {
+  subject_id: string;
+  subject_name: string;
+  exam_session: string | null; // "2027-06"
+  days_to_exam: number | null;
+  weighted_share: number | null;
+  weakest_skill: string | null; // named only once it can be judged
+  objectives_total: number;
+  objectives_met: number;
+  objectives_secure: number;
+  notes: string[];
+  skills: { skill_code: string; skill_name: string; share: number | null; band: string }[];
+  papers_available: number;
+  papers_sat: number;
+  next_step: string | null;
+};

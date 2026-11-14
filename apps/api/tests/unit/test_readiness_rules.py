@@ -83,3 +83,13 @@ def test_topic_readiness_is_unknown_until_there_is_evidence() -> None:
 def test_coverage() -> None:
     assert rules.coverage(3, 6) == 0.5
     assert rules.coverage(0, 0) == 0.0
+
+
+def test_the_weakest_objective_is_named_only_once_it_can_be_judged() -> None:
+    """Improvement 10: never the 'weakest' of objectives nobody has evidence for."""
+    nothing = rules.skill_readiness([], skill_codes=AOS, weightings=WEIGHTS)
+    assert rules.weakest_skill(nothing) is None
+    splits = [split(10, {"AO1": 9, "AO2": 5, "AO3": 3}) for _ in range(3)]
+    assert rules.weakest_skill(rules.skill_readiness(splits, skill_codes=AOS, weightings=WEIGHTS)) == "AO3"
+    only_ao1 = [split(10, {"AO1": 4}, codes=("AO1",)) for _ in range(3)]
+    assert rules.weakest_skill(rules.skill_readiness(only_ao1, skill_codes=AOS, weightings=WEIGHTS)) == "AO1"

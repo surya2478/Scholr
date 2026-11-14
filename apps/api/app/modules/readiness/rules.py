@@ -110,6 +110,7 @@ class TopicEvidence:
     answers: int
     objectives_total: int
     objectives_secure: int
+    objectives_met: int = 0  # introduced or better: met in class or here, not yet necessarily secure
 
 
 @dataclass(frozen=True)
@@ -121,6 +122,7 @@ class TopicReadiness:
     answers: int
     objectives_total: int
     objectives_secure: int
+    objectives_met: int = 0  # introduced or better: met in class or here, not yet necessarily secure
 
 
 def topic_readiness(evidence: Sequence[TopicEvidence]) -> list[TopicReadiness]:
@@ -136,6 +138,7 @@ def topic_readiness(evidence: Sequence[TopicEvidence]) -> list[TopicReadiness]:
                 answers=e.answers,
                 objectives_total=e.objectives_total,
                 objectives_secure=e.objectives_secure,
+                objectives_met=e.objectives_met,
             )
         )
     return rows
@@ -152,6 +155,16 @@ def weighted_share(skills: Sequence[SkillReadiness]) -> float | None:
     if not judged or total_weight <= 0:
         return None
     return round(sum((s.weighting or 0.0) * (s.share or 0.0) for s in judged) / total_weight, 4)
+
+
+def weakest_skill(skills: Sequence[SkillReadiness]) -> str | None:
+    """The assessment objective to work on: the lowest share among those with enough evidence to judge.
+
+    None until at least one can be judged — never the "weakest" of objectives nobody has evidence for."""
+    judged = [s for s in skills if s.share is not None and s.band != "unknown"]
+    if not judged:
+        return None
+    return min(judged, key=lambda s: (s.share, s.skill_code)).skill_code
 
 
 def coverage(answered_topics: int, total_topics: int) -> float:

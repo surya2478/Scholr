@@ -149,9 +149,14 @@ def _topic_evidence(
         counts[top] += 1
 
     secure: dict[UUID, int] = defaultdict(int)
+    met: dict[UUID, int] = defaultdict(int)
     for row in mastery.list_mastery(s, student_id=student_id, subject_id=subject_id):
-        if row.level >= int(MasteryLevel.COMPETENT) and row.objective_id in objective_topic:
+        if row.objective_id not in objective_topic:
+            continue
+        if row.level >= int(MasteryLevel.COMPETENT):
             secure[objective_topic[row.objective_id]] += 1
+        if row.level >= int(MasteryLevel.INTRODUCED):
+            met[objective_topic[row.objective_id]] += 1
 
     awarded: dict[UUID, float] = defaultdict(float)
     available: dict[UUID, float] = defaultdict(float)
@@ -176,6 +181,7 @@ def _topic_evidence(
             answers=answers[topic.id],
             objectives_total=counts[topic.id],
             objectives_secure=secure[topic.id],
+            objectives_met=met[topic.id],
         )
         for topic in topics
     ], {t.code: t.id for t in topics}
@@ -303,8 +309,8 @@ def readiness(s: Session, principal: Principal, *, student_id: UUID, subject_id:
         )
     if config.evaluation and not config.evaluation.calibrated:
         notes.append(
-            "Every mark in this subject waits for your review before it counts, so readiness moves only "
-            "after you have checked the work."
+            "Every mark in this subject waits for a parent's check before it counts, so readiness moves only "
+            "after the work has been checked."
         )
 
     return ReadinessOut(
@@ -314,6 +320,10 @@ def readiness(s: Session, principal: Principal, *, student_id: UUID, subject_id:
         days_to_exam=_days_to_exam(exam_session, today),
         rule_version=rules.RULE_VERSION,
         weighted_share=rules.weighted_share(skill_rows),
+        weakest_skill=rules.weakest_skill(skill_rows),
+        objectives_total=sum(r.objectives_total for r in topic_rows),
+        objectives_met=sum(r.objectives_met for r in topic_rows),
+        objectives_secure=sum(r.objectives_secure for r in topic_rows),
         notes=notes,
         skills=[SkillReadinessOut(**{**row.__dict__, "skill_name": skills[row.skill_code][1]}) for row in skill_rows],
         topics=[TopicReadinessOut(**{**row.__dict__, "topic_id": topic_ids[row.topic_code]}) for row in topic_rows],

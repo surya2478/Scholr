@@ -1,6 +1,7 @@
 "use client";
 
 import { CalibrationMatrix } from "@/components/CalibrationMatrix";
+import { ExamPicture } from "@/components/ExamPicture";
 import { IndependenceMeter } from "@/components/IndependenceMeter";
 import { SubjectLevels } from "@/components/SubjectLevels";
 import { Card, Chip, Empty, ErrorNote, LevelBar, Stat } from "@/components/ui";
@@ -37,6 +38,9 @@ export default function Progress() {
           </div>
         </div>
       </div>
+
+      {/* One honest exam picture per subject (improvement 10) */}
+      <ExamPicture />
 
       {/* This Week Stats */}
       <Card title="This Week's Activity" subtitle="Verified practice and completed missions">
