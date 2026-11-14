@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMe } from "@/components/AppShell";
+import { ClassCheckIn } from "@/components/ClassCheckIn";
 import { DayTimeline } from "@/components/DayTimeline";
 import { Icon, type IconName } from "@/components/icons";
 import { SessionDoors } from "@/components/learn/SessionDoors";
@@ -245,6 +246,9 @@ export default function StudentHome() {
               ))}
             </ul>
           </Card>
+
+          {/* ---- What did class cover today? (F4, improvement 7) -------------------------------------- */}
+          <ClassCheckIn />
 
           {/* ---- This week's timed question (improvement 4) ------------------------------------------ */}
           <WeeklyTimedQuestion questions={timed.data ?? []} />

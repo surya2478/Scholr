@@ -15,6 +15,7 @@ from app.core.errors import install_error_handlers
 from app.core.telemetry import install_request_id
 from app.llm.gateway import LLMGateway
 from app.modules.assessment.api import router as assessment_router
+from app.modules.classlog.api import router as classlog_router
 from app.modules.critic.api import router as critic_router
 from app.modules.curriculum.api import router as curriculum_router
 from app.modules.enrollment.api import router as enrollment_router
@@ -73,6 +74,7 @@ def create_app(
         safety_router,
         tutoring_router,
         enrollment_router,
+        classlog_router,
         planner_router,
         progress_router,
         studies_router,

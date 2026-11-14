@@ -984,3 +984,17 @@ export type TimedQuestion = {
   minutes_used: number | null;
   over_time: boolean;
 };
+
+// "What did class cover today?" (F4, improvement 7): each school subject, what she tapped, and the likeliest chapters.
+export type ClassChapter = { topic_id: string; code: string; name: string };
+export type ClassCheckIn = {
+  day: string;
+  school_day: boolean;
+  subjects: {
+    subject_id: string;
+    subject_name: string;
+    logged: (ClassChapter & { entry_id: string; next_objective_id: string | null; next_objective_code: string | null })[];
+    suggestions: ClassChapter[];
+    others: ClassChapter[];
+  }[];
+};
